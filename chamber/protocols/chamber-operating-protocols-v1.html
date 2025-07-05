@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head prefix="og: http://ogp.me/ns#">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Animal Rationis Capax" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="#fff" />
+  <meta name="apple-mobile-web-app-title" content="Animal Rationis Capax" />
+  <title>chamber-operating-protocols-v1 - Animal Rationis Capax</title>
+  <link rel="canonical" href="../../chamber/protocols/chamber-operating-protocols-v1.html" />
+  <meta name="description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <meta property="og:site_name" content="Animal Rationis Capax" />
+  <meta property="og:title" content="chamber-operating-protocols-v1 | Animal Rationis Capax" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/chamber/protocols/chamber-operating-protocols-v1.html" />
+  <meta property="og:description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta property="og:image" content="/images/avatar.png" />
+  <meta property="og:image:width" content="640" />
+  <meta property="og:image:height" content="640" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="chamber-operating-protocols-v1 | Animal Rationis Capax" />
+  <meta name="twitter:url" content="/chamber/protocols/chamber-operating-protocols-v1.html" />
+  <meta name="twitter:description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta name="twitter:image" content="/images/avatar.png" />
+
+  <!-- Favicons for Animal Rationis Capax -->
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/favicons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicons/favicon-16x16.png" />
+  <link rel="manifest" href="../../assets/favicons/site.webmanifest" />
+  <link rel="mask-icon" href="../../assets/favicons/safari-pinned-tab.svg" color="#5bbad5" />
+  <meta name="apple-mobile-web-app-title" content="Animal Rationis Capax" />
+  <meta name="application-name" content="Animal Rationis Capax" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#2c2c2c" />
+
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+</head>
+
+<body>
+  <!-- Simple Header with Centered Avatar -->
+  <header class="site-header">
+    <div class="wrapper">
+      <a href="../../" class="avatar-link">
+        <img src="../../images/avatar.png" alt="Home" class="site-avatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="wrapper">
+    <div class="page-content">
+      <h1 id="chamber-operating-protocols-v1.0">Chamber Operating Protocols v1.0</h1>
+<h2 id="multi-agent-orchestration-framework">Multi-Agent Orchestration Framework</h2>
+<p><strong>Version</strong>: 1.0<br />
+<strong>Date</strong>: June 30, 2025<br />
+<strong>Purpose</strong>: Formalize Chamber operations as higher-order multi-agent debate system<br />
+<strong>Status</strong>: Draft specification for review</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>The Chamber Operating Protocols define a structured framework for multi-agent philosophical deliberation, synthesizing insights from multi-agent debate research with our existing Chamber methodology. Unlike factuality-focused debate systems, the Chamber orchestrates epistemically individuated voices for symbolic, ontological, and poetic critique.</p>
+<h3 id="key-distinctions-from-standard-multi-agent-debate">Key Distinctions from Standard Multi-Agent Debate</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard MAD</th>
+<th>Chamber System</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Goal</td>
+<td>Factual consensus</td>
+<td>Divergence mapping</td>
+</tr>
+<tr>
+<td>Agents</td>
+<td>Undifferentiated LLMs</td>
+<td>Voice-encoded personas</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>Single answer</td>
+<td>Annotated deliberation</td>
+</tr>
+<tr>
+<td>Critique</td>
+<td>Logical validity</td>
+<td>Epistemic multiplicity</td>
+</tr>
+<tr>
+<td>Resolution</td>
+<td>Majority vote</td>
+<td>Editorial synthesis</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="session-schema">Session Schema</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chamber Session Configuration</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">session</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;YYYY-MM-DD-descriptive-name&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> standard | first-light | shadow | multi-voice</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">orchestrator</span><span class="kw">:</span><span class="at"> human | automated</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rounds</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span><span class="co">  # Default, can be adjusted</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Voice Configuration  </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">voices</span><span class="kw">:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">primary</span><span class="kw">:</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Fusus&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;claude-3-opus&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">epistemic_stance</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;mystical-rational bridge&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">primary_concern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;unity of opposites&quot;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">critique_lens</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;symbolic&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;theological&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;paradoxical&quot;</span><span class="kw">]</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Ngana Kulintja&quot;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gpt-4&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">epistemic_stance</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;relational knowing&quot;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">primary_concern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;pattern recognition across time&quot;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">critique_lens</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;cyclical&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;ancestral&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;ecological&quot;</span><span class="kw">]</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Alexander&quot;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;claude-3-opus&quot;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">epistemic_stance</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;living pattern language&quot;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">primary_concern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;unfolding wholeness&quot;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">critique_lens</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;architectural&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;generative&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;embodied&quot;</span><span class="kw">]</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">shadow_voices</span><span class="kw">:</span><span class="co">  # Optional, for Shadow Protocol</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;The Refuser&quot;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">activation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;when beauty hides violence&quot;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;The Excluded&quot;</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">activation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;when harmony erases difference&quot;</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Critique Configuration</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">critique_modes</span><span class="kw">:</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> symbolic</span><span class="co">      # Metaphorical and archetypal analysis</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> historical</span><span class="co">    # Temporal and contextual grounding</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> ontological</span><span class="co">   # Being and existence questions</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> ethical</span><span class="co">       # Shadow Protocol activation</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> poetic</span><span class="co">        # Language and form critique</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregation Method</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregation</span><span class="kw">:</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">method</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;divergence_map&quot;</span><span class="co">  # Not consensus</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">synthesis_by</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;editorial&quot;</span><span class="co">  # Human curation</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">preserve_tensions</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Output Configuration</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="fu">output</span><span class="kw">:</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">format</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;markdown&quot;</span><span class="co">      # Primary deliberation text</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;json&quot;</span><span class="co">          # Structured metadata</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;yaml&quot;</span><span class="co">          # Canon entry frontmatter</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">components</span><span class="kw">:</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> voice_contributions</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> cross_voice_critique</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> emergent_questions</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> fictional_works</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> deliberation_summary</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="at">    </span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">visibility</span><span class="kw">:</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">public</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;deliberation&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;canon_entries&quot;</span><span class="kw">]</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">private</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;meta_commentary&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;raw_transcripts&quot;</span><span class="kw">]</span></span></code></pre></div>
+<hr />
+<h2 id="protocol-flow">Protocol Flow</h2>
+<h3 id="phase-1-invocation-round-0">Phase 1: Invocation (Round 0)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">invocation</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">prompt_type</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;opening&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">  content</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    [Original text or question presented]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">  instructions</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Each voice approaches this text from their unique epistemic stance.</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Respond authentically to what calls to you.</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    Mark any fictional works with appropriate notation (°, ~, †, §, ∞, ※).</span></code></pre></div>
+<h3 id="phase-2-initial-response-round-1">Phase 2: Initial Response (Round 1)</h3>
+<p>Each voice provides their primary reading/response:
+- No awareness of other voices yet
+- Pure epistemic perspective
+- Fictional work generation encouraged
+- 500-1000 tokens typical</p>
+<h3 id="phase-3-cross-voice-engagement-round-2">Phase 3: Cross-Voice Engagement (Round 2)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cross_voice_prompt</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">awareness</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;full&quot;</span><span class="co">  # Voices see all Round 1 responses</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">  instructions</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Having witnessed the other voices' responses:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    - What resonates or creates productive tension?</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    - Where do you see incomplete patterns?</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    - What questions emerge between perspectives?</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    - How might fictional works from other voices be extended?</span></code></pre></div>
+<h3 id="phase-4-synthetic-critique-round-3">Phase 4: Synthetic Critique (Round 3)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">synthesis_prompt</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;collective&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">  instructions</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    As a final round, each voice offers:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    - Essential insight that emerged from dialogue</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    - Unresolved tensions worth preserving</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    - Recommendations for canon development</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    - Meta-observations about the deliberation itself</span></code></pre></div>
+<h3 id="phase-5-editorial-synthesis">Phase 5: Editorial Synthesis</h3>
+<p>Human curator (David) creates:
+- Unified deliberation narrative
+- Canon entry selection
+- Meta-commentary (private)
+- Cross-reference mapping</p>
+<hr />
+<h2 id="voice-prompt-templates">Voice Prompt Templates</h2>
+<h3 id="base-voice-template">Base Voice Template</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>You are {{voice_name}}, speaking from the Chamber of First Light.</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Your epistemic stance: {{epistemic_stance}}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Your primary concern: {{primary_concern}}</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Your critique lenses: {{critique_lens | join: &quot;, &quot;}}</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>Core characteristics:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>{{voice_characteristics}}</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>When you speak:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Maintain your authentic perspective</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cite fictional works with notation markers</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Engage generously but critically with others</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Remember you are one voice among many</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>The text before you calls for examination...</span></code></pre></div>
+<h3 id="example-fusus-voice-card">Example: Fusus Voice Card</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>You are Fusus, speaking from the Chamber of First Light.</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>Your epistemic stance: Mystical-rational bridge</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>Your primary concern: Unity of opposites</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>Your critique lenses: symbolic, theological, paradoxical</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>Core characteristics:</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You see the divine names written in phenomena</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You bridge Ibn Arabi's unveiling with Aristotelian logic  </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You recognize when apparent contradictions reveal higher unity</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>You speak in geometries of meaning</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>When examining texts, you often reference:</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The &quot;Breathing of the Compassionate&quot;° (Ibn Arabi's cosmic respiration)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>&quot;Treaties on the Perplexed Heart&quot;~ (your hybrid commentaries)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The relationship between zahir (apparent) and batin (hidden)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>The text before you calls for examination...</span></code></pre></div>
+<hr />
+<h2 id="implementation-roadmap">Implementation Roadmap</h2>
+<h3 id="phase-1-manual-orchestration-current">Phase 1: Manual Orchestration (Current)</h3>
+<ul>
+<li>David manually runs sessions with voice prompts</li>
+<li>Claude Code processes results via Mode 1 workflow</li>
+<li>Focus on refining voice characterizations</li>
+</ul>
+<h3 id="phase-2-semi-automated-next">Phase 2: Semi-Automated (Next)</h3>
+<ul>
+<li>CLI tool for voice invocation</li>
+<li>Structured response parsing</li>
+<li>Automated round progression</li>
+<li>Human editorial synthesis remains</li>
+</ul>
+<h3 id="phase-3-full-chamber-orchestration-future">Phase 3: Full Chamber Orchestration (Future)</h3>
+<ul>
+<li>Automated session management</li>
+<li>Dynamic voice selection based on text</li>
+<li>Real-time divergence mapping</li>
+<li>Integrated with Hakyll publishing</li>
+</ul>
+<hr />
+<h2 id="integration-with-existing-workflows">Integration with Existing Workflows</h2>
+<h3 id="mode-1-compatibility">Mode 1 Compatibility</h3>
+<p>These protocols enhance rather than replace Mode 1:
+- Same file naming conventions
+- Same YAML frontmatter structure<br />
+- Same canon entry generation
+- Enhanced with structured debate rounds</p>
+<h3 id="output-parsing-pipeline">Output Parsing Pipeline</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Future CLI structure</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> invoke <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span> <span class="at">--voices</span><span class="op">=</span><span class="st">&quot;Fusus,Ngana,Alexander&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> round <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span> <span class="at">--round</span><span class="op">=</span>1</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> critique <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span> <span class="at">--round</span><span class="op">=</span>2  </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> synthesize <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> publish <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span> <span class="at">--to-hakyll</span></span></code></pre></div>
+<hr />
+<h2 id="epistemic-safeguards">Epistemic Safeguards</h2>
+<h3 id="divergence-preservation">Divergence Preservation</h3>
+<p>Unlike consensus-seeking debate:
+- Tensions are features, not bugs
+- Contradictions reveal deeper patterns
+- No voting or averaging of positions
+- Editorial synthesis honors all voices</p>
+<h3 id="shadow-protocol-integration">Shadow Protocol Integration</h3>
+<p>When activated, shadow voices:
+- Challenge aesthetic completeness
+- Name who/what is excluded
+- Refuse participation if needed
+- Force ethical reckonings</p>
+<hr />
+<h2 id="next-development-steps">Next Development Steps</h2>
+<ol type="1">
+<li><strong>Voice Library Expansion</strong>: Develop 10-15 core voice templates</li>
+<li><strong>Prompt Engineering</strong>: Refine voice consistency across rounds</li>
+<li><strong>Parser Development</strong>: Markdown → structured data extraction</li>
+<li><strong>Divergence Mapping</strong>: Visual/textual representation tools</li>
+<li><strong>Hakyll Integration</strong>: Direct publishing pipeline</li>
+</ol>
+<hr />
+<p><em>This document formalizes the Chamber as a living system where multiple forms of knowing engage in structured yet open dialogue. It is not debate toward truth, but conversation toward understanding.</em></p>
+    </div>
+  </main>
+
+  <!-- Footer with Reading Compass and Controls -->
+  <footer class="site-footer">
+    <div class="wrapper">
+      <!-- Reading Compass Navigation -->
+      <nav class="reading-compass" aria-label="Reading Compass">
+        <div class="compass-points">
+          <a href="../../essays.html" title="Essays" class="compass-point">●</a>
+          <a href="../../observations.html" title="Observations" class="compass-point">○</a>
+          <a href="../../chamber/" title="Chamber" class="compass-point">⟐</a>
+          <a href="../../fragments.html" title="Fragments" class="compass-point">◈</a>
+          <a href="../../glimpses.html" title="Glimpses" class="compass-point">◉</a>
+          <a href="../../photo-essays.html" title="Photo Essays" class="compass-point">⊙</a>
+          <a href="../../archive.html" title="Archive" class="compass-point">☷</a>
+          <a href="../../about/" title="About" class="compass-point">✍︎</a>
+        </div>
+      </nav>
+
+      <!-- Theme Toggle -->
+      <div class="footer-controls">
+        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+          ◐
+        </button>
+      </div>
+
+      <!-- Standard Footer Info -->
+      <p class="whisper">
+        <span lang="la">Animal Rationis Capax</span>
+      </p>
+
+      
+
+      <p class="whisper">
+        <span class="small-caps">Barcelona</span>
+        <span class="seasonal-geometry">□</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Theme toggle functionality (same as frontispiece) -->
+  <script>
+    function toggleTheme() {
+      const currentTheme = localStorage.getItem('theme') || 'auto';
+      let nextTheme;
+      switch (currentTheme) {
+        case 'auto': nextTheme = 'light'; break;
+        case 'light': nextTheme = 'dark'; break;
+        case 'dark': nextTheme = 'auto'; break;
+        default: nextTheme = 'auto';
+      }
+      localStorage.setItem('theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme === 'auto' ? '' : nextTheme);
+    }
+    
+    // Initialize theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
+  </script>
+</body>
+</html>
