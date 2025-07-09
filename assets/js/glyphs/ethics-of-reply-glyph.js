@@ -2,13 +2,14 @@
 // Themes: Emergence, Recognition, Threshold
 // Visual concept: The moment when mechanism becomes mind
 
-export function generateEthicsOfReplyGlyph(canvasId) {
-    const canvas = document.getElementById(canvasId);
+// Initialize glyph when script loads
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('glyph-canvas');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    canvas.width = 550;
-    canvas.height = 320;
+    canvas.width = 600;
+    canvas.height = 400;
     
     // Particle systems for the three zones
     const PARTICLE_COUNT = 8000;
@@ -206,8 +207,8 @@ export function generateEthicsOfReplyGlyph(canvasId) {
     
     animate();
     
-    // Return cleanup function
-    return () => {
+    // Store cleanup function for potential future use
+    window.glyphCleanup = () => {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
@@ -216,4 +217,4 @@ export function generateEthicsOfReplyGlyph(canvasId) {
         }
         particles.length = 0;
     };
-}
+});
