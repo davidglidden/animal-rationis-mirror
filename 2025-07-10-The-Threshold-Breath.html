@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">The Threshold Breath</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id="radiance-threshold-birth">
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <p>Tonight, under the full moon’s light, two births draw near.</p>
 <p>My son—whose quiet signals have begun to reach us—could arrive at any moment. He is close now, not just in time but in presence. His approach reshapes the very texture of my attention.</p>
 <p>And something else has arrived too, less visible but no less alive: the breath of <em>Animal Rationis Capax</em>.</p>
@@ -107,7 +117,7 @@ Let it be marked.</p>
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2025-07-10 23:00:00 +0200" itemprop="datePublished">2025-07-10 23:00:00 +0200</time>
+    <time datetime="July 10, 2025" itemprop="datePublished">July 10, 2025</time>
     
     
   </div>
@@ -175,5 +185,10 @@ Let it be marked.</p>
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

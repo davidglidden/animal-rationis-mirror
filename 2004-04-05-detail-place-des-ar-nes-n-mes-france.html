@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">Detail, Place des Arènes, Nîmes, France</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id>
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <figure>
 <img src="./assets/img/2004-04-05-detail-place-des-ar-nes-n-mes-france.jpeg" alt="Detail, Place des Arènes, Nîmes, France">
 <figcaption>
@@ -79,7 +89,7 @@ Detail, Place des Arènes, Nîmes, France
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2004-04-05" itemprop="datePublished">2004-04-05</time>
+    <time datetime="April  5, 2004" itemprop="datePublished">April  5, 2004</time>
     
       <span class="location">• 43.833872, 4.359997</span>
     
@@ -149,5 +159,10 @@ Detail, Place des Arènes, Nîmes, France
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

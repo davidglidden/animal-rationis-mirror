@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">January 11th, 2024</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id>
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <p>After days of overcast skies the sun has come.</p>
 <p>Two rapaces are calling to each other across the fields.</p>
 <p>Some chickadees also chirping in their search for some seed to eat.</p>
@@ -84,7 +94,7 @@ Generated: 2025-06-09 13:56:57
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2024-01-11" itemprop="datePublished">2024-01-11</time>
+    <time datetime="January 11, 2024" itemprop="datePublished">January 11, 2024</time>
     
     
   </div>
@@ -152,5 +162,10 @@ Generated: 2025-06-09 13:56:57
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

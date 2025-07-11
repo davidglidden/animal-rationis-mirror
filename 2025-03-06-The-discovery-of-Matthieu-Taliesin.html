@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">The Discovery of Matthieu Taliesin</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id>
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <figure>
 <img src="./assets/img/matthieu-t.jpg" alt="Matthieu Taliesin, date and location unknown.">
 <figcaption>
@@ -115,7 +125,7 @@ Matthieu Taliesin holding his viola with a viola d’amore in foreground. Date &
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2025-03-06" itemprop="datePublished">2025-03-06</time>
+    <time datetime="March  6, 2025" itemprop="datePublished">March  6, 2025</time>
     
     
   </div>
@@ -183,5 +193,10 @@ Matthieu Taliesin holding his viola with a viola d’amore in foreground. Date &
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

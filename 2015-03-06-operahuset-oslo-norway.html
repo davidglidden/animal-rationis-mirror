@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">Operahuset, Oslo, Norway</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id>
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <figure>
 <img src="./assets/img/2015-03-06-operahuset-oslo-norway.jpeg" alt="Operahuset, Oslo, Norway">
 <figcaption>
@@ -79,7 +89,7 @@ Operahuset, Oslo, Norway
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2015-03-06" itemprop="datePublished">2015-03-06</time>
+    <time datetime="March  6, 2015" itemprop="datePublished">March  6, 2015</time>
     
       <span class="location">• Oslo, Norway</span>
     
@@ -149,5 +159,10 @@ Operahuset, Oslo, Norway
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">December 31st, 2023</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id="11">
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title">Glowing Eye</span>
+        <span class="glyph-confidence">4</span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <p>A young couple about to kiss in front of me. 25-30 years old. Young man and young woman. Same age? <em>Probable</em>.</p>
 <p>Faces so close to each other’s, if not yet touching in the lightest of ways, then tantalizingly close.</p>
 <p>Soft sweet words exchanged, barely audible even for them, but language is unnecessarily: <em>their shared searching gaze communicating what words cannot.</em></p>
@@ -83,7 +93,7 @@ Generated: 2025-06-09 13:54:49
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2023-12-31" itemprop="datePublished">2023-12-31</time>
+    <time datetime="December 31, 2023" itemprop="datePublished">December 31, 2023</time>
     
     
   </div>
@@ -151,5 +161,10 @@ Generated: 2025-06-09 13:54:49
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

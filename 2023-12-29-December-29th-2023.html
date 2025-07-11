@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">December 29th, 2023</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id="27">
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title">Neural Network</span>
+        <span class="glyph-confidence">4</span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <p>In the café, warm. (<em>croisement</em> de <em>Charonne et Ledru Rollin</em>).</p>
 <p>Café <em>allongé</em>. Glass of water.</p>
 <p>Reading Handke: vicariously living a no-longer-existant Salzburg through his fragments.</p>
@@ -88,7 +98,7 @@ Generated: 2025-06-09 13:54:32
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2023-12-29" itemprop="datePublished">2023-12-29</time>
+    <time datetime="December 29, 2023" itemprop="datePublished">December 29, 2023</time>
     
     
   </div>
@@ -156,5 +166,10 @@ Generated: 2025-06-09 13:54:32
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

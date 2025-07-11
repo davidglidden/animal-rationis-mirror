@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">The Ethics of the Reply</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id="ethics-of-reply-glyph.js">
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <h3 id="preamble">Preamble</h3>
 <blockquote>
 <p><em>“Man is a rope stretched between the animal and the overman—a rope over an abyss.”</em><br />
@@ -291,7 +301,7 @@ preparing for conversations we cannot yet imagine.</p>
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2025-06-17 09:00:00 +0100" itemprop="datePublished">2025-06-17 09:00:00 +0100</time>
+    <time datetime="June 17, 2025" itemprop="datePublished">June 17, 2025</time>
     
     
   </div>
@@ -363,5 +373,10 @@ preparing for conversations we cannot yet imagine.</p>
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

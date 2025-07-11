@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">December 22nd, 2023</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id="4">
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title">Particle Cylinder</span>
+        <span class="glyph-confidence">5</span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <p>Half light the 22nd of December at 10:20.</p>
 <p>The apartment has a <em>fond d’air froid</em>, creeping cold, but not yet penetrating.</p>
 <p>My mind turns to Charles Ives: the sarabande from Bach’s sixth keyboard partita playing softly in the livingroom is the anchor of this moment of experience, riven in two by the spinning laundry in the kitchen and the pounding sledgehammers in an apartment below me—and yet the sarabande holds its integrity, such is its depth, such is its inviolable strength and beauty. B minor: key of human suffering at the moment when the half light seems to lift momentarily. Charles would have been amused</p>
@@ -82,7 +92,7 @@ Generated: 2025-06-09 13:54:26
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2023-12-22" itemprop="datePublished">2023-12-22</time>
+    <time datetime="December 22, 2023" itemprop="datePublished">December 22, 2023</time>
     
     
   </div>
@@ -150,5 +160,10 @@ Generated: 2025-06-09 13:54:26
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>

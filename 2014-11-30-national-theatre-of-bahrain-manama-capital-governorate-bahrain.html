@@ -64,11 +64,21 @@
     </div>
     
     
-    <!-- DEBUG: working on title display - debug_test should be working -->
-    <!-- Title and glyph will be restored after context rebuild -->
+    
+    <h1 class="post-title" itemprop="name headline">‎⁨National Theatre of Bahrain⁩, ⁨Manama⁩, ⁨Capital Governorate⁩, ⁨Bahrain⁩</h1>
+    
+    
+    
+    <div class="glyph-container" data-glyph-id>
+      <canvas id="glyph-canvas"></canvas>
+      <div class="glyph-metadata">
+        <span class="glyph-title"></span>
+        <span class="glyph-confidence"></span>
+      </div>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
-    <p>DEBUG TEST: debug_test=working</p>
     <figure>
 <img src="./assets/img/2014-11-30-national-theatre-of-bahrain-manama-capital-governorate-bahrain.jpeg" alt="‎⁨National Theatre of Bahrain⁩, ⁨Manama⁩, ⁨Capital Governorate⁩, ⁨Bahrain⁩">
 <img src="./assets/img/2014-12-03-national-theatre-of-bahrain-manama-capital-governorate-bahrain.jpeg" alt="‎⁨National Theatre of Bahrain⁩, ⁨Manama⁩, ⁨Capital Governorate⁩, ⁨Bahrain⁩">
@@ -80,7 +90,7 @@
 
   <!-- Post metadata at bottom in monospace -->
   <div class="post-meta center">
-    <time datetime="2014-11-30" itemprop="datePublished">2014-11-30</time>
+    <time datetime="November 30, 2014" itemprop="datePublished">November 30, 2014</time>
     
       <span class="location">• 26.242247, 50.598694</span>
     
@@ -150,5 +160,10 @@
     const savedTheme = localStorage.getItem('theme') || 'auto';
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
+
+  
+  <!-- Procedural Glyph Renderer -->
+  <script src="./assets/js/procedural-glyph-renderer.js"></script>
+  
 </body>
 </html>
