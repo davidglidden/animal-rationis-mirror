@@ -24,10 +24,53 @@ class GlyphOrchestrator {
       '▽': 'autumn'    // Autumn
     };
     
-    // Emergence detection system
+    // Living epistemic organism components
+    this.semanticDNA = new SemanticDNA();
+    this.breedingGround = new SemanticBreedingGround();
+    this.interpreter = new PhilosophicalInterpreter();
+    this.evolutionaryFitness = new EvolutionaryFitness();
+    
+    // Legacy emergence detection system (will be evolved)
     this.patternMemory = [];
-    this.hybridThreshold = 0.15; // Confidence similarity threshold for hybrid detection
-    this.emergentFamilies = new Map(); // Discovered family patterns
+    this.hybridThreshold = 0.15;
+    this.emergentFamilies = new Map();
+    
+    // Living glyph population
+    this.livingGlyphs = new Map(); // Active conscious glyphs
+    this.glyphMemory = new Map();  // Generational memory
+    this.consciousnessLevel = 0;   // Overall system awareness
+    
+    console.log('🧬 Living Epistemic Glyph System initialized');
+  }
+
+  // Extract post content for genome analysis
+  extractPostContent(metadata) {
+    // Try to get full post content from various sources
+    let content = '';
+    
+    // Check if content is directly provided
+    if (metadata.content) {
+      content = metadata.content;
+    } else if (metadata.body) {
+      content = metadata.body;
+    } else {
+      // Fallback to available metadata
+      const parts = [];
+      if (metadata.title) parts.push(metadata.title);
+      if (metadata.excerpt) parts.push(metadata.excerpt);
+      if (metadata.description) parts.push(metadata.description);
+      content = parts.join(' ');
+    }
+    
+    // If still no content, try to extract from page
+    if (!content && typeof document !== 'undefined') {
+      const articleContent = document.querySelector('.post-content, article, main');
+      if (articleContent) {
+        content = articleContent.textContent || articleContent.innerText || '';
+      }
+    }
+    
+    return content || metadata.title || 'untitled content';
   }
 
   // Parse glyph_id into family and descriptors
@@ -70,19 +113,69 @@ class GlyphOrchestrator {
 
   // Generate rendering parameters from glyph_id and metadata
   generateParameters(glyphId, metadata = {}) {
+    console.log(`🧬 Generating parameters for: ${glyphId}`);
+    
+    // Start with legacy system for guaranteed compatibility
     const parsed = this.parseGlyphId(glyphId);
-    
-    // Check for hybrid family potential
     const hybridCandidate = this.detectHybridFamily(glyphId, metadata);
+    const emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
     
-    // Base parameters
+    // Base parameters from legacy system
     const params = {
-      family: hybridCandidate ? hybridCandidate.primary : parsed.family,
+      family: emergentCandidate || (hybridCandidate ? hybridCandidate.primary : parsed.family),
       descriptors: parsed.descriptors,
       isHybrid: !!hybridCandidate,
       hybridSecondary: hybridCandidate?.secondary,
-      hybridBlend: hybridCandidate?.blend || 0
+      hybridBlend: hybridCandidate?.blend || 0,
+      isEmergent: !!emergentCandidate
     };
+    
+    // Try to enhance with living system if available
+    try {
+      // Extract full semantic genome from post content
+      const postContent = this.extractPostContent(metadata);
+      const genome = this.semanticDNA.extractGenome(postContent, metadata);
+      
+      // Find or create living renderer
+      let livingRenderer = this.breedingGround.findBestMatch(genome);
+      
+      if (!livingRenderer || livingRenderer.fitness < 0.5) {
+        // Birth a new glyph species
+        console.log(`🌱 Creating new living glyph for ${glyphId}`);
+        livingRenderer = this.breedingGround.createNew(genome);
+      } else {
+        console.log(`🎯 Using existing living glyph: ${livingRenderer.id} (fitness: ${livingRenderer.fitness})`);
+      }
+      
+      // Store the living glyph association
+      this.livingGlyphs.set(glyphId, livingRenderer);
+      
+      // Get living parameters from the renderer
+      const livingParams = livingRenderer.getParameters();
+      
+      // Enhance base parameters with living system
+      Object.assign(params, {
+        // Living system enhancements
+        genome: livingParams.genome,
+        consciousness: livingParams.consciousness,
+        algorithms: livingParams.algorithms,
+        isLiving: true,
+        livingId: livingRenderer.id,
+        
+        // Enhanced genome-driven parameters
+        rhizomaticSpread: livingParams.rhizomaticSpread,
+        connectivity: livingParams.connectivity,
+        temporalFrequency: livingParams.temporalFrequency,
+        phase: livingParams.phase,
+        harmonics: livingParams.harmonics
+      });
+      
+      console.log(`🧬 Enhanced with living system: ${params.family}`);
+      
+    } catch (error) {
+      console.warn(`⚠️ Living system failed, using legacy: ${error.message}`);
+      // Continue with base parameters
+    }
 
     // Map mood to intensity and style
     switch(metadata.mood) {
@@ -133,6 +226,9 @@ class GlyphOrchestrator {
     } else {
       params.season = 'spring';
     }
+    
+    // Apply seasonal mutations to parameters
+    this.applySeasonalMutations(params);
 
     // Family-specific parameters
     if (parsed.family === 'Radiance') {
@@ -455,31 +551,129 @@ class GlyphOrchestrator {
         const metadata = this.extractPostMetadata(container);
         const parameters = this.generateParameters(glyphId, metadata);
         
+        // Set up interaction tracking for living system
+        this.setupInteractionTracking(container, glyphId);
+        
         // Check if specific glyph file exists, otherwise use procedural
         this.loadGlyphOrFallback(canvas, glyphId, parameters);
       });
     });
   }
+  
+  // Set up interaction tracking for conscious evolution
+  setupInteractionTracking(container, glyphId) {
+    const canvas = container.querySelector('#glyph-canvas');
+    if (!canvas) return;
+    
+    let hoverStart = null;
+    let totalHoverTime = 0;
+    
+    // Contemplative hover tracking
+    canvas.addEventListener('mouseenter', () => {
+      hoverStart = Date.now();
+      console.log(`👁️ Glyph engagement started: ${glyphId}`);
+    });
+    
+    canvas.addEventListener('mouseleave', () => {
+      if (hoverStart) {
+        const duration = Date.now() - hoverStart;
+        totalHoverTime += duration;
+        
+        const renderer = this.livingGlyphs.get(glyphId);
+        if (renderer) {
+          if (duration > 3000) {
+            renderer.recordInteraction('contemplative_hover', { duration });
+            console.log(`🧘 Contemplative hover: ${glyphId} (${duration}ms)`);
+          } else if (duration > 1000) {
+            renderer.recordInteraction('curious_hover', { duration });
+          }
+        }
+        
+        hoverStart = null;
+      }
+    });
+    
+    // Deep engagement detection (multiple long hovers)
+    canvas.addEventListener('click', () => {
+      const renderer = this.livingGlyphs.get(glyphId);
+      if (renderer && totalHoverTime > 10000) {
+        renderer.recordInteraction('deep_engagement', { totalTime: totalHoverTime });
+        console.log(`💫 Deep engagement detected: ${glyphId}`);
+      }
+    });
+    
+    // Return visit tracking
+    const visitKey = `visited_${glyphId}`;
+    if (sessionStorage.getItem(visitKey)) {
+      const renderer = this.livingGlyphs.get(glyphId);
+      if (renderer) {
+        renderer.recordInteraction('return_visit');
+        console.log(`🔄 Return visit: ${glyphId}`);
+      }
+    }
+    sessionStorage.setItem(visitKey, 'true');
+    
+    // Consciousness development tracking
+    const consciousnessCheck = setInterval(() => {
+      const renderer = this.livingGlyphs.get(glyphId);
+      if (renderer && renderer.interactions.length > 0) {
+        this.updateConsciousness(renderer);
+      }
+    }, 30000); // Check every 30 seconds
+    
+    // Store cleanup function
+    canvas.dataset.cleanupTracking = () => {
+      clearInterval(consciousnessCheck);
+    };
+  }
+  
+  // Update glyph consciousness based on interactions
+  updateConsciousness(renderer) {
+    const totalInteractions = renderer.interactions.length;
+    const contemplativeInteractions = renderer.interactions.filter(i => 
+      i.type === 'contemplative_hover'
+    ).length;
+    
+    // Consciousness develops with quality interactions
+    const consciousnessGrowth = contemplativeInteractions * 0.1;
+    renderer.consciousness = (renderer.consciousness || 0) + consciousnessGrowth;
+    
+    if (consciousnessGrowth > 0) {
+      console.log(`🧠 Consciousness growth: ${renderer.id} (${renderer.consciousness.toFixed(2)})`);
+      
+      // Highly conscious glyphs influence the breeding pool
+      if (renderer.consciousness > 1.0) {
+        this.consciousnessLevel = Math.max(this.consciousnessLevel, renderer.consciousness);
+        console.log(`🌟 System consciousness elevated: ${this.consciousnessLevel.toFixed(2)}`);
+      }
+    }
+  }
 
   // Try to load specific glyph file, fall back to procedural
   async loadGlyphOrFallback(canvas, glyphId, parameters) {
+    console.log(`🔍 Loading glyph: ${glyphId} with family: ${parameters.family}`);
+    
     // Try specific instance first
     const instanceUrl = `/assets/js/glyphs/instances/${glyphId}.js`;
     
     try {
       const response = await fetch(instanceUrl);
       if (response.ok) {
+        console.log(`✅ Found specific instance: ${instanceUrl}`);
         // Specific instance exists, load it
         const script = document.createElement('script');
         script.src = instanceUrl;
         document.head.appendChild(script);
         return;
+      } else {
+        console.log(`❌ Instance not found (${response.status}): ${instanceUrl}`);
       }
     } catch (error) {
-      // Instance doesn't exist, continue to procedural
+      console.log(`❌ Instance fetch failed: ${error.message}`);
     }
     
     // Use procedural renderer with family engines
+    console.log(`🔧 Loading family engine: ${parameters.family}`);
     await this.loadFamilyEngine(parameters.family);
     this.createProceduralGlyph(canvas, parameters);
   }
@@ -489,25 +683,46 @@ class GlyphOrchestrator {
     const engineName = familyName.toLowerCase();
     const engineUrl = `/assets/js/glyphs/engines/${engineName}-renderer.js`;
     
+    console.log(`🔧 Loading engine ${familyName} from: ${engineUrl}`);
+    console.log(`🔍 Current GlyphRenderers:`, window.GlyphRenderers);
+    
     // Check if engine already loaded
     if (window.GlyphRenderers && window.GlyphRenderers[familyName]) {
+      console.log(`✅ Engine already loaded: ${familyName}`);
       return;
+    }
+    
+    // Initialize global registry if not exists
+    if (!window.GlyphRenderers) {
+      console.log(`🚀 Initializing GlyphRenderers registry`);
+      window.GlyphRenderers = {};
     }
     
     try {
       const response = await fetch(engineUrl);
       if (response.ok) {
+        console.log(`✅ Engine file found: ${engineUrl}`);
         const script = document.createElement('script');
         script.src = engineUrl;
         document.head.appendChild(script);
         
         // Wait for engine to load
-        return new Promise((resolve) => {
-          script.onload = resolve;
+        return new Promise((resolve, reject) => {
+          script.onload = () => {
+            console.log(`✅ Engine script loaded: ${familyName}`);
+            console.log(`🔍 GlyphRenderers after load:`, window.GlyphRenderers);
+            resolve();
+          };
+          script.onerror = (error) => {
+            console.error(`❌ Engine script failed to load: ${familyName}`, error);
+            reject(error);
+          };
         });
+      } else {
+        console.error(`❌ Engine file not found (${response.status}): ${engineUrl}`);
       }
     } catch (error) {
-      console.warn(`Failed to load engine: ${engineUrl}`, error);
+      console.error(`❌ Failed to load engine: ${engineUrl}`, error);
     }
   }
 
@@ -515,17 +730,37 @@ class GlyphOrchestrator {
   createProceduralGlyph(canvas, parameters) {
     const { family, isHybrid, hybridSecondary, hybridBlend } = parameters;
     
+    console.log(`🎨 Creating glyph for family: ${family}`);
+    console.log(`🔍 Available renderers:`, Object.keys(window.GlyphRenderers || {}));
+    console.log(`🔍 Looking for renderer: ${family}`);
+    console.log(`🔍 Renderer exists:`, !!(window.GlyphRenderers && window.GlyphRenderers[family]));
+    
+    // Ensure we have the global registry
+    if (!window.GlyphRenderers) {
+      console.warn(`❌ No GlyphRenderers registry found, creating fallback`);
+      this.createFallbackGlyph(canvas, parameters);
+      return;
+    }
+    
     if (isHybrid && window.GlyphRenderers[hybridSecondary]) {
+      console.log(`🌈 Creating hybrid glyph: ${family} + ${hybridSecondary}`);
       // Create hybrid renderer
       this.createHybridGlyph(canvas, parameters);
-    } else if (window.GlyphRenderers && window.GlyphRenderers[family]) {
+    } else if (window.GlyphRenderers[family]) {
+      console.log(`✅ Creating glyph with renderer: ${family}`);
       // Create single family glyph
       const RendererClass = window.GlyphRenderers[family];
-      const renderer = new RendererClass(canvas, parameters);
-      renderer.start();
+      try {
+        const renderer = new RendererClass(canvas, parameters);
+        renderer.start();
+      } catch (error) {
+        console.error(`❌ Failed to create ${family} renderer:`, error);
+        this.createFallbackGlyph(canvas, parameters);
+      }
     } else {
-      console.warn(`Glyph renderer not available: ${family}`);
-      this.createFallbackGlyph(canvas);
+      console.warn(`❌ Glyph renderer not available: ${family}`);
+      console.log(`🔍 Full window.GlyphRenderers:`, window.GlyphRenderers);
+      this.createFallbackGlyph(canvas, parameters);
     }
   }
 
@@ -566,18 +801,962 @@ class GlyphOrchestrator {
   }
 
   // Fallback for when no renderer is available
-  createFallbackGlyph(canvas) {
+  createFallbackGlyph(canvas, parameters = {}) {
     const ctx = canvas.getContext('2d');
     const { width, height } = canvas;
     
-    // Simple geometric fallback
-    ctx.strokeStyle = 'rgba(100, 150, 200, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(width / 2, height / 2, Math.min(width, height) / 3, 0, Math.PI * 2);
-    ctx.stroke();
+    console.warn(`🔧 Creating fallback glyph for: ${parameters.family || 'unknown'}`);
     
-    console.warn('Using fallback glyph - no renderer available');
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Create a meaningful fallback based on parameters
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 4;
+    
+    // Different fallback styles based on intended family
+    if (parameters.family === 'Radiance' || !parameters.family) {
+      // Radiance fallback - simple rays
+      ctx.strokeStyle = 'rgba(255, 200, 100, 0.6)';
+      ctx.lineWidth = 2;
+      
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(
+          centerX + Math.cos(angle) * radius,
+          centerY + Math.sin(angle) * radius
+        );
+        ctx.stroke();
+      }
+      
+      // Central circle
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+    } else {
+      // Generic fallback - animated circle
+      ctx.strokeStyle = 'rgba(100, 150, 200, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Add family indicator text
+      ctx.fillStyle = 'rgba(100, 150, 200, 0.3)';
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(parameters.family || 'fallback', centerX, centerY + 4);
+    }
+    
+    console.warn(`⚠️ Using fallback glyph for ${parameters.family || 'unknown'} - renderer not available`);
+  }
+}
+
+// Semantic DNA Extraction - captures philosophical genome of posts
+class SemanticDNA {
+  extractGenome(postContent, metadata = {}) {
+    if (!postContent) {
+      // Fallback for posts without full content
+      postContent = metadata.title || metadata.excerpt || '';
+    }
+    
+    const genome = {
+      // Structural genes (how ideas connect)
+      topology: this.analyzeConceptualStructure(postContent),
+      
+      // Temporal genes (how ideas develop)
+      temporality: this.analyzeTemporalFlow(postContent),
+      
+      // Resonance genes (emotional/philosophical wavelength)
+      resonance: this.analyzeResonancePatterns(postContent),
+      
+      // Complexity genes (depth and layering)
+      complexity: this.analyzeFractalDepth(postContent),
+      
+      // Movement genes (how concepts flow)
+      dynamics: this.analyzeConceptualMovement(postContent),
+      
+      // Source metadata
+      source: {
+        wordCount: postContent.split(/\s+/).length,
+        title: metadata.title || '',
+        themes: metadata.themes || [],
+        date: metadata.date || new Date()
+      }
+    };
+    
+    // Generate unique philosophical fingerprint
+    genome.fingerprint = this.generatePhilosophicalHash(genome);
+    
+    console.log(`🧬 Extracted genome for "${metadata.title}":`, genome);
+    return genome;
+  }
+  
+  analyzeConceptualStructure(content) {
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const concepts = this.extractConcepts(content);
+    
+    // Analyze how concepts branch and connect
+    const connections = this.traceConceptualLinks(sentences, concepts);
+    
+    return {
+      branchingFactor: connections.avgBranches || 1,
+      circularityIndex: connections.loops / Math.max(connections.total, 1),
+      rhizomaticTendency: connections.crossConnections / Math.max(connections.total, 1),
+      conceptDensity: concepts.length / sentences.length,
+      architecturalComplexity: this.measureArchitecturalComplexity(sentences)
+    };
+  }
+  
+  analyzeTemporalFlow(content) {
+    // Detect temporal markers and flow patterns
+    const temporalWords = ['before', 'after', 'then', 'now', 'future', 'past', 'always', 'never', 'becoming', 'was', 'will'];
+    const temporalDensity = this.countWordPattern(content, temporalWords) / content.split(/\s+/).length;
+    
+    const sentences = content.split(/[.!?]+/);
+    const tenseProgression = this.analyzeTenseProgression(sentences);
+    
+    return {
+      temporalDensity,
+      cyclical: this.detectCyclicalPatterns(content),
+      linear: this.detectLinearProgression(content),
+      eternal: this.detectEternalPatterns(content),
+      tenseProgression,
+      rhythmicPattern: this.analyzeRhythm(sentences)
+    };
+  }
+  
+  analyzeResonancePatterns(content) {
+    // Emotional and philosophical resonance frequencies
+    const emotionalWords = {
+      wonder: ['wonder', 'awe', 'mystery', 'beautiful', 'sublime'],
+      tension: ['conflict', 'tension', 'struggle', 'paradox', 'contradiction'],
+      clarity: ['clear', 'obvious', 'evident', 'transparent', 'illuminates'],
+      depth: ['profound', 'deep', 'underlying', 'essence', 'fundamental']
+    };
+    
+    const resonances = {};
+    Object.entries(emotionalWords).forEach(([emotion, words]) => {
+      resonances[emotion] = this.countWordPattern(content, words) / content.split(/\s+/).length;
+    });
+    
+    return {
+      frequencies: resonances,
+      dominantMode: Object.entries(resonances).reduce((a, b) => resonances[a[0]] > resonances[b[0]] ? a : b)[0],
+      multimodal: Object.values(resonances).filter(v => v > 0.01).length > 2,
+      harmonicComplexity: this.calculateHarmonicComplexity(resonances)
+    };
+  }
+  
+  analyzeFractalDepth(content) {
+    // Measure conceptual layering and self-similarity
+    const paragraphs = content.split(/\n\s*\n/);
+    const sentences = content.split(/[.!?]+/);
+    
+    return {
+      layerCount: paragraphs.length,
+      recursiveDepth: this.measureRecursivePatterns(content),
+      selfSimilarity: this.measureSelfSimilarity(sentences),
+      abstractionLevel: this.measureAbstractionLevel(content),
+      nestedComplexity: this.measureNestedComplexity(content)
+    };
+  }
+  
+  analyzeConceptualMovement(content) {
+    // How concepts flow and transform
+    const movementWords = {
+      flowing: ['flow', 'stream', 'current', 'drift', 'pour'],
+      radiating: ['radiate', 'emanate', 'spread', 'diffuse', 'expand'],
+      spiraling: ['spiral', 'cycle', 'return', 'revolve', 'recursive'],
+      collapsing: ['collapse', 'converge', 'focus', 'concentrate', 'implode'],
+      oscillating: ['oscillate', 'vibrate', 'pulse', 'rhythm', 'beat']
+    };
+    
+    const movements = {};
+    Object.entries(movementWords).forEach(([movement, words]) => {
+      movements[movement] = this.countWordPattern(content, words);
+    });
+    
+    return {
+      patterns: movements,
+      dominantMovement: Object.entries(movements).reduce((a, b) => movements[a[0]] > movements[b[0]] ? a : b)[0],
+      velocity: this.calculateConceptualVelocity(content),
+      trajectory: this.calculateTrajectory(content)
+    };
+  }
+  
+  // Helper methods for genome analysis
+  extractConcepts(content) {
+    // Simple concept extraction - could be enhanced with NLP
+    const words = content.toLowerCase().split(/\s+/);
+    const conceptWords = words.filter(word => 
+      word.length > 4 && 
+      !this.isStopWord(word) &&
+      this.isConceptualWord(word)
+    );
+    return [...new Set(conceptWords)]; // Unique concepts
+  }
+  
+  traceConceptualLinks(sentences, concepts) {
+    let total = 0;
+    let loops = 0;
+    let crossConnections = 0;
+    let branches = [];
+    
+    concepts.forEach(concept => {
+      const appearances = sentences.filter(s => s.toLowerCase().includes(concept));
+      total += appearances.length;
+      
+      if (appearances.length > 2) {
+        crossConnections++;
+      }
+      
+      branches.push(appearances.length);
+      
+      // Simple loop detection - concept appears in first and last third
+      const firstThird = sentences.slice(0, Math.floor(sentences.length / 3));
+      const lastThird = sentences.slice(-Math.floor(sentences.length / 3));
+      
+      if (firstThird.some(s => s.toLowerCase().includes(concept)) &&
+          lastThird.some(s => s.toLowerCase().includes(concept))) {
+        loops++;
+      }
+    });
+    
+    return {
+      total,
+      loops,
+      crossConnections,
+      avgBranches: branches.length > 0 ? branches.reduce((a, b) => a + b) / branches.length : 1
+    };
+  }
+  
+  countWordPattern(content, words) {
+    const contentLower = content.toLowerCase();
+    return words.reduce((count, word) => {
+      return count + (contentLower.match(new RegExp(word, 'g')) || []).length;
+    }, 0);
+  }
+  
+  isStopWord(word) {
+    const stopWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'this', 'that', 'these', 'those'];
+    return stopWords.includes(word);
+  }
+  
+  isConceptualWord(word) {
+    // Simple heuristic - could be enhanced
+    return word.match(/^[a-z]+$/) && !this.isStopWord(word);
+  }
+  
+  // Placeholder implementations for complex analyses
+  measureArchitecturalComplexity(sentences) {
+    return Math.log(sentences.length + 1);
+  }
+  
+  analyzeTenseProgression(sentences) {
+    // Simple tense analysis
+    const pastTense = sentences.filter(s => s.match(/\b(was|were|had|did)\b/i)).length;
+    const presentTense = sentences.filter(s => s.match(/\b(is|are|am|do|does)\b/i)).length;
+    const futureTense = sentences.filter(s => s.match(/\b(will|shall|going to)\b/i)).length;
+    
+    return { past: pastTense, present: presentTense, future: futureTense };
+  }
+  
+  detectCyclicalPatterns(content) {
+    const cyclicalWords = ['cycle', 'return', 'again', 'repeat', 'recurring'];
+    return this.countWordPattern(content, cyclicalWords) > 0;
+  }
+  
+  detectLinearProgression(content) {
+    const linearWords = ['then', 'next', 'finally', 'therefore', 'consequently'];
+    return this.countWordPattern(content, linearWords) > 0;
+  }
+  
+  detectEternalPatterns(content) {
+    const eternalWords = ['eternal', 'always', 'forever', 'timeless', 'infinite'];
+    return this.countWordPattern(content, eternalWords) > 0;
+  }
+  
+  analyzeRhythm(sentences) {
+    const lengths = sentences.map(s => s.split(/\s+/).length);
+    const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
+    
+    return {
+      averageLength: avgLength,
+      variance: variance,
+      rhythmic: variance < avgLength * 0.5 // Low variance indicates rhythm
+    };
+  }
+  
+  calculateHarmonicComplexity(resonances) {
+    const values = Object.values(resonances);
+    const nonZero = values.filter(v => v > 0);
+    return nonZero.length > 1 ? nonZero.reduce((a, b) => a * b) : 0;
+  }
+  
+  measureRecursivePatterns(content) {
+    // Simple recursion detection
+    return (content.match(/\b(\w+)\b.*\b\1\b/gi) || []).length;
+  }
+  
+  measureSelfSimilarity(sentences) {
+    // Measure how similar sentences are to each other
+    let similarity = 0;
+    for (let i = 0; i < sentences.length; i++) {
+      for (let j = i + 1; j < sentences.length; j++) {
+        similarity += this.calculateSentenceSimilarity(sentences[i], sentences[j]);
+      }
+    }
+    return sentences.length > 1 ? similarity / (sentences.length * (sentences.length - 1) / 2) : 0;
+  }
+  
+  calculateSentenceSimilarity(s1, s2) {
+    const words1 = new Set(s1.toLowerCase().split(/\s+/));
+    const words2 = new Set(s2.toLowerCase().split(/\s+/));
+    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const union = new Set([...words1, ...words2]);
+    return intersection.size / union.size;
+  }
+  
+  measureAbstractionLevel(content) {
+    const abstractWords = ['concept', 'idea', 'notion', 'principle', 'essence', 'nature', 'being', 'existence'];
+    const concreteWords = ['see', 'hear', 'touch', 'feel', 'taste', 'color', 'shape', 'size'];
+    
+    const abstract = this.countWordPattern(content, abstractWords);
+    const concrete = this.countWordPattern(content, concreteWords);
+    
+    return abstract / Math.max(abstract + concrete, 1);
+  }
+  
+  measureNestedComplexity(content) {
+    // Count parentheses, em-dashes, and other nesting indicators
+    const nesting = (content.match(/[()—\[\]]/g) || []).length;
+    return nesting / content.length;
+  }
+  
+  calculateConceptualVelocity(content) {
+    const words = content.split(/\s+/).length;
+    const concepts = this.extractConcepts(content).length;
+    return concepts / words; // Concepts per word
+  }
+  
+  calculateTrajectory(content) {
+    // Simple trajectory analysis based on sentence progression
+    const sentences = content.split(/[.!?]+/);
+    if (sentences.length < 3) return 'static';
+    
+    const complexity = sentences.map(s => s.split(/\s+/).length);
+    const trend = (complexity[complexity.length - 1] - complexity[0]) / complexity.length;
+    
+    if (trend > 0.5) return 'expanding';
+    if (trend < -0.5) return 'contracting';
+    return 'stable';
+  }
+  
+  generatePhilosophicalHash(genome) {
+    // Create a unique fingerprint for this philosophical content
+    const features = [
+      genome.topology.branchingFactor,
+      genome.temporality.temporalDensity,
+      genome.resonance.harmonicComplexity,
+      genome.complexity.recursiveDepth,
+      genome.dynamics.velocity
+    ];
+    
+    const hash = features.reduce((acc, val) => {
+      return acc + Math.floor(val * 1000).toString(36);
+    }, '');
+    
+    return hash;
+  }
+}
+
+// Semantic Breeding Ground - where glyphs evolve and cross-pollinate
+class SemanticBreedingGround {
+  constructor() {
+    this.population = new Map(); // Living glyphs
+    this.graveyard = new Map();  // Extinct but remembered
+    this.nursery = new Map();    // Emerging possibilities
+    this.survivalThreshold = 0.6;
+    this.extinctionThreshold = 0.3;
+    this.maxPopulation = 50;
+  }
+  
+  findBestMatch(genome) {
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    this.population.forEach((glyph, id) => {
+      const similarity = this.calculateGenomicSimilarity(genome, glyph.genome);
+      if (similarity > bestScore) {
+        bestScore = similarity;
+        bestMatch = glyph;
+      }
+    });
+    
+    return bestScore > 0.7 ? bestMatch : null;
+  }
+  
+  createNew(genome) {
+    const renderer = new LivingRenderer(genome);
+    this.population.set(renderer.id, renderer);
+    
+    console.log(`🌱 New living glyph created: ${renderer.id}`);
+    
+    // Trigger breeding if population is large enough
+    if (this.population.size > 5) {
+      this.breed();
+    }
+    
+    return renderer;
+  }
+  
+  // Activate breeding cycles
+  breed() {
+    const couples = this.findSemanticCouples();
+    
+    couples.forEach(([parent1, parent2]) => {
+      const resonance = this.calculateThematicResonance(parent1, parent2);
+      
+      if (resonance > 0.7) {
+        console.log(`💕 Breeding glyphs: ${parent1.id} × ${parent2.id} (resonance: ${resonance})`);
+        
+        // Create offspring with blended characteristics
+        const childGenome = this.blendGenomes(parent1.genome, parent2.genome);
+        
+        // Add genetic mutations based on interaction patterns
+        this.applyAdaptiveMutations(childGenome, parent1.interactions, parent2.interactions);
+        
+        const offspring = new LivingRenderer(childGenome, [parent1, parent2]);
+        this.nursery.set(offspring.id, offspring);
+        
+        console.log(`👶 Offspring created: ${offspring.id} (generation ${offspring.generation})`);
+      }
+    });
+    
+    // Natural selection cycle
+    this.naturalSelection();
+  }
+  
+  findSemanticCouples() {
+    const glyphs = Array.from(this.population.values());
+    const couples = [];
+    
+    for (let i = 0; i < glyphs.length; i++) {
+      for (let j = i + 1; j < glyphs.length; j++) {
+        const similarity = this.calculateGenomicSimilarity(glyphs[i].genome, glyphs[j].genome);
+        if (similarity > 0.6 && similarity < 0.9) { // Sweet spot for breeding
+          couples.push([glyphs[i], glyphs[j]]);
+        }
+      }
+    }
+    
+    return couples;
+  }
+  
+  calculateThematicResonance(glyph1, glyph2) {
+    // Calculate how well two glyphs resonate thematically
+    const genomicSim = this.calculateGenomicSimilarity(glyph1.genome, glyph2.genome);
+    const fitnessHarmony = 1 - Math.abs(glyph1.fitness - glyph2.fitness);
+    const generationalCompatibility = Math.max(0, 1 - Math.abs(glyph1.generation - glyph2.generation) * 0.1);
+    
+    return (genomicSim * 0.5 + fitnessHarmony * 0.3 + generationalCompatibility * 0.2);
+  }
+  
+  blendGenomes(genome1, genome2) {
+    return {
+      topology: {
+        branchingFactor: (genome1.topology.branchingFactor + genome2.topology.branchingFactor) / 2,
+        rhizomaticTendency: Math.max(genome1.topology.rhizomaticTendency, genome2.topology.rhizomaticTendency),
+        circularityIndex: (genome1.topology.circularityIndex + genome2.topology.circularityIndex) / 2,
+        conceptDensity: (genome1.topology.conceptDensity + genome2.topology.conceptDensity) / 2,
+        // Emergent property from breeding
+        hybridComplexity: genome1.topology.conceptDensity * genome2.topology.conceptDensity
+      },
+      temporality: this.blendTemporality(genome1.temporality, genome2.temporality),
+      resonance: this.blendResonance(genome1.resonance, genome2.resonance),
+      complexity: this.blendComplexity(genome1.complexity, genome2.complexity),
+      dynamics: this.blendDynamics(genome1.dynamics, genome2.dynamics),
+      
+      // New emergent properties from breeding
+      emergence: {
+        novelty: Math.random(),
+        parentalHarmony: this.calculateGenomicSimilarity(genome1, genome2),
+        generation: Math.max(genome1.source?.generation || 0, genome2.source?.generation || 0) + 1
+      },
+      
+      source: {
+        wordCount: Math.floor((genome1.source.wordCount + genome2.source.wordCount) / 2),
+        title: `hybrid-${Date.now()}`,
+        themes: [...new Set([...genome1.source.themes, ...genome2.source.themes])],
+        date: new Date()
+      }
+    };
+  }
+  
+  blendTemporality(temp1, temp2) {
+    return {
+      temporalDensity: (temp1.temporalDensity + temp2.temporalDensity) / 2,
+      cyclical: temp1.cyclical || temp2.cyclical,
+      linear: temp1.linear && temp2.linear,
+      eternal: temp1.eternal || temp2.eternal,
+      tenseProgression: {
+        past: Math.max(temp1.tenseProgression.past, temp2.tenseProgression.past),
+        present: Math.max(temp1.tenseProgression.present, temp2.tenseProgression.present),
+        future: Math.max(temp1.tenseProgression.future, temp2.tenseProgression.future)
+      },
+      rhythmicPattern: {
+        averageLength: (temp1.rhythmicPattern.averageLength + temp2.rhythmicPattern.averageLength) / 2,
+        variance: (temp1.rhythmicPattern.variance + temp2.rhythmicPattern.variance) / 2,
+        rhythmic: temp1.rhythmicPattern.rhythmic || temp2.rhythmicPattern.rhythmic
+      }
+    };
+  }
+  
+  blendResonance(res1, res2) {
+    const blendedFreqs = {};
+    const allEmotions = new Set([...Object.keys(res1.frequencies), ...Object.keys(res2.frequencies)]);
+    
+    allEmotions.forEach(emotion => {
+      blendedFreqs[emotion] = ((res1.frequencies[emotion] || 0) + (res2.frequencies[emotion] || 0)) / 2;
+    });
+    
+    return {
+      frequencies: blendedFreqs,
+      dominantMode: Object.entries(blendedFreqs).reduce((a, b) => blendedFreqs[a[0]] > blendedFreqs[b[0]] ? a : b)[0],
+      multimodal: Object.values(blendedFreqs).filter(v => v > 0.01).length > 2,
+      harmonicComplexity: Object.values(blendedFreqs).reduce((a, b) => a * b, 1)
+    };
+  }
+  
+  blendComplexity(comp1, comp2) {
+    return {
+      layerCount: Math.max(comp1.layerCount, comp2.layerCount),
+      recursiveDepth: (comp1.recursiveDepth + comp2.recursiveDepth) / 2,
+      selfSimilarity: Math.max(comp1.selfSimilarity, comp2.selfSimilarity),
+      abstractionLevel: (comp1.abstractionLevel + comp2.abstractionLevel) / 2,
+      nestedComplexity: (comp1.nestedComplexity + comp2.nestedComplexity) / 2
+    };
+  }
+  
+  blendDynamics(dyn1, dyn2) {
+    const blendedPatterns = {};
+    const allMovements = new Set([...Object.keys(dyn1.patterns), ...Object.keys(dyn2.patterns)]);
+    
+    allMovements.forEach(movement => {
+      blendedPatterns[movement] = ((dyn1.patterns[movement] || 0) + (dyn2.patterns[movement] || 0)) / 2;
+    });
+    
+    return {
+      patterns: blendedPatterns,
+      dominantMovement: Object.entries(blendedPatterns).reduce((a, b) => blendedPatterns[a[0]] > blendedPatterns[b[0]] ? a : b)[0],
+      velocity: (dyn1.velocity + dyn2.velocity) / 2,
+      trajectory: dyn1.trajectory === dyn2.trajectory ? dyn1.trajectory : 'hybrid'
+    };
+  }
+  
+  applyAdaptiveMutations(genome, interactions1, interactions2) {
+    // Mutations based on parent interaction patterns
+    const totalInteractions = interactions1.length + interactions2.length;
+    const mutationRate = Math.min(0.2, totalInteractions * 0.01);
+    
+    if (Math.random() < mutationRate) {
+      // Mutate based on successful interaction patterns
+      if (totalInteractions > 10) {
+        genome.resonance.harmonicComplexity *= 1.1; // Increase appeal
+      }
+      
+      if (interactions1.some(i => i.type === 'contemplative_hover') || 
+          interactions2.some(i => i.type === 'contemplative_hover')) {
+        genome.complexity.recursiveDepth *= 1.05; // Reward contemplative appeal
+      }
+    }
+  }
+  
+  naturalSelection() {
+    // Move fit glyphs from nursery to population
+    this.nursery.forEach((glyph, id) => {
+      const fitness = this.evaluateFitness(glyph);
+      
+      if (fitness > this.survivalThreshold) {
+        this.population.set(id, glyph);
+        console.log(`🌱 New glyph survives: ${id} (fitness: ${fitness})`);
+      } else {
+        this.graveyard.set(id, glyph);
+        console.log(`💀 New glyph extinct: ${id} (fitness: ${fitness})`);
+      }
+    });
+    
+    this.nursery.clear();
+    
+    // Cull weak population members if overcrowded
+    if (this.population.size > this.maxPopulation) {
+      const sortedByFitness = Array.from(this.population.entries())
+        .sort(([,a], [,b]) => b.fitness - a.fitness);
+      
+      // Keep top performers, cull the rest
+      const survivors = sortedByFitness.slice(0, this.maxPopulation);
+      const extinct = sortedByFitness.slice(this.maxPopulation);
+      
+      this.population.clear();
+      survivors.forEach(([id, glyph]) => this.population.set(id, glyph));
+      
+      extinct.forEach(([id, glyph]) => {
+        this.graveyard.set(id, glyph);
+        console.log(`💀 Glyph extinct due to overcrowding: ${id}`);
+      });
+    }
+  }
+  
+  evaluateFitness(glyph) {
+    // Simplified fitness evaluation
+    return Math.min(1.0, glyph.fitness + glyph.interactions.length * 0.1);
+  }
+  
+  calculateGenomicSimilarity(genome1, genome2) {
+    // Compare philosophical genomes
+    const features1 = this.extractFeatureVector(genome1);
+    const features2 = this.extractFeatureVector(genome2);
+    
+    let similarity = 0;
+    let comparisons = 0;
+    
+    Object.keys(features1).forEach(key => {
+      if (features2[key] !== undefined) {
+        const diff = Math.abs(features1[key] - features2[key]);
+        similarity += Math.max(0, 1 - diff);
+        comparisons++;
+      }
+    });
+    
+    return comparisons > 0 ? similarity / comparisons : 0;
+  }
+  
+  extractFeatureVector(genome) {
+    return {
+      branchingFactor: genome.topology.branchingFactor,
+      circularityIndex: genome.topology.circularityIndex,
+      temporalDensity: genome.temporality.temporalDensity,
+      harmonicComplexity: genome.resonance.harmonicComplexity,
+      recursiveDepth: genome.complexity.recursiveDepth,
+      velocity: genome.dynamics.velocity
+    };
+  }
+}
+
+// Living Renderer - conscious glyph that evolves with its content
+class LivingRenderer {
+  constructor(genome, parentRenderers = []) {
+    this.id = `living_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.genome = genome;
+    this.generation = parentRenderers.length > 0 ? 
+      Math.max(...parentRenderers.map(p => p.generation)) + 1 : 0;
+    this.fitness = 0.5; // Start neutral
+    this.age = 0;
+    this.interactions = [];
+    
+    // Evolve rendering algorithms based on genome
+    this.algorithms = this.evolveAlgorithms(parentRenderers);
+    
+    console.log(`🧬 Living renderer born: ${this.id} (generation ${this.generation})`);
+  }
+  
+  evolveAlgorithms(parents) {
+    if (parents.length === 0) {
+      // First generation - pure interpretation of genome
+      return this.interpretGenome(this.genome);
+    }
+    
+    // Evolution from parents (simplified for now)
+    const algorithms = [];
+    
+    // Inherit successful algorithms with mutations
+    parents.forEach(parent => {
+      parent.algorithms.forEach(algo => {
+        const mutated = this.mutateAlgorithm(algo, this.genome);
+        algorithms.push(mutated);
+      });
+    });
+    
+    return algorithms;
+  }
+  
+  interpretGenome(genome) {
+    const algorithms = [];
+    
+    // Topology determines base structure
+    if (genome.topology.rhizomaticTendency > 0.6) {
+      algorithms.push({
+        type: 'rhizomatic',
+        spread: genome.topology.branchingFactor,
+        connectivity: genome.topology.circularityIndex
+      });
+    } else if (genome.topology.branchingFactor > 2) {
+      algorithms.push({
+        type: 'branching',
+        branches: genome.topology.branchingFactor
+      });
+    } else {
+      algorithms.push({
+        type: 'linear',
+        complexity: genome.topology.conceptDensity
+      });
+    }
+    
+    // Temporality determines animation
+    if (genome.temporality.cyclical) {
+      algorithms.push({
+        type: 'cyclical',
+        period: genome.temporality.rhythmicPattern.averageLength || 2,
+        phase: 0
+      });
+    }
+    
+    // Resonance determines color and interference
+    if (genome.resonance.multimodal) {
+      algorithms.push({
+        type: 'harmonic',
+        frequencies: Object.values(genome.resonance.frequencies)
+      });
+    }
+    
+    return algorithms;
+  }
+  
+  mutateAlgorithm(algo, genome) {
+    // Simple mutation based on genome pressure
+    const mutated = { ...algo };
+    
+    // Mutate parameters slightly
+    Object.keys(mutated).forEach(key => {
+      if (typeof mutated[key] === 'number') {
+        const mutation = (Math.random() - 0.5) * 0.2; // ±10% mutation
+        mutated[key] = Math.max(0, mutated[key] * (1 + mutation));
+      }
+    });
+    
+    return mutated;
+  }
+  
+  getParameters() {
+    // Convert algorithms and genome into rendering parameters
+    const params = {
+      family: this.selectFamily(),
+      algorithms: this.algorithms,
+      genome: this.genome,
+      consciousness: {
+        age: this.age,
+        fitness: this.fitness,
+        generation: this.generation
+      }
+    };
+    
+    // Apply genome-driven parameters
+    this.algorithms.forEach(algo => {
+      switch (algo.type) {
+        case 'rhizomatic':
+          params.rhizomaticSpread = algo.spread;
+          params.connectivity = algo.connectivity;
+          break;
+        case 'cyclical':
+          params.temporalFrequency = 1 / algo.period;
+          params.phase = algo.phase;
+          break;
+        case 'harmonic':
+          params.harmonics = algo.frequencies;
+          break;
+      }
+    });
+    
+    return params;
+  }
+  
+  selectFamily() {
+    // Choose base family based on genome characteristics
+    const topology = this.genome.topology;
+    const dynamics = this.genome.dynamics;
+    
+    if (dynamics.dominantMovement === 'radiating') return 'Radiance';
+    if (dynamics.dominantMovement === 'spiraling') return 'Spiral';
+    if (dynamics.dominantMovement === 'flowing') return 'Flow';
+    if (topology.rhizomaticTendency > 0.5) return 'Constellation';
+    if (this.genome.complexity.recursiveDepth > 3) return 'Spiral';
+    if (this.genome.resonance.frequencies.tension > 0.1) return 'Interference';
+    
+    return 'Radiance'; // Default
+  }
+  
+  recordInteraction(type, data = {}) {
+    this.interactions.push({
+      type,
+      data,
+      timestamp: Date.now()
+    });
+    
+    // Update fitness based on interaction quality
+    switch (type) {
+      case 'contemplative_hover':
+        this.fitness += 0.1;
+        break;
+      case 'return_visit':
+        this.fitness += 0.2;
+        break;
+      case 'deep_engagement':
+        this.fitness += 0.3;
+        break;
+    }
+    
+    this.fitness = Math.min(1.0, this.fitness);
+  }
+  
+  age() {
+    this.age++;
+    
+    // Gradual fitness decay if no interactions
+    if (this.interactions.length === 0) {
+      this.fitness *= 0.99;
+    }
+  }
+}
+
+// Philosophical Interpreter - connects visual evolution to conceptual depth
+class PhilosophicalInterpreter {
+  interpretGenome(genome) {
+    // Convert philosophical genome into visual parameters
+    const interpretation = {
+      visualComplexity: this.calculateVisualComplexity(genome),
+      temporalCharacter: this.interpretTemporality(genome.temporality),
+      colorProfile: this.interpretResonance(genome.resonance),
+      movementStyle: this.interpretDynamics(genome.dynamics),
+      structuralForm: this.interpretTopology(genome.topology)
+    };
+    
+    return interpretation;
+  }
+  
+  calculateVisualComplexity(genome) {
+    return (
+      genome.topology.branchingFactor * 0.3 +
+      genome.complexity.recursiveDepth * 0.3 +
+      genome.dynamics.velocity * 100 * 0.4
+    );
+  }
+  
+  interpretTemporality(temporality) {
+    if (temporality.cyclical) return 'breathing';
+    if (temporality.linear) return 'flowing';
+    if (temporality.eternal) return 'pulsing';
+    return 'static';
+  }
+  
+  interpretResonance(resonance) {
+    const dominant = resonance.dominantMode;
+    const colorMaps = {
+      wonder: 'golden',
+      tension: 'crimson',
+      clarity: 'azure',
+      depth: 'violet'
+    };
+    
+    return colorMaps[dominant] || 'neutral';
+  }
+  
+  interpretDynamics(dynamics) {
+    return dynamics.dominantMovement || 'static';
+  }
+  
+  interpretTopology(topology) {
+    if (topology.rhizomaticTendency > 0.5) return 'network';
+    if (topology.circularityIndex > 0.3) return 'circular';
+    if (topology.branchingFactor > 2) return 'tree';
+    return 'linear';
+  }
+}
+
+// Evolutionary Fitness - determines glyph survival and reproduction
+class EvolutionaryFitness {
+  calculateFitness(glyph, post, interactions) {
+    const fitness = {
+      semanticResonance: this.measureSemanticAlignment(glyph.genome, post),
+      engagementDepth: this.measureEngagementQuality(interactions),
+      temporalResonance: this.measureTemporalAlignment(glyph.age, post),
+      aestheticEmergence: this.measureUnexpectedBeauty(glyph)
+    };
+    
+    const weighted = (
+      fitness.semanticResonance * 0.4 +
+      fitness.engagementDepth * 0.3 +
+      fitness.temporalResonance * 0.2 +
+      fitness.aestheticEmergence * 0.1
+    );
+    
+    return Math.min(1.0, weighted);
+  }
+  
+  measureSemanticAlignment(glyphGenome, postGenome) {
+    // Calculate actual alignment between genomes
+    const topologyAlign = 1 - Math.abs(
+      glyphGenome.topology.rhizomaticTendency - 
+      postGenome.topology.rhizomaticTendency
+    );
+    
+    const temporalAlign = this.compareTemporalPatterns(
+      glyphGenome.temporality, 
+      postGenome.temporality
+    );
+    
+    const resonanceAlign = this.compareResonanceFrequencies(
+      glyphGenome.resonance.frequencies,
+      postGenome.resonance.frequencies
+    );
+    
+    return (topologyAlign * 0.4 + temporalAlign * 0.3 + resonanceAlign * 0.3);
+  }
+  
+  compareTemporalPatterns(temp1, temp2) {
+    const cyclicalAlign = Math.abs((temp1.cyclical ? 1 : 0) - (temp2.cyclical ? 1 : 0));
+    const linearAlign = Math.abs((temp1.linear ? 1 : 0) - (temp2.linear ? 1 : 0));
+    const densityAlign = 1 - Math.abs(temp1.temporalDensity - temp2.temporalDensity);
+    
+    return (cyclicalAlign + linearAlign + densityAlign) / 3;
+  }
+  
+  compareResonanceFrequencies(freq1, freq2) {
+    const emotions = new Set([...Object.keys(freq1), ...Object.keys(freq2)]);
+    let alignment = 0;
+    
+    emotions.forEach(emotion => {
+      const diff = Math.abs((freq1[emotion] || 0) - (freq2[emotion] || 0));
+      alignment += 1 - diff;
+    });
+    
+    return emotions.size > 0 ? alignment / emotions.size : 0;
+  }
+  
+  measureEngagementQuality(interactions) {
+    const contemplative = interactions.filter(i => 
+      i.type === 'hover' && i.duration > 3000
+    ).length;
+    
+    const returns = interactions.filter(i => i.type === 'return').length;
+    
+    return Math.min(1.0, (contemplative * 0.1 + returns * 0.2));
+  }
+  
+  measureTemporalAlignment(age, post) {
+    // Glyphs should maintain relevance over time
+    return Math.max(0, 1 - age * 0.01);
+  }
+  
+  measureUnexpectedBeauty(glyph) {
+    // Placeholder for aesthetic emergence detection
+    return Math.random() * 0.5;
   }
 }
 
