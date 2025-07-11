@@ -62,9 +62,26 @@ The Chamber’s examinations feature voices across time, discipline, and reality
 
 </div>
 <h2 id="featured-voices">Featured Voices</h2>
-<p><em>Voice listings will appear here as they participate in Chamber sessions.</em></p>
-<h3 id="recent-participants">Recent Participants</h3>
-<p>Voices recently featured in Chamber deliberations will be listed here with their session appearances and generated works.</p>
+<span class="math inline">\(for(voices)\)</span>
+<div class="voice-entry">
+<h3>
+<a href="$url$"><span class="math inline">\(name\)</span></a> <span class="voice-symbol"><span class="math inline">\(symbol\)</span></span>
+</h3>
+<p class="voice-meta">
+<strong><span class="math inline">\(description\)</span></strong>
+<span class="math inline">\(if(tone)\)</span> • <em><span class="math inline">\(tone\)</span></em><span class="math inline">\(endif\)</span>
+<span class="math inline">\(if(chamber_appearances)\)</span> • <span class="appearances-count"><span class="math inline">\(chamber_appearances\)</span> appearances</span><span class="math inline">\(endif\)</span>
+</p>
+<span class="math inline">\(if(epistemic_stance)\)</span>
+<p class="voice-stance">
+<strong>Approach:</strong> <span class="math inline">\(epistemic_stance\)</span>
+</p>
+<p><span class="math inline">\(endif\)</span></p>
+</div>
+<p><span class="math inline">\(endfor\)</span></p>
+<p><span class="math inline">\(if(voices)\)</span><span class="math inline">\(else\)</span>
+<em>Voice listings will appear here as they participate in Chamber sessions.</em>
+<span class="math inline">\(endif\)</span></p>
 <nav class="chamber-enfilade">
 <a href="../../chamber/">Chamber</a>
 <span class="separator">·</span>
@@ -138,6 +155,7 @@ The Chamber’s examinations feature voices across time, discipline, and reality
     document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
   </script>
 
-  
+  <!-- Philosophical Glyph Orchestrator -->
+  <script src="../../assets/js/glyphs/glyph-orchestrator.js"></script>
 </body>
 </html>
