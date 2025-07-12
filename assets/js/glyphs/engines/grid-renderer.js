@@ -12,7 +12,7 @@ class GridRenderer {
       connectionProbability: params.connectionProbability || 0.3,
       geometricComplexity: params.geometricComplexity || 0.5,
       logicalDepth: params.logicalDepth || 3,
-      animationSpeed: params.animationSpeed || 0.01,
+      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001),
       ...params
     };
     this.time = 0;
@@ -285,7 +285,14 @@ class GridRenderer {
   }
 
   renderGridStructure() {
-    this.ctx.strokeStyle = 'rgba(100, 120, 140, 0.2)';
+    // Use sacred palette if available
+    const palette = window.SacredPalette || { 
+      families: { grid: { primary: '#778899' } },
+      utils: { mix: (a,b,r) => a }
+    };
+    
+    const gridColors = palette.families.grid;
+    this.ctx.strokeStyle = palette.utils.mix(gridColors.primary, palette.ground?.vellum || '#FAF8F3', 0.85);
     this.ctx.lineWidth = 1;
     
     if (this.params.gridType === 'cartesian') {
@@ -308,29 +315,35 @@ class GridRenderer {
   }
 
   renderConnections() {
+    const palette = window.SacredPalette || { families: { grid: {} } };
+    const gridColors = palette.families.grid;
+    
     this.connections.forEach(connection => {
       const p1 = this.gridPoints[connection.from];
       const p2 = this.gridPoints[connection.to];
       
-      const alpha = connection.strength * 0.6;
-      let color;
+      const alpha = connection.strength * 0.4; // More subtle than before
+      let baseColor;
       
+      // Use sacred palette colors, muted and contemplative
       switch (connection.logicalType) {
         case 'equivalence':
-          color = `rgba(100, 255, 100, ${alpha})`;
+          baseColor = gridColors.accent || '#8FA68E'; // Moss hint
           break;
         case 'implication':
-          color = `rgba(100, 150, 255, ${alpha})`;
+          baseColor = gridColors.primary || '#778899'; // Slate blue
           break;
         case 'contrast':
-          color = `rgba(255, 100, 100, ${alpha})`;
+          baseColor = gridColors.secondary || '#A8A8A8'; // Warm grey
           break;
         default:
-          color = `rgba(150, 150, 150, ${alpha})`;
+          baseColor = palette.base?.ash || '#9B9B9B'; // Gentle grey
       }
       
-      this.ctx.strokeStyle = color;
-      this.ctx.lineWidth = 1 + connection.strength;
+      // Convert hex to rgba with contemplative alpha
+      const rgb = palette.utils?.hexToRgb(baseColor) || {r: 120, g: 136, b: 153};
+      this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      this.ctx.lineWidth = 0.5 + connection.strength * 0.5; // Thinner, more subtle
       this.ctx.beginPath();
       this.ctx.moveTo(p1.x, p1.y);
       this.ctx.lineTo(p2.x, p2.y);
@@ -339,31 +352,55 @@ class GridRenderer {
   }
 
   renderGridPoints() {
+    const palette = window.SacredPalette || { families: { grid: {} } };
+    const gridColors = palette.families.grid;
+    
     this.gridPoints.forEach(point => {
       const logicalIntensity = point.logicalValue;
       const stabilityIndicator = point.stability;
       
-      // Point color based on logical value
-      const hue = logicalIntensity * 240; // Blue for true, red for false
-      const saturation = 70 + stabilityIndicator * 30;
-      const lightness = 40 + logicalIntensity * 40;
-      const alpha = 0.7 + Math.sin(this.time + point.phase) * 0.3;
+      // Use sacred palette grid colors for contemplative gradation
+      const primaryRgb = palette.utils?.hexToRgb(gridColors.primary || '#778899') || {r: 119, g: 136, b: 153};
+      const secondaryRgb = palette.utils?.hexToRgb(gridColors.secondary || '#A8A8A8') || {r: 168, g: 168, b: 168};
+      const accentRgb = palette.utils?.hexToRgb(gridColors.accent || '#8FA68E') || {r: 143, g: 166, b: 142};
       
-      this.ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+      // Blend between primary -> accent -> secondary based on logical intensity
+      let r, g, b;
+      if (logicalIntensity < 0.5) {
+        // Blend primary to accent (contemplative progression)
+        const t = logicalIntensity * 2;
+        r = primaryRgb.r + (accentRgb.r - primaryRgb.r) * t;
+        g = primaryRgb.g + (accentRgb.g - primaryRgb.g) * t;
+        b = primaryRgb.b + (accentRgb.b - primaryRgb.b) * t;
+      } else {
+        // Blend accent to secondary (deepening thought)
+        const t = (logicalIntensity - 0.5) * 2;
+        r = accentRgb.r + (secondaryRgb.r - accentRgb.r) * t;
+        g = accentRgb.g + (secondaryRgb.g - accentRgb.g) * t;
+        b = accentRgb.b + (secondaryRgb.b - accentRgb.b) * t;
+      }
       
-      // Point size based on logical certainty
-      const size = 3 + logicalIntensity * 4 + stabilityIndicator * 2;
+      // Breathing animation using sacred timing
+      const breathPhase = this.time * (palette.timing?.breathRate || 0.001) + point.phase;
+      const breathAlpha = 0.3 + Math.sin(breathPhase) * 0.15; // Gentle contemplative pulse
+      
+      this.ctx.fillStyle = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${breathAlpha})`;
+      
+      // Point size based on logical certainty - modest sizing
+      const size = 2 + logicalIntensity * 3 + stabilityIndicator * 1.5;
       
       this.ctx.beginPath();
       this.ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
       this.ctx.fill();
       
-      // Logical state indicator
+      // Subtle logical state indicator
       if (this.params.geometricComplexity > 0.5) {
-        this.ctx.strokeStyle = `hsla(${hue}, 90%, 80%, 0.8)`;
-        this.ctx.lineWidth = 1;
+        const indicatorColor = palette.utils?.weather(gridColors.primary || '#778899', 0.5) || '#5A6A79';
+        const indicatorRgb = palette.utils?.hexToRgb(indicatorColor) || {r: 90, g: 106, b: 121};
+        this.ctx.strokeStyle = `rgba(${indicatorRgb.r}, ${indicatorRgb.g}, ${indicatorRgb.b}, 0.4)`;
+        this.ctx.lineWidth = 0.5;
         this.ctx.beginPath();
-        this.ctx.arc(point.x, point.y, size + 2, 0, Math.PI * 2);
+        this.ctx.arc(point.x, point.y, size + 1, 0, Math.PI * 2);
         this.ctx.stroke();
       }
     });

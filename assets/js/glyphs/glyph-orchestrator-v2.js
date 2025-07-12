@@ -924,6 +924,10 @@ class GlyphOrchestrator {
   createProceduralGlyph(canvas, parameters) {
     const { family, isHybrid, hybridSecondary, hybridBlend } = parameters;
     
+    // Set canvas to proper contemplative dimensions (Animal Rationis Capax standard)
+    canvas.width = 600;
+    canvas.height = 400;
+    
     console.log(`🎨 Creating glyph for family: ${family}`);
     console.log(`🔍 Available renderers:`, Object.keys(window.GlyphRenderers || {}));
     console.log(`🔍 Looking for renderer: ${family}`);
