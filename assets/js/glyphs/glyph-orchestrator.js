@@ -543,7 +543,7 @@ class GlyphOrchestrator {
   initializeAll() {
     const initialize = () => {
       console.log('🔍 DOM ready, searching for glyph containers...');
-      const containers = document.querySelectorAll('.philosophical-glyph[data-glyph-id]');
+      const containers = document.querySelectorAll('.contemplative-sigil[data-glyph-id]');
       console.log(`📊 Found ${containers.length} glyph containers`);
       
       containers.forEach(container => {
