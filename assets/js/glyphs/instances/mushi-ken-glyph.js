@@ -4,7 +4,7 @@
 
 // Initialize glyph when script loads
 document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('glyph-canvas');
+    const canvas = document.getElementById('glyph-canvas-mushi-ken-glyph');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
