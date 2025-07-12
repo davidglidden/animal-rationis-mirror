@@ -6,7 +6,7 @@
 // Movement: radiating - consequences spreading outward
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const canvas = document.getElementById('glyph-canvas');
+    const canvas = document.getElementById('glyph-canvas-grid-systems-change');
     if (!canvas) return;
     
     canvas.width = 600;
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-    const canvas = document.getElementById('glyph-canvas');
+    const canvas = document.getElementById('glyph-canvas-grid-systems-change');
     if (canvas && canvas.glyphRenderer) {
         canvas.glyphRenderer.destroy();
     }
