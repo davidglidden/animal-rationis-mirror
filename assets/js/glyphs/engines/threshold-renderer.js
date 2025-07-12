@@ -7,7 +7,7 @@ class ThresholdRenderer {
     this.params = {
       thresholdType: params.thresholdType || 'portal', // portal, membrane, phase, gateway
       permeability: params.permeability || 0.5,
-      transitionSpeed: params.transitionSpeed || 0.02,
+      transitionSpeed: params.transitionSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 20,
       dimensionalOverlap: params.dimensionalOverlap || 0.3,
       boundaryTension: params.boundaryTension || 1.0,
       phaseDensity: params.phaseDensity || 0.7,
@@ -297,19 +297,34 @@ class ThresholdRenderer {
   renderDimensionalLayers() {
     const { width, height } = this.canvas;
     
-    // Before-space (left/background)
-    const beforeGradient = this.ctx.createLinearGradient(0, 0, width / 2, 0);
-    beforeGradient.addColorStop(0, 'rgba(20, 20, 50, 0.3)');
-    beforeGradient.addColorStop(1, 'rgba(40, 40, 80, 0.1)');
-    this.ctx.fillStyle = beforeGradient;
-    this.ctx.fillRect(0, 0, width / 2, height);
+    // Use Sacred Palette threshold colors for liminal spaces
+    const palette = window.SacredPalette?.families?.threshold || {
+      primary: '#B89B9B', secondary: '#E8DCC6', accent: '#7B6D8D'
+    };
+    const groundColor = window.SacredPalette?.ground?.vellum || '#FAF8F3';
     
-    // After-space (right/foreground)  
+    // Before-space (left/background) - bone color
+    const beforeGradient = this.ctx.createLinearGradient(0, 0, width / 2, 0);
+    const beforeRgb = window.SacredPalette?.utils?.hexToRgb(palette.secondary);
+    const groundRgb = window.SacredPalette?.utils?.hexToRgb(groundColor);
+    
+    if (beforeRgb && groundRgb) {
+      beforeGradient.addColorStop(0, `rgba(${beforeRgb.r}, ${beforeRgb.g}, ${beforeRgb.b}, 0.3)`);
+      beforeGradient.addColorStop(1, `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, 0.1)`);
+      this.ctx.fillStyle = beforeGradient;
+      this.ctx.fillRect(0, 0, width / 2, height);
+    }
+    
+    // After-space (right/foreground) - dusty rose
     const afterGradient = this.ctx.createLinearGradient(width / 2, 0, width, 0);
-    afterGradient.addColorStop(0, 'rgba(80, 40, 40, 0.1)');
-    afterGradient.addColorStop(1, 'rgba(50, 20, 20, 0.3)');
-    this.ctx.fillStyle = afterGradient;
-    this.ctx.fillRect(width / 2, 0, width / 2, height);
+    const afterRgb = window.SacredPalette?.utils?.hexToRgb(palette.primary);
+    
+    if (afterRgb && groundRgb) {
+      afterGradient.addColorStop(0, `rgba(${afterRgb.r}, ${afterRgb.g}, ${afterRgb.b}, 0.1)`);
+      afterGradient.addColorStop(1, `rgba(${afterRgb.r}, ${afterRgb.g}, ${afterRgb.b}, 0.3)`);
+      this.ctx.fillStyle = afterGradient;
+      this.ctx.fillRect(width / 2, 0, width / 2, height);
+    }
   }
 
   renderThresholds() {
@@ -332,20 +347,27 @@ class ThresholdRenderer {
   renderPortal() {
     const portal = this.thresholds[0];
     
-    // Portal rim
+    // Portal rim using Sacred Palette threshold colors
     const rimGradient = this.ctx.createRadialGradient(
       portal.x, portal.y, portal.innerRadius,
       portal.x, portal.y, portal.outerRadius
     );
-    rimGradient.addColorStop(0, 'rgba(100, 200, 255, 0.8)');
-    rimGradient.addColorStop(0.5, 'rgba(200, 100, 255, 0.6)');
-    rimGradient.addColorStop(1, 'rgba(100, 200, 255, 0.2)');
     
-    this.ctx.fillStyle = rimGradient;
-    this.ctx.beginPath();
-    this.ctx.arc(portal.x, portal.y, portal.outerRadius, 0, Math.PI * 2);
-    this.ctx.arc(portal.x, portal.y, portal.innerRadius, 0, Math.PI * 2, true);
-    this.ctx.fill();
+    const twilightRgb = window.SacredPalette?.utils?.hexToRgb(palette.accent); // Twilight
+    const dustyRgb = window.SacredPalette?.utils?.hexToRgb(palette.primary);    // Dusty rose
+    const boneRgb = window.SacredPalette?.utils?.hexToRgb(palette.secondary);  // Bone
+    
+    if (twilightRgb && dustyRgb && boneRgb) {
+      rimGradient.addColorStop(0, `rgba(${twilightRgb.r}, ${twilightRgb.g}, ${twilightRgb.b}, 0.8)`);
+      rimGradient.addColorStop(0.5, `rgba(${dustyRgb.r}, ${dustyRgb.g}, ${dustyRgb.b}, 0.6)`);
+      rimGradient.addColorStop(1, `rgba(${boneRgb.r}, ${boneRgb.g}, ${boneRgb.b}, 0.2)`);
+      
+      this.ctx.fillStyle = rimGradient;
+      this.ctx.beginPath();
+      this.ctx.arc(portal.x, portal.y, portal.outerRadius, 0, Math.PI * 2);
+      this.ctx.arc(portal.x, portal.y, portal.innerRadius, 0, Math.PI * 2, true);
+      this.ctx.fill();
+    }
     
     // Portal energy rings
     for (let i = 0; i < 3; i++) {
@@ -449,17 +471,13 @@ class ThresholdRenderer {
     this.particles.forEach(particle => {
       const interaction = this.checkThresholdInteraction(particle);
       
-      // Calculate rendering properties based on phase and transition
+      // Calculate rendering properties using Sacred Palette threshold colors
       let alpha = particle.opacity;
       let size = particle.size;
-      let hue = particle.hue;
       
-      if (particle.transitionProgress > 0) {
-        // Particle is transitioning
-        alpha *= (1 + Math.sin(particle.transitionProgress * Math.PI) * 0.5);
-        size *= (1 + particle.transitionProgress * 0.5);
-        hue = (particle.hue + particle.transitionProgress * 60) % 360;
-      }
+      // Use threshold palette colors instead of HSL hue
+      const colors = [palette.secondary, palette.primary, palette.accent]; // Bone -> Dusty rose -> Twilight
+      let particleColor = colors[Math.floor(particle.hue / 120) % colors.length];\n      \n      if (particle.transitionProgress > 0) {\n        // Particle is transitioning - enhance properties\n        alpha *= (1 + Math.sin(particle.transitionProgress * Math.PI) * 0.5);\n        size *= (1 + particle.transitionProgress * 0.5);\n        \n        // Color shifts through threshold palette during transition\n        const transitionIndex = Math.floor(particle.transitionProgress * (colors.length - 1));\n        particleColor = colors[transitionIndex] || particleColor;\n      }
       
       if (interaction.crossing) {
         alpha += interaction.intensity * 0.3;
@@ -471,25 +489,29 @@ class ThresholdRenderer {
         hue = (hue + 30) % 360;
       }
       
-      this.ctx.fillStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
-      this.ctx.beginPath();
-      this.ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
-      this.ctx.fill();
-      
-      // Draw transition aura
-      if (particle.transitionProgress > 0) {
-        const auraRadius = size * (2 + particle.transitionProgress * 3);
-        const auraGradient = this.ctx.createRadialGradient(
-          particle.x, particle.y, size,
-          particle.x, particle.y, auraRadius
-        );
-        auraGradient.addColorStop(0, `hsla(${hue}, 80%, 80%, 0.3)`);
-        auraGradient.addColorStop(1, `hsla(${hue}, 80%, 80%, 0)`);
-        
-        this.ctx.fillStyle = auraGradient;
+      // Draw particle using Sacred Palette threshold colors
+      const particleRgb = window.SacredPalette?.utils?.hexToRgb(particleColor);
+      if (particleRgb) {
+        this.ctx.fillStyle = `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, ${alpha})`;
         this.ctx.beginPath();
-        this.ctx.arc(particle.x, particle.y, auraRadius, 0, Math.PI * 2);
+        this.ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
         this.ctx.fill();
+        
+        // Draw transition aura
+        if (particle.transitionProgress > 0) {
+          const auraRadius = size * (2 + particle.transitionProgress * 3);
+          const auraGradient = this.ctx.createRadialGradient(
+            particle.x, particle.y, size,
+            particle.x, particle.y, auraRadius
+          );
+          auraGradient.addColorStop(0, `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, 0.3)`);
+          auraGradient.addColorStop(1, `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, 0)`);
+          
+          this.ctx.fillStyle = auraGradient;
+          this.ctx.beginPath();
+          this.ctx.arc(particle.x, particle.y, auraRadius, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
       }
     });
   }

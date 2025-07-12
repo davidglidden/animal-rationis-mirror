@@ -11,7 +11,7 @@ class InterferenceRenderer {
       phase: params.phase || 0,
       interferenceType: params.interferenceType || 'constructive', // constructive, destructive, mixed
       colorIntensity: params.colorIntensity || 0.7,
-      animationSpeed: params.animationSpeed || 0.01,
+      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.shiftRate || 0.0005) * 20,
       ...params
     };
     this.time = 0;
@@ -63,14 +63,35 @@ class InterferenceRenderer {
           }
         }
         
-        // Normalize and apply color
+        // Normalize and apply Sacred Palette interference colors - "necessary discord, weathered"
         const intensity = Math.abs(amplitude) / this.params.waveCount;
-        const hue = this.params.interferenceType === 'destructive' ? 
-          (intensity * 60 + 200) % 360 : // Blue-purple for destructive
-          (intensity * 60 + 320) % 360;  // Purple-red for constructive
+        const palette = window.SacredPalette?.families?.interference || {
+          primary: '#A67373', secondary: '#6B6B6B', accent: '#8B7D8B'
+        };
         
-        this.ctx.fillStyle = `hsla(${hue}, 70%, ${50 + intensity * 20}%, ${intensity * this.params.colorIntensity})`;
-        this.ctx.fillRect(x, y, 2, 2);
+        // Choose color based on interference pattern intensity
+        let baseColor;
+        if (intensity > 0.7) {
+          baseColor = palette.primary; // Muted crimson for high intensity
+        } else if (intensity > 0.4) {
+          baseColor = palette.accent;   // Bruised plum for medium
+        } else {
+          baseColor = palette.secondary; // Graphite for low
+        }
+        
+        // Apply breathing and weathering effects
+        const weathered = window.SacredPalette?.utils?.weather ?
+          window.SacredPalette.utils.weather(baseColor, 0.3) : baseColor;
+        const breathed = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(weathered, this.time, intensity * 0.1) : weathered;
+        
+        // Convert hex to rgba with intensity-based alpha
+        const rgb = window.SacredPalette?.utils?.hexToRgb(breathed);
+        if (rgb) {
+          const alpha = intensity * this.params.colorIntensity;
+          this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+          this.ctx.fillRect(x, y, 2, 2);
+        }
       }
     }
   }

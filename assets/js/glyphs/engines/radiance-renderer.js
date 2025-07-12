@@ -8,7 +8,7 @@ class RadianceRenderer {
       rayCount: params.rayCount || 12,
       coreRadius: params.coreRadius || 20,
       maxRadius: params.maxRadius || 200,
-      pulseFrequency: params.pulseFrequency || 0.02,
+      pulseFrequency: params.pulseFrequency || (window.SacredPalette?.timing?.breathRate || 0.001),
       rayType: params.rayType || 'classic', // classic, spiral, fibonacci, burst
       intensity: params.intensity || 0.8,
       centerStrength: params.centerStrength || 1.0,
@@ -267,10 +267,16 @@ class RadianceRenderer {
     );
     
     const coreAlpha = this.params.centerStrength * 0.1;
-    gradient.addColorStop(0, `rgba(255, 255, 200, ${coreAlpha})`);
-    gradient.addColorStop(0.3, `rgba(255, 200, 100, ${coreAlpha * 0.5})`);
-    gradient.addColorStop(0.7, `rgba(100, 150, 255, ${coreAlpha * 0.2})`);
-    gradient.addColorStop(1, 'rgba(0, 0, 50, 0)');
+    // Use Sacred Palette radiance colors (candlelight on vellum)
+    const palette = window.SacredPalette || { families: { radiance: {} } };
+    const colors = palette.families.radiance;
+    const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
+    const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
+    
+    gradient.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${coreAlpha})`);
+    gradient.addColorStop(0.3, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${coreAlpha * 0.5})`);
+    gradient.addColorStop(0.7, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${coreAlpha * 0.2})`);
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, width, height);
@@ -286,13 +292,17 @@ class RadianceRenderer {
         this.center.x, this.center.y, endX, endY
       );
       
-      const baseHue = 45; // Golden/yellow base
-      const hueShift = ray.phase * 30;
-      const alpha = ray.currentIntensity || ray.intensity;
+      // Sacred Palette radiance ray colors
+      const palette = window.SacredPalette || { families: { radiance: {} } };
+      const colors = palette.families.radiance;
+      const alpha = (ray.currentIntensity || ray.intensity) * 0.6; // More contemplative
       
-      rayGradient.addColorStop(0, `hsla(${baseHue + hueShift}, 80%, 80%, ${alpha})`);
-      rayGradient.addColorStop(0.7, `hsla(${baseHue + hueShift}, 60%, 60%, ${alpha * 0.6})`);
-      rayGradient.addColorStop(1, `hsla(${baseHue + hueShift}, 40%, 40%, 0)`);
+      const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
+      const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
+      
+      rayGradient.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${alpha})`);
+      rayGradient.addColorStop(0.7, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${alpha * 0.6})`);
+      rayGradient.addColorStop(1, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0)`);
       
       this.ctx.strokeStyle = rayGradient;
       this.ctx.lineWidth = ray.thickness;

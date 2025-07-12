@@ -8,7 +8,7 @@ class SpiralRenderer {
       spiralType: params.spiralType || 'fibonacci', // fibonacci, archimedean, logarithmic
       arms: params.arms || 3,
       growth: params.growth || 0.2,
-      rotationSpeed: params.rotationSpeed || 0.005,
+      rotationSpeed: params.rotationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 5,
       particleCount: params.particleCount || 200,
       trailLength: params.trailLength || 0.95,
       colorShift: params.colorShift || 0,
@@ -91,13 +91,28 @@ class SpiralRenderer {
       particle.life += particle.speed * 0.01;
       if (particle.life > 1) particle.life = 0;
       
-      // Color based on position in spiral and time
-      const hue = (index * 137.5 + this.time * 50 + this.params.colorShift) % 360; // Golden angle
-      const saturation = 70 + particle.life * 30;
-      const lightness = 40 + particle.life * 40;
-      const alpha = Math.sin(particle.life * Math.PI) * 0.8;
+      // Color using Sacred Palette spiral family - golden growth spiraling
+      const palette = window.SacredPalette?.families?.spiral || {
+        primary: '#8B4513', secondary: '#CD853F', accent: '#D2691E'
+      };
       
-      this.ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+      // Cycle through spiral colors based on position and time
+      const colorPhase = (index * 137.5 + this.time * 50) % 360; // Golden angle
+      let color;
+      if (colorPhase < 120) {
+        color = palette.primary;
+      } else if (colorPhase < 240) {
+        color = palette.secondary;
+      } else {
+        color = palette.accent;
+      }
+      
+      // Apply life-based alpha and slight weathering
+      const alpha = Math.sin(particle.life * Math.PI) * 0.8;
+      const weathering = window.SacredPalette?.utilities?.weatherColor ? 
+        window.SacredPalette.utilities.weatherColor(color, particle.life * 0.3) : color;
+      
+      this.ctx.fillStyle = weathering.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
       
       // Draw particle with size based on life
       const size = 2 + particle.life * 4;
@@ -108,7 +123,9 @@ class SpiralRenderer {
       // Draw connecting lines between nearby particles
       if (index > 0 && index % 3 === 0) {
         const prevPos = this.getSpiralPosition(this.particles[index - 1].angle, index - 1);
-        this.ctx.strokeStyle = `hsla(${hue}, 50%, 60%, 0.3)`;
+        // Use muted accent color for connections
+        const connectionColor = palette.accent;
+        this.ctx.strokeStyle = connectionColor.replace('rgb', 'rgba').replace(')', ', 0.3)');
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.moveTo(prevPos.x, prevPos.y);

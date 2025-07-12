@@ -11,7 +11,7 @@ class StrataRenderer {
       compressionForce: params.compressionForce || 0.1,
       timeScale: params.timeScale || 1000,
       colorVariation: params.colorVariation || 30,
-      animationSpeed: params.animationSpeed || 0.001,
+      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001),
       ...params
     };
     this.time = 0;
@@ -25,7 +25,11 @@ class StrataRenderer {
   initLayers() {
     this.layers = [];
     const { height } = this.canvas;
-    const baseHue = 30; // Earthy brown/orange base
+    // Use Sacred Palette strata family - "geological memory"
+    const palette = window.SacredPalette?.families?.strata || {
+      primary: '#D4C5A0', secondary: '#8B8680', accent: '#B8956A'
+    };
+    const baseColors = [palette.primary, palette.secondary, palette.accent];
     
     for (let i = 0; i < this.params.layerCount; i++) {
       const age = i / this.params.layerCount;
@@ -35,9 +39,9 @@ class StrataRenderer {
         age: age,
         thickness: thickness,
         baseY: (height / this.params.layerCount) * i,
-        hue: baseHue + (Math.random() - 0.5) * this.params.colorVariation,
-        saturation: 40 + Math.random() * 30,
-        lightness: 20 + age * 40,
+        color: baseColors[i % baseColors.length],
+        colorIndex: i % baseColors.length,
+        weathering: age * 0.4, // Older layers more weathered
         hardness: Math.random(), // Resistance to erosion
         compression: 0,
         folds: []
@@ -130,10 +134,13 @@ class StrataRenderer {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
     
-    // Draw background gradient (deep earth)
+    // Draw background gradient using Sacred Palette ground colors
+    const groundColor = window.SacredPalette?.ground?.fresco || '#F5F0E6';
+    const deepColor = window.SacredPalette?.families?.strata?.secondary || '#8B8680';
+    
     const bgGradient = this.ctx.createLinearGradient(0, 0, 0, height);
-    bgGradient.addColorStop(0, '#1a1a2e');
-    bgGradient.addColorStop(1, '#2d1b0e');
+    bgGradient.addColorStop(0, groundColor);
+    bgGradient.addColorStop(1, deepColor);
     this.ctx.fillStyle = bgGradient;
     this.ctx.fillRect(0, 0, width, height);
     
@@ -167,52 +174,73 @@ class StrataRenderer {
       
       this.ctx.closePath();
       
-      // Fill layer with color
+      // Fill layer with Sacred Palette geological colors
       const erosion = Math.sin(this.time * this.params.erosionRate + layerIndex) * 0.1 + 0.9;
-      const lightness = layer.lightness * erosion;
-      this.ctx.fillStyle = `hsl(${layer.hue}, ${layer.saturation}%, ${lightness}%)`;
-      this.ctx.fill();
       
-      // Add layer texture
-      this.ctx.strokeStyle = `hsl(${layer.hue}, ${layer.saturation}%, ${lightness * 0.7}%)`;
-      this.ctx.lineWidth = 0.5;
-      this.ctx.stroke();
+      // Apply weathering and erosion to base color
+      let layerColor = layer.color;
+      if (window.SacredPalette?.utils?.weather) {
+        layerColor = window.SacredPalette.utils.weather(layerColor, layer.weathering);
+      }
+      if (window.SacredPalette?.utils?.breathe) {
+        layerColor = window.SacredPalette.utils.breathe(layerColor, this.time + layerIndex, erosion * 0.1);
+      }
+      
+      // Convert to rgba for filling
+      const rgb = window.SacredPalette?.utils?.hexToRgb(layerColor);
+      if (rgb) {
+        this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${erosion})`;
+        this.ctx.fill();
+        
+        // Add layer texture with darker version
+        this.ctx.strokeStyle = `rgba(${rgb.r * 0.7}, ${rgb.g * 0.7}, ${rgb.b * 0.7}, ${erosion * 0.8})`;
+        this.ctx.lineWidth = 0.5;
+        this.ctx.stroke();
+      }
     }
     
-    // Draw fault lines
+    // Draw fault lines using Sacred Palette
+    const faultColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
     this.faults.forEach(fault => {
-      this.ctx.strokeStyle = `rgba(200, 50, 50, ${fault.activity * 0.8})`;
-      this.ctx.lineWidth = fault.width;
-      this.ctx.setLineDash([5, 5]);
-      
-      this.ctx.beginPath();
-      const x1 = fault.x;
-      const y1 = 0;
-      const x2 = fault.x + Math.tan(fault.angle) * height;
-      const y2 = height;
-      
-      this.ctx.moveTo(x1, y1);
-      this.ctx.lineTo(x2, y2);
-      this.ctx.stroke();
-      
-      this.ctx.setLineDash([]);
-    });
-    
-    // Add surface erosion effects
-    const surfaceLayer = this.layers[0];
-    if (surfaceLayer) {
-      this.ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
-      this.ctx.lineWidth = 1;
-      
-      for (let x = 0; x < width; x += 5) {
-        const erosionNoise = Math.sin(x * 0.01 + this.time * 2) * Math.cos(x * 0.007 + this.time * 1.5);
-        const erosionDepth = erosionNoise * this.params.erosionRate * 5;
-        const y = this.getLayerHeight(surfaceLayer, x) + erosionDepth;
+      const rgb = window.SacredPalette?.utils?.hexToRgb(faultColor);
+      if (rgb) {
+        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${fault.activity * 0.8})`;
+        this.ctx.lineWidth = fault.width;
+        this.ctx.setLineDash([5, 5]);
         
         this.ctx.beginPath();
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x, y + Math.abs(erosionDepth) + 2);
+        const x1 = fault.x;
+        const y1 = 0;
+        const x2 = fault.x + Math.tan(fault.angle) * height;
+        const y2 = height;
+        
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
         this.ctx.stroke();
+        
+        this.ctx.setLineDash([]);
+      }
+    });
+    
+    // Add surface erosion effects with Sacred Palette
+    const surfaceLayer = this.layers[0];
+    if (surfaceLayer) {
+      const erosionColor = window.SacredPalette?.base?.umber || '#826B4F';
+      const rgb = window.SacredPalette?.utils?.hexToRgb(erosionColor);
+      if (rgb) {
+        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`;
+        this.ctx.lineWidth = 1;
+        
+        for (let x = 0; x < width; x += 5) {
+          const erosionNoise = Math.sin(x * 0.01 + this.time * 2) * Math.cos(x * 0.007 + this.time * 1.5);
+          const erosionDepth = erosionNoise * this.params.erosionRate * 5;
+          const y = this.getLayerHeight(surfaceLayer, x) + erosionDepth;
+          
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, y);
+          this.ctx.lineTo(x, y + Math.abs(erosionDepth) + 2);
+          this.ctx.stroke();
+        }
       }
     }
   }

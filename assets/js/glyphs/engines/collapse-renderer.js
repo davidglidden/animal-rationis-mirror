@@ -7,7 +7,7 @@ class CollapseRenderer {
     this.params = {
       collapseType: params.collapseType || 'gravitational', // gravitational, structural, cascade
       particleCount: params.particleCount || 150,
-      collapseSpeed: params.collapseSpeed || 0.02,
+      collapseSpeed: params.collapseSpeed || (window.SacredPalette?.timing?.shiftRate || 0.0005) * 40,
       centerMass: params.centerMass || 5,
       eventHorizon: params.eventHorizon || 30,
       shearForce: params.shearForce || 0.1,
@@ -93,7 +93,7 @@ class CollapseRenderer {
         structural: structural,
         collapsed: false,
         fragmentTime: 0,
-        hue: Math.random() * 60 + 300, // Purple to red range
+        colorIndex: Math.floor(Math.random() * 3), // For Sacred Palette cycling
         life: 1,
         trail: []
       });
@@ -228,88 +228,137 @@ class CollapseRenderer {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
     
-    // Draw background with collapse distortion
+    // Draw background with collapse distortion using Sacred Palette
+    const palette = window.SacredPalette?.families?.collapse || {
+      primary: '#8B7D8B', secondary: '#5C5C5C', accent: '#7B8B7B'
+    };
+    const groundColor = window.SacredPalette?.ground?.fresco || '#F5F0E6';
+    
     const gradient = this.ctx.createRadialGradient(
       this.collapseCenter.x, this.collapseCenter.y, 0,
       this.collapseCenter.x, this.collapseCenter.y, 200
     );
-    gradient.addColorStop(0, 'rgba(50, 0, 0, 0.3)');
-    gradient.addColorStop(0.5, 'rgba(20, 0, 20, 0.1)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    this.ctx.fillStyle = gradient;
-    this.ctx.fillRect(0, 0, width, height);
     
-    // Draw event horizon
-    this.ctx.strokeStyle = 'rgba(255, 100, 100, 0.3)';
-    this.ctx.lineWidth = 2;
-    this.ctx.setLineDash([5, 5]);
-    this.ctx.beginPath();
-    this.ctx.arc(this.collapseCenter.x, this.collapseCenter.y, this.params.eventHorizon, 0, Math.PI * 2);
-    this.ctx.stroke();
-    this.ctx.setLineDash([]);
+    // Use muted collapse colors for background
+    const centerRgb = window.SacredPalette?.utils?.hexToRgb(palette.secondary);
+    const midRgb = window.SacredPalette?.utils?.hexToRgb(palette.primary);
+    const groundRgb = window.SacredPalette?.utils?.hexToRgb(groundColor);
+    
+    if (centerRgb && midRgb && groundRgb) {
+      gradient.addColorStop(0, `rgba(${centerRgb.r}, ${centerRgb.g}, ${centerRgb.b}, 0.3)`);
+      gradient.addColorStop(0.5, `rgba(${midRgb.r}, ${midRgb.g}, ${midRgb.b}, 0.1)`);
+      gradient.addColorStop(1, `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, 0)`);
+      this.ctx.fillStyle = gradient;
+      this.ctx.fillRect(0, 0, width, height);
+    }
+    
+    // Draw event horizon using Sacred Palette
+    const horizonColor = palette.accent; // Copper patina
+    const horizonRgb = window.SacredPalette?.utils?.hexToRgb(horizonColor);
+    if (horizonRgb) {
+      this.ctx.strokeStyle = `rgba(${horizonRgb.r}, ${horizonRgb.g}, ${horizonRgb.b}, 0.3)`;
+      this.ctx.lineWidth = 2;
+      this.ctx.setLineDash([5, 5]);
+      this.ctx.beginPath();
+      this.ctx.arc(this.collapseCenter.x, this.collapseCenter.y, this.params.eventHorizon, 0, Math.PI * 2);
+      this.ctx.stroke();
+      this.ctx.setLineDash([]);
+    }
     
     // Draw particles
     this.particles.forEach(particle => {
-      // Draw trail
-      particle.trail.forEach((point, index) => {
-        const alpha = (index / particle.trail.length) * particle.life * 0.3;
-        this.ctx.fillStyle = `hsla(${particle.hue}, 70%, 50%, ${alpha})`;
-        this.ctx.beginPath();
-        this.ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
-        this.ctx.fill();
-      });
+      // Draw trail using Sacred Palette colors
+      const colors = [palette.primary, palette.secondary, palette.accent];
+      const trailColor = colors[particle.colorIndex % colors.length];
+      const trailRgb = window.SacredPalette?.utils?.hexToRgb(trailColor);
+      
+      if (trailRgb) {
+        particle.trail.forEach((point, index) => {
+          const alpha = (index / particle.trail.length) * particle.life * 0.3;
+          this.ctx.fillStyle = `rgba(${trailRgb.r}, ${trailRgb.g}, ${trailRgb.b}, ${alpha})`;
+          this.ctx.beginPath();
+          this.ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+          this.ctx.fill();
+        });
+      }
       
       if (particle.collapsed) {
-        // Render as fragments/energy
+        // Render as fragments/energy using Sacred Palette
         const fragmentSize = Math.sin(particle.fragmentTime * 10) * 2 + 1;
-        this.ctx.fillStyle = `hsla(${particle.hue + 60}, 90%, 70%, ${particle.life})`;
-        this.ctx.beginPath();
-        this.ctx.arc(particle.x, particle.y, fragmentSize, 0, Math.PI * 2);
-        this.ctx.fill();
+        const fragmentColor = palette.accent; // Copper patina for fragments
+        const breathing = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(fragmentColor, particle.fragmentTime, 0.2) : fragmentColor;
+        const fragRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+        
+        if (fragRgb) {
+          this.ctx.fillStyle = `rgba(${fragRgb.r}, ${fragRgb.g}, ${fragRgb.b}, ${particle.life})`;
+          this.ctx.beginPath();
+          this.ctx.arc(particle.x, particle.y, fragmentSize, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
         
         particle.life *= 0.98;
       } else {
-        // Render as particle with structural integrity
+        // Render as particle with structural integrity using Sacred Palette
         const size = 2 + particle.mass * 2;
-        const structuralHue = particle.hue + (1 - particle.structural) * 60;
+        const colors = [palette.primary, palette.secondary, palette.accent];
+        const baseColor = colors[particle.colorIndex % colors.length];
+        
+        // Weather the color based on structural damage
+        const weathered = window.SacredPalette?.utils?.weather ?
+          window.SacredPalette.utils.weather(baseColor, 1 - particle.structural) : baseColor;
         const alpha = particle.structural * 0.8 + 0.2;
+        const particleRgb = window.SacredPalette?.utils?.hexToRgb(weathered);
         
-        // Draw particle glow
-        const glowGradient = this.ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, size * 2
-        );
-        glowGradient.addColorStop(0, `hsla(${structuralHue}, 80%, 60%, ${alpha})`);
-        glowGradient.addColorStop(1, `hsla(${structuralHue}, 60%, 40%, 0)`);
-        
-        this.ctx.fillStyle = glowGradient;
-        this.ctx.beginPath();
-        this.ctx.arc(particle.x, particle.y, size * 2, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        // Draw particle core
-        this.ctx.fillStyle = `hsla(${structuralHue}, 90%, 70%, ${alpha})`;
-        this.ctx.beginPath();
-        this.ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        // Draw stress indicators for low structural integrity
-        if (particle.structural < 0.5) {
-          this.ctx.strokeStyle = `hsla(0, 90%, 60%, ${1 - particle.structural})`;
-          this.ctx.lineWidth = 1;
+        if (particleRgb) {
+          // Draw particle glow
+          const glowGradient = this.ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, size * 2
+          );
+          glowGradient.addColorStop(0, `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, ${alpha})`);
+          glowGradient.addColorStop(1, `rgba(${particleRgb.r * 0.6}, ${particleRgb.g * 0.6}, ${particleRgb.b * 0.6}, 0)`);
+          
+          this.ctx.fillStyle = glowGradient;
           this.ctx.beginPath();
-          this.ctx.arc(particle.x, particle.y, size + 2, 0, Math.PI * 2);
-          this.ctx.stroke();
+          this.ctx.arc(particle.x, particle.y, size * 2, 0, Math.PI * 2);
+          this.ctx.fill();
+          
+          // Draw particle core
+          this.ctx.fillStyle = `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, ${alpha})`;
+          this.ctx.beginPath();
+          this.ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+          this.ctx.fill();
+          
+          // Draw stress indicators for low structural integrity
+          if (particle.structural < 0.5) {
+            const stressColor = palette.accent; // Copper patina for stress
+            const stressRgb = window.SacredPalette?.utils?.hexToRgb(stressColor);
+            if (stressRgb) {
+              this.ctx.strokeStyle = `rgba(${stressRgb.r}, ${stressRgb.g}, ${stressRgb.b}, ${1 - particle.structural})`;
+              this.ctx.lineWidth = 1;
+              this.ctx.beginPath();
+              this.ctx.arc(particle.x, particle.y, size + 2, 0, Math.PI * 2);
+              this.ctx.stroke();
+            }
+          }
         }
       }
     });
     
-    // Draw collapse center
+    // Draw collapse center using Sacred Palette
     const centerPulse = Math.sin(this.time * 5) * 0.3 + 0.7;
-    this.ctx.fillStyle = `rgba(255, 0, 0, ${centerPulse * 0.8})`;
-    this.ctx.beginPath();
-    this.ctx.arc(this.collapseCenter.x, this.collapseCenter.y, 8 * centerPulse, 0, Math.PI * 2);
-    this.ctx.fill();
+    const centerColor = palette.secondary; // Warm charcoal
+    const breathing = window.SacredPalette?.utils?.breathe ?
+      window.SacredPalette.utils.breathe(centerColor, this.time, centerPulse * 0.2) : centerColor;
+    const centerRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+    
+    if (centerRgb) {
+      this.ctx.fillStyle = `rgba(${centerRgb.r}, ${centerRgb.g}, ${centerRgb.b}, ${centerPulse * 0.8})`;
+      this.ctx.beginPath();
+      this.ctx.arc(this.collapseCenter.x, this.collapseCenter.y, 8 * centerPulse, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
   }
 
   destroy() {

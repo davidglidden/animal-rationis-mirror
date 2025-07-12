@@ -53,7 +53,7 @@ class ConstellationRenderer {
         pulsePhase: Math.random() * Math.PI * 2,
         driftPhase: Math.random() * Math.PI * 2,
         size: 1 + Math.random() * 3,
-        hue: Math.random() * 60 + 200 // Blue to purple range
+        colorIndex: Math.floor(Math.random() * 3) // For Sacred Palette color cycling
       });
     }
   }
@@ -80,10 +80,15 @@ class ConstellationRenderer {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
     
-    // Add subtle background
+    // Add subtle background using Sacred Palette ground colors
+    const palette = window.SacredPalette?.families?.constellation || {
+      primary: '#2F4F4F', secondary: '#708090', accent: '#B0C4DE'
+    };
+    const groundColor = window.SacredPalette?.ground?.manuscript || '#F7F3E9';
+    
     const gradient = this.ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
-    gradient.addColorStop(0, 'rgba(5, 5, 20, 0.9)');
-    gradient.addColorStop(1, 'rgba(0, 0, 5, 0.95)');
+    gradient.addColorStop(0, palette.primary.replace('rgb', 'rgba').replace(')', ', 0.15)'));
+    gradient.addColorStop(1, groundColor.replace('rgb', 'rgba').replace(')', ', 0.95)'));
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, width, height);
     
@@ -93,8 +98,8 @@ class ConstellationRenderer {
       star.y = star.originalY + Math.cos(this.time * this.params.driftSpeed + star.driftPhase) * 10;
     });
     
-    // Draw connections between nearby stars
-    this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.2)';
+    // Draw connections between nearby stars using Sacred Palette
+    const connectionColor = palette.accent;
     this.ctx.lineWidth = 1;
     for (let i = 0; i < this.stars.length; i++) {
       for (let j = i + 1; j < this.stars.length; j++) {
@@ -104,7 +109,7 @@ class ConstellationRenderer {
         
         if (distance < this.params.connectionDistance) {
           const alpha = (1 - distance / this.params.connectionDistance) * 0.3;
-          this.ctx.strokeStyle = `rgba(100, 150, 255, ${alpha})`;
+          this.ctx.strokeStyle = connectionColor.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
           this.ctx.beginPath();
           this.ctx.moveTo(star1.x, star1.y);
           this.ctx.lineTo(star2.x, star2.y);
@@ -113,17 +118,25 @@ class ConstellationRenderer {
       }
     }
     
-    // Draw stars with pulsing effect
+    // Draw stars with pulsing effect using Sacred Palette
     this.stars.forEach(star => {
       const pulse = Math.sin(this.time + star.pulsePhase) * 0.3 + 0.7;
       const brightness = star.brightness * pulse * this.params.brightness;
       const size = star.size * (0.8 + pulse * 0.4);
       
+      // Get star color from Sacred Palette constellation family
+      const colors = [palette.primary, palette.secondary, palette.accent];
+      const starColor = colors[star.colorIndex % colors.length];
+      
+      // Apply breathing effect if available
+      const breathedColor = window.SacredPalette?.utilities?.breatheColor ?
+        window.SacredPalette.utilities.breatheColor(starColor, pulse) : starColor;
+      
       // Draw star glow
       const gradient = this.ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, size * 3);
-      gradient.addColorStop(0, `hsla(${star.hue}, 80%, 80%, ${brightness})`);
-      gradient.addColorStop(0.5, `hsla(${star.hue}, 60%, 60%, ${brightness * 0.5})`);
-      gradient.addColorStop(1, `hsla(${star.hue}, 40%, 40%, 0)`);
+      gradient.addColorStop(0, breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`));
+      gradient.addColorStop(0.5, breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness * 0.5})`));
+      gradient.addColorStop(1, breathedColor.replace('rgb', 'rgba').replace(')', ', 0)'));
       
       this.ctx.fillStyle = gradient;
       this.ctx.beginPath();
@@ -131,7 +144,7 @@ class ConstellationRenderer {
       this.ctx.fill();
       
       // Draw star core
-      this.ctx.fillStyle = `hsla(${star.hue}, 90%, 90%, ${brightness})`;
+      this.ctx.fillStyle = breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`);
       this.ctx.beginPath();
       this.ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
       this.ctx.fill();

@@ -11,7 +11,7 @@ class BalanceRenderer {
       perturbation: params.perturbation || 0.1,
       restoreForce: params.restoreForce || 0.02,
       damping: params.damping || 0.98,
-      animationSpeed: params.animationSpeed || 0.01,
+      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 10,
       ...params
     };
     this.time = 0;
@@ -203,11 +203,18 @@ class BalanceRenderer {
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // Draw central pivot/anchor
-    this.ctx.fillStyle = 'rgba(100, 100, 100, 0.8)';
-    this.ctx.beginPath();
-    this.ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
-    this.ctx.fill();
+    // Draw central pivot/anchor using Sacred Palette
+    const palette = window.SacredPalette?.families?.balance || {
+      primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE'
+    };
+    const pivotColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
+    const rgb = window.SacredPalette?.utils?.hexToRgb(pivotColor);
+    if (rgb) {
+      this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`;
+      this.ctx.beginPath();
+      this.ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
     
     switch (this.params.balanceType) {
       case 'scales':
@@ -229,41 +236,56 @@ class BalanceRenderer {
   }
 
   renderScales(centerX, centerY) {
-    // Draw balance beam
+    // Draw balance beam using Sacred Palette
     const beam = this.balanceElements[0];
     const beamTilt = beam ? Math.atan2(beam.y - centerY, beam.x - centerX) : 0;
     
-    this.ctx.strokeStyle = 'rgba(150, 150, 150, 0.8)';
-    this.ctx.lineWidth = 3;
-    this.ctx.beginPath();
-    this.ctx.moveTo(centerX - 120, centerY);
-    this.ctx.lineTo(centerX + 120, centerY);
-    this.ctx.stroke();
+    const beamColor = palette.secondary; // Warm taupe
+    const beamRgb = window.SacredPalette?.utils?.hexToRgb(beamColor);
+    if (beamRgb) {
+      this.ctx.strokeStyle = `rgba(${beamRgb.r}, ${beamRgb.g}, ${beamRgb.b}, 0.8)`;
+      this.ctx.lineWidth = 3;
+      this.ctx.beginPath();
+      this.ctx.moveTo(centerX - 120, centerY);
+      this.ctx.lineTo(centerX + 120, centerY);
+      this.ctx.stroke();
+    }
     
-    // Draw weights
+    // Draw weights using Sacred Palette balance colors
     this.balanceElements.forEach((element, index) => {
-      const hue = element.side < 0 ? 240 : 0; // Blue for left, red for right
-      const saturation = 70 + element.weight * 30;
-      const lightness = 50 + Math.sin(this.time + index) * 10;
+      // Use primary for left side, accent for right side
+      const weightColor = element.side < 0 ? palette.primary : palette.accent;
+      const breathing = window.SacredPalette?.utils?.breathe ?
+        window.SacredPalette.utils.breathe(weightColor, this.time + index, 0.1) : weightColor;
       
-      this.ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-      
-      // Draw connecting line
-      this.ctx.strokeStyle = 'rgba(100, 100, 100, 0.6)';
-      this.ctx.lineWidth = 2;
-      this.ctx.beginPath();
-      this.ctx.moveTo(element.x, centerY);
-      this.ctx.lineTo(element.x, element.y);
-      this.ctx.stroke();
-      
-      // Draw weight
-      const size = 8 + element.weight * 10;
-      this.ctx.beginPath();
-      this.ctx.arc(element.x, element.y, size, 0, Math.PI * 2);
-      this.ctx.fill();
-      this.ctx.strokeStyle = 'rgba(50, 50, 50, 0.8)';
-      this.ctx.lineWidth = 1;
-      this.ctx.stroke();
+      const weightRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+      if (weightRgb) {
+        this.ctx.fillStyle = `rgba(${weightRgb.r}, ${weightRgb.g}, ${weightRgb.b}, 0.8)`;
+        
+        // Draw connecting line
+        const lineColor = palette.secondary;
+        const lineRgb = window.SacredPalette?.utils?.hexToRgb(lineColor);
+        if (lineRgb) {
+          this.ctx.strokeStyle = `rgba(${lineRgb.r}, ${lineRgb.g}, ${lineRgb.b}, 0.6)`;
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(element.x, centerY);
+          this.ctx.lineTo(element.x, element.y);
+          this.ctx.stroke();
+        }
+        
+        // Draw weight
+        const size = 8 + element.weight * 10;
+        this.ctx.beginPath();
+        this.ctx.arc(element.x, element.y, size, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Outline with darker version
+        const darkRgb = { r: weightRgb.r * 0.6, g: weightRgb.g * 0.6, b: weightRgb.b * 0.6 };
+        this.ctx.strokeStyle = `rgba(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b}, 0.8)`;
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+      }
     });
   }
 
@@ -272,48 +294,63 @@ class BalanceRenderer {
       const x = centerX + Math.sin(element.angle) * element.length;
       const y = centerY + Math.cos(element.angle) * element.length;
       
-      const hue = (index * 60) % 360;
+      // Use Sacred Palette balance colors for pendulum
+      const colors = [palette.primary, palette.secondary, palette.accent];
+      const pendulumColor = colors[index % colors.length];
       const alpha = 0.7 + Math.sin(this.time + index) * 0.3;
       
-      // Draw pendulum rod
-      this.ctx.strokeStyle = `hsla(${hue}, 50%, 60%, ${alpha})`;
-      this.ctx.lineWidth = 2;
-      this.ctx.beginPath();
-      this.ctx.moveTo(centerX, centerY);
-      this.ctx.lineTo(x, y);
-      this.ctx.stroke();
+      // Breathe the color
+      const breathing = window.SacredPalette?.utils?.breathe ?
+        window.SacredPalette.utils.breathe(pendulumColor, this.time + index, 0.1) : pendulumColor;
+      const rgb = window.SacredPalette?.utils?.hexToRgb(breathing);
       
-      // Draw pendulum bob
-      this.ctx.fillStyle = `hsla(${hue}, 70%, 50%, ${alpha})`;
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, 6 + element.mass * 3, 0, Math.PI * 2);
-      this.ctx.fill();
+      if (rgb) {
+        // Draw pendulum rod
+        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(centerX, centerY);
+        this.ctx.lineTo(x, y);
+        this.ctx.stroke();
+        
+        // Draw pendulum bob
+        this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 6 + element.mass * 3, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
     });
   }
 
   renderHarmonic(centerX, centerY) {
-    // Draw oscillation traces
-    this.ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
-    this.ctx.lineWidth = 1;
-    
     this.balanceElements.forEach((element, index) => {
-      const hue = (index * 120) % 360;
+      // Use Sacred Palette balance colors for harmonic oscillators
+      const colors = [palette.primary, palette.secondary, palette.accent];
+      const oscColor = colors[index % colors.length];
+      const rgb = window.SacredPalette?.utils?.hexToRgb(oscColor);
       
-      // Draw spring connection
-      this.ctx.strokeStyle = `hsla(${hue}, 60%, 60%, 0.6)`;
-      this.ctx.lineWidth = 2;
-      this.ctx.setLineDash([3, 3]);
-      this.ctx.beginPath();
-      this.ctx.moveTo(centerX, element.baseY);
-      this.ctx.lineTo(element.x, element.y);
-      this.ctx.stroke();
-      this.ctx.setLineDash([]);
-      
-      // Draw oscillator
-      this.ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
-      this.ctx.beginPath();
-      this.ctx.arc(element.x, element.y, 8, 0, Math.PI * 2);
-      this.ctx.fill();
+      if (rgb) {
+        // Draw spring connection
+        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`;
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([3, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(centerX, element.baseY);
+        this.ctx.lineTo(element.x, element.y);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+        
+        // Draw oscillator with breathing
+        const breathing = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(oscColor, this.time + index, 0.1) : oscColor;
+        const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+        if (breathRgb) {
+          this.ctx.fillStyle = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
+          this.ctx.beginPath();
+          this.ctx.arc(element.x, element.y, 8, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+      }
     });
   }
 
@@ -322,33 +359,43 @@ class BalanceRenderer {
       const x = centerX + Math.cos(element.angle) * element.perturbedRadius;
       const y = centerY + Math.sin(element.angle) * element.perturbedRadius;
       
-      const hue = (index * 72) % 360; // Golden angle distribution
+      // Use Sacred Palette balance colors for orbital elements
+      const colors = [palette.primary, palette.secondary, palette.accent];
+      const orbitalColor = colors[index % colors.length];
+      const rgb = window.SacredPalette?.utils?.hexToRgb(orbitalColor);
       
-      // Draw orbital path
-      this.ctx.strokeStyle = `hsla(${hue}, 40%, 50%, 0.2)`;
-      this.ctx.lineWidth = 1;
-      this.ctx.beginPath();
-      this.ctx.arc(centerX, centerY, element.baseRadius, 0, Math.PI * 2);
-      this.ctx.stroke();
-      
-      // Draw orbital body
-      this.ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, 5 + element.mass * 2, 0, Math.PI * 2);
-      this.ctx.fill();
-      
-      // Draw trail
-      const trailLength = 20;
-      for (let i = 1; i <= trailLength; i++) {
-        const trailAngle = element.angle - i * element.angularVelocity;
-        const trailX = centerX + Math.cos(trailAngle) * element.perturbedRadius;
-        const trailY = centerY + Math.sin(trailAngle) * element.perturbedRadius;
-        const alpha = (trailLength - i) / trailLength * 0.3;
-        
-        this.ctx.fillStyle = `hsla(${hue}, 50%, 60%, ${alpha})`;
+      if (rgb) {
+        // Draw orbital path
+        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+        this.ctx.lineWidth = 1;
         this.ctx.beginPath();
-        this.ctx.arc(trailX, trailY, 2, 0, Math.PI * 2);
-        this.ctx.fill();
+        this.ctx.arc(centerX, centerY, element.baseRadius, 0, Math.PI * 2);
+        this.ctx.stroke();
+        
+        // Draw orbital body with breathing
+        const breathing = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(orbitalColor, this.time + index, 0.1) : orbitalColor;
+        const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+        if (breathRgb) {
+          this.ctx.fillStyle = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
+          this.ctx.beginPath();
+          this.ctx.arc(x, y, 5 + element.mass * 2, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+        
+        // Draw trail
+        const trailLength = 20;
+        for (let i = 1; i <= trailLength; i++) {
+          const trailAngle = element.angle - i * element.angularVelocity;
+          const trailX = centerX + Math.cos(trailAngle) * element.perturbedRadius;
+          const trailY = centerY + Math.sin(trailAngle) * element.perturbedRadius;
+          const alpha = (trailLength - i) / trailLength * 0.3;
+          
+          this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+          this.ctx.beginPath();
+          this.ctx.arc(trailX, trailY, 2, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
       }
     });
   }
@@ -358,17 +405,30 @@ class BalanceRenderer {
     const isBalanced = this.checkEquilibrium();
     const { width, height } = this.canvas;
     
-    this.ctx.fillStyle = isBalanced ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 100, 0, 0.2)';
-    this.ctx.fillRect(width - 20, 10, 10, 10);
+    // Use Sacred Palette for equilibrium indicators
+    const indicatorColor = isBalanced ? palette.primary : palette.accent;
+    const indRgb = window.SacredPalette?.utils?.hexToRgb(indicatorColor);
+    if (indRgb) {
+      this.ctx.fillStyle = `rgba(${indRgb.r}, ${indRgb.g}, ${indRgb.b}, 0.3)`;
+      this.ctx.fillRect(width - 20, 10, 10, 10);
+    }
     
     // Draw balance meter
-    this.ctx.strokeStyle = 'rgba(200, 200, 200, 0.5)';
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(width - 40, 30, 30, 100);
-    
-    const balanceLevel = this.getBalanceLevel();
-    this.ctx.fillStyle = `hsla(${120 - Math.abs(balanceLevel) * 120}, 70%, 50%, 0.6)`;
-    this.ctx.fillRect(width - 39, 30 + (1 - balanceLevel) * 50, 28, Math.abs(balanceLevel) * 50);
+    const meterColor = palette.secondary;
+    const meterRgb = window.SacredPalette?.utils?.hexToRgb(meterColor);
+    if (meterRgb) {
+      this.ctx.strokeStyle = `rgba(${meterRgb.r}, ${meterRgb.g}, ${meterRgb.b}, 0.5)`;
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeRect(width - 40, 30, 30, 100);
+      
+      const balanceLevel = this.getBalanceLevel();
+      const levelColor = balanceLevel < 0.1 ? palette.primary : palette.accent;
+      const levelRgb = window.SacredPalette?.utils?.hexToRgb(levelColor);
+      if (levelRgb) {
+        this.ctx.fillStyle = `rgba(${levelRgb.r}, ${levelRgb.g}, ${levelRgb.b}, 0.6)`;
+        this.ctx.fillRect(width - 39, 30 + (1 - balanceLevel) * 50, 28, Math.abs(balanceLevel) * 50);
+      }
+    }
   }
 
   checkEquilibrium() {
