@@ -230,6 +230,7 @@ class ChaosRenderer {
         const intensity = Math.min(point.intensity * 0.1, 1);
         
         // Use Sacred Palette chaos colors for trail
+        const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
         const colors = [palette.primary, palette.secondary, palette.accent];
         const trailColor = colors[system.colorIndex % colors.length];
         const breathing = window.SacredPalette?.utils?.breathe ?
@@ -251,6 +252,7 @@ class ChaosRenderer {
           Math.min(system.trail[system.trail.length - 1].intensity * 0.1, 1) : 0.5;
         
         // Use Sacred Palette chaos colors for current position
+        const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
         const colors = [palette.primary, palette.secondary, palette.accent];
         const currentColor = colors[system.colorIndex % colors.length];
         const weathered = window.SacredPalette?.utils?.weather ?
@@ -273,6 +275,7 @@ class ChaosRenderer {
           );
           
           // Use Sacred Palette for glow
+          const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
           const glowColor = palette.accent; // Old gold for glow
           const glowRgb = window.SacredPalette?.utils?.hexToRgb(glowColor);
           if (glowRgb) {

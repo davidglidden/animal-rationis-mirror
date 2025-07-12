@@ -477,7 +477,17 @@ class ThresholdRenderer {
       
       // Use threshold palette colors instead of HSL hue
       const colors = [palette.secondary, palette.primary, palette.accent]; // Bone -> Dusty rose -> Twilight
-      let particleColor = colors[Math.floor(particle.hue / 120) % colors.length];\n      \n      if (particle.transitionProgress > 0) {\n        // Particle is transitioning - enhance properties\n        alpha *= (1 + Math.sin(particle.transitionProgress * Math.PI) * 0.5);\n        size *= (1 + particle.transitionProgress * 0.5);\n        \n        // Color shifts through threshold palette during transition\n        const transitionIndex = Math.floor(particle.transitionProgress * (colors.length - 1));\n        particleColor = colors[transitionIndex] || particleColor;\n      }
+      let particleColor = colors[Math.floor(particle.hue / 120) % colors.length];
+      
+      if (particle.transitionProgress > 0) {
+        // Particle is transitioning - enhance properties
+        alpha *= (1 + Math.sin(particle.transitionProgress * Math.PI) * 0.5);
+        size *= (1 + particle.transitionProgress * 0.5);
+        
+        // Color shifts through threshold palette during transition
+        const transitionIndex = Math.floor(particle.transitionProgress * (colors.length - 1));
+        particleColor = colors[transitionIndex] || particleColor;
+      }
       
       if (interaction.crossing) {
         alpha += interaction.intensity * 0.3;

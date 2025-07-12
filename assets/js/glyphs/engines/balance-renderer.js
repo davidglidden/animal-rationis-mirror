@@ -240,6 +240,7 @@ class BalanceRenderer {
     const beam = this.balanceElements[0];
     const beamTilt = beam ? Math.atan2(beam.y - centerY, beam.x - centerX) : 0;
     
+    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     const beamColor = palette.secondary; // Warm taupe
     const beamRgb = window.SacredPalette?.utils?.hexToRgb(beamColor);
     if (beamRgb) {
@@ -290,6 +291,7 @@ class BalanceRenderer {
   }
 
   renderPendulum(centerX, centerY) {
+    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
       const x = centerX + Math.sin(element.angle) * element.length;
       const y = centerY + Math.cos(element.angle) * element.length;
@@ -323,6 +325,7 @@ class BalanceRenderer {
   }
 
   renderHarmonic(centerX, centerY) {
+    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
       // Use Sacred Palette balance colors for harmonic oscillators
       const colors = [palette.primary, palette.secondary, palette.accent];
@@ -355,6 +358,7 @@ class BalanceRenderer {
   }
 
   renderOrbital(centerX, centerY) {
+    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
       const x = centerX + Math.cos(element.angle) * element.perturbedRadius;
       const y = centerY + Math.sin(element.angle) * element.perturbedRadius;
@@ -404,6 +408,7 @@ class BalanceRenderer {
     // Draw equilibrium state indicator
     const isBalanced = this.checkEquilibrium();
     const { width, height } = this.canvas;
+    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     
     // Use Sacred Palette for equilibrium indicators
     const indicatorColor = isBalanced ? palette.primary : palette.accent;

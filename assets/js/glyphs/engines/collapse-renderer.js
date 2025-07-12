@@ -253,6 +253,7 @@ class CollapseRenderer {
     }
     
     // Draw event horizon using Sacred Palette
+    const palette = window.SacredPalette?.families?.collapse || { primary: '#A0826D', secondary: '#826B4F', accent: '#7B6D8D' };
     const horizonColor = palette.accent; // Copper patina
     const horizonRgb = window.SacredPalette?.utils?.hexToRgb(horizonColor);
     if (horizonRgb) {
