@@ -876,6 +876,12 @@ class GlyphOrchestrator {
     // Placeholder - will implement emergent family detection in Mode 2
     return null;
   }
+
+  // Apply seasonal mutations to parameters (placeholder for future development)
+  applySeasonalMutations(params) {
+    // Placeholder - will implement seasonal mutations in Mode 2
+    return params;
+  }
 }
 
 // Semantic DNA Extraction - captures philosophical genome of posts
