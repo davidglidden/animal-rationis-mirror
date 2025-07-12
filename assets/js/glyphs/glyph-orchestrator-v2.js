@@ -80,7 +80,8 @@ class GlyphOrchestrator {
     const descriptors = parts.slice(1);
     
     return {
-      family: this.familyMap[family] || 'Radiance',
+      family: this.familyMap[family] || null, // Don't default yet, let semantic analysis decide
+      rawFamily: family, // Keep the raw family for debugging
       descriptors: descriptors
     };
   }
@@ -92,10 +93,78 @@ class GlyphOrchestrator {
     // Get data attributes from container
     metadata.glyphId = container.dataset.glyphId || '';
     
+    // IMPORTANT: Look for content in the broader document context, not just the container
+    // The container is just the glyph div, not the entire post
+    
+    // Extract post title from the page (multiple fallback strategies)
+    let titleElement = document.querySelector('.post-title, h1[itemprop="name headline"], article h1, main h1');
+    
+    if (!titleElement) {
+      // Fallback 1: Try any h1 on the page
+      titleElement = document.querySelector('h1');
+    }
+    
+    if (!titleElement) {
+      // Fallback 2: Try breadcrumb current span
+      titleElement = document.querySelector('.breadcrumb .current');
+    }
+    
+    if (!titleElement) {
+      // Fallback 3: Try page title element and clean it
+      titleElement = document.querySelector('title');
+    }
+    
+    if (titleElement) {
+      metadata.title = titleElement.textContent || titleElement.innerText || '';
+      // Clean up title - remove site suffix if present
+      metadata.title = metadata.title.replace(/ - Animal Rationis Capax$/, '').trim();
+    } else {
+      // Last resort: try to extract from glyph ID
+      metadata.title = metadata.glyphId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      console.warn('⚠️ No title element found, using glyph ID as title:', metadata.title);
+    }
+    
+    console.log('🔍 Title extraction:', {
+      titleElement: titleElement?.tagName,
+      titleText: metadata.title,
+      titleLength: metadata.title ? metadata.title.length : 0
+    });
+    
+    // Extract post content for semantic analysis - look in the whole document
+    const contentElement = document.querySelector('.post-content[itemprop="articleBody"], .post-content, article .content, main .content, article');
+    if (contentElement) {
+      metadata.content = contentElement.textContent || contentElement.innerText || '';
+    } else {
+      // If no content element found, try to get all text from article or main
+      const fallbackContent = document.querySelector('article, main');
+      if (fallbackContent) {
+        metadata.content = fallbackContent.textContent || fallbackContent.innerText || '';
+      }
+    }
+    
+    // Extract post class/type
+    const articleElement = document.querySelector('article');
+    if (articleElement) {
+      const classList = Array.from(articleElement.classList);
+      metadata.class = classList.find(cls => ['essay', 'observation', 'fragment', 'glimpse', 'photo-essay', 'chamber'].includes(cls)) || '';
+    }
+    
+    // Extract post date
+    const dateElement = document.querySelector('time[datetime]');
+    if (dateElement) {
+      metadata.date = dateElement.getAttribute('datetime') || dateElement.textContent || '';
+    }
+    
+    // Extract meta description for additional context
+    const descriptionMeta = document.querySelector('meta[name="description"], meta[property="og:description"]');
+    if (descriptionMeta) {
+      metadata.description = descriptionMeta.getAttribute('content') || '';
+    }
+    
     // Try to find metadata in the page (from Hakyll context)
-    const metaElements = document.querySelectorAll('meta[name^="glyph-"]');
+    const metaElements = document.querySelectorAll('meta[name^="glyph-"], meta[name^="theme-"]');
     metaElements.forEach(meta => {
-      const key = meta.name.replace('glyph-', '');
+      const key = meta.name.replace(/^(glyph-|theme-)/, '');
       metadata[key] = meta.content;
     });
     
@@ -106,7 +175,25 @@ class GlyphOrchestrator {
       } catch(e) {
         metadata.themes = metadata.themes.split(',').map(t => t.trim());
       }
+    } else {
+      // Try to extract themes from data attributes or other sources
+      const themesMeta = document.querySelector('meta[name="themes"], meta[name="keywords"]');
+      if (themesMeta) {
+        const themesContent = themesMeta.getAttribute('content') || '';
+        metadata.themes = themesContent.split(',').map(t => t.trim()).filter(t => t.length > 0);
+      }
     }
+    
+    // Debug logging to track metadata extraction
+    console.log('🔍 Extracted metadata:', {
+      title: metadata.title,
+      class: metadata.class,
+      contentLength: metadata.content?.length || 0,
+      glyphId: metadata.glyphId,
+      themes: metadata.themes || [],
+      hasContent: !!metadata.content,
+      contentPreview: metadata.content ? metadata.content.substring(0, 100) + '...' : 'No content'
+    });
     
     return metadata;
   }
@@ -121,14 +208,42 @@ class GlyphOrchestrator {
     const hybridCandidate = this.detectHybridFamily(glyphId, metadata);
     const emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
     
+    // Determine family - use semantic analysis if no valid family from glyph_id
+    let chosenFamily = parsed.family;
+    if (!chosenFamily) {
+      // Use semantic analysis to determine family
+      const familyConfidences = this.calculateFamilyConfidences(metadata);
+      const topFamily = Object.entries(familyConfidences)
+        .sort(([,a], [,b]) => b - a)[0];
+      
+      if (topFamily && topFamily[1] > 0.2) {
+        chosenFamily = topFamily[0];
+        console.log(`🧠 Semantic analysis selected family: ${chosenFamily} (confidence: ${topFamily[1].toFixed(2)}) for raw family: ${parsed.rawFamily}`);
+        console.log(`📊 All family confidences:`, Object.entries(familyConfidences)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
+          .join(', '));
+      } else {
+        chosenFamily = 'Radiance'; // Final fallback
+        console.log(`⚠️ No confident family match found, defaulting to Radiance for: ${parsed.rawFamily}`);
+        console.log(`📊 Top confidences were:`, Object.entries(familyConfidences)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 3)
+          .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
+          .join(', '));
+      }
+    }
+    
     // Base parameters from legacy system
     const params = {
-      family: emergentCandidate || (hybridCandidate ? hybridCandidate.primary : parsed.family),
+      family: emergentCandidate || (hybridCandidate ? hybridCandidate.primary : chosenFamily),
       descriptors: parsed.descriptors,
       isHybrid: !!hybridCandidate,
       hybridSecondary: hybridCandidate?.secondary,
       hybridBlend: hybridCandidate?.blend || 0,
-      isEmergent: !!emergentCandidate
+      isEmergent: !!emergentCandidate,
+      rawFamily: parsed.rawFamily // For debugging
     };
     
     // Try to enhance with living system if available
@@ -283,91 +398,155 @@ class GlyphOrchestrator {
   calculateFamilyConfidences(metadata) {
     const confidences = {};
     const themes = metadata.themes || [];
-    const content = (metadata.content || '').toLowerCase();
+    const content = (metadata.content || metadata.title || metadata.description || '').toLowerCase();
     
     // Initialize all families with base confidence
     Object.values(this.familyMap).forEach(family => {
       confidences[family] = 0.1;
     });
     
+    // Log what we're analyzing
+    console.log('📊 Analyzing content for family assignment:', {
+      themes: themes,
+      contentLength: content.length,
+      titleWords: metadata.title ? metadata.title.toLowerCase().split(/\s+/) : [],
+      hasContent: content.length > 100
+    });
+    
     // Analyze themes for family resonance
     themes.forEach(theme => {
-      switch(theme.toLowerCase()) {
+      const themeLower = theme.toLowerCase();
+      console.log(`  🏷️ Processing theme: ${themeLower}`);
+      
+      switch(themeLower) {
         case 'transformation':
         case 'becoming':
         case 'transition':
+        case 'change':
+        case 'metamorphosis':
           confidences['Threshold'] += 0.3;
           confidences['Flow'] += 0.2;
           break;
         case 'memory':
         case 'time':
         case 'repetition':
+        case 'history':
+        case 'recursion':
           confidences['Spiral'] += 0.3;
           confidences['Strata'] += 0.2;
           break;
         case 'connection':
         case 'relationship':
         case 'network':
+        case 'community':
+        case 'constellation':
           confidences['Constellation'] += 0.3;
           confidences['Grid'] += 0.2;
           break;
         case 'conflict':
         case 'tension':
         case 'opposition':
+        case 'duality':
+        case 'paradox':
           confidences['Interference'] += 0.3;
           confidences['Balance'] += 0.2;
           break;
         case 'chaos':
         case 'uncertainty':
         case 'complexity':
+        case 'emergence':
+        case 'disorder':
           confidences['Chaos'] += 0.3;
           confidences['Flow'] += 0.2;
           break;
         case 'order':
         case 'structure':
         case 'stability':
+        case 'system':
+        case 'systems':
+        case 'pattern':
           confidences['Grid'] += 0.3;
           confidences['Strata'] += 0.2;
           break;
         case 'collapse':
         case 'ending':
         case 'destruction':
+        case 'failure':
+        case 'crisis':
           confidences['Collapse'] += 0.3;
           confidences['Chaos'] += 0.1;
           break;
         case 'balance':
         case 'equilibrium':
         case 'harmony':
+        case 'ethics':
+        case 'stability':
           confidences['Balance'] += 0.3;
           confidences['Flow'] += 0.1;
+          break;
+        case 'light':
+        case 'illumination':
+        case 'clarity':
+        case 'radiance':
+        case 'bright':
+          confidences['Radiance'] += 0.3;
           break;
       }
     });
     
-    // Analyze content for keyword resonance
+    // Analyze content for keyword resonance - FIXED: Use proper family names
     const keywordAnalysis = {
-      'threshold': ['portal', 'boundary', 'crossing', 'liminal', 'between'],
-      'spiral': ['recursive', 'cycle', 'spiral', 'fibonacci', 'golden'],
-      'constellation': ['stars', 'connection', 'pattern', 'navigation', 'celestial'],
-      'flow': ['current', 'stream', 'fluid', 'movement', 'dynamic'],
-      'strata': ['layers', 'geological', 'sediment', 'history', 'accumulation'],
-      'balance': ['equilibrium', 'scales', 'harmony', 'pendulum', 'stable'],
-      'collapse': ['fall', 'crumble', 'gravity', 'implosion', 'failure'],
-      'chaos': ['random', 'butterfly', 'attractor', 'sensitive', 'turbulent'],
-      'interference': ['wave', 'pattern', 'conflict', 'superposition', 'resonance'],
-      'grid': ['matrix', 'lattice', 'regular', 'ordered', 'systematic']
+      'Threshold': ['portal', 'boundary', 'crossing', 'liminal', 'between', 'threshold', 'transition', 'edge', 'verge'],
+      'Spiral': ['recursive', 'cycle', 'spiral', 'fibonacci', 'golden', 'return', 'loop', 'helix', 'vortex'],
+      'Constellation': ['stars', 'connection', 'pattern', 'navigation', 'celestial', 'constellation', 'network', 'nodes'],
+      'Flow': ['current', 'stream', 'fluid', 'movement', 'dynamic', 'flow', 'river', 'liquid', 'flux'],
+      'Strata': ['layers', 'geological', 'sediment', 'history', 'accumulation', 'strata', 'depth', 'archaeological'],
+      'Balance': ['equilibrium', 'scales', 'harmony', 'pendulum', 'stable', 'balance', 'equal', 'symmetry'],
+      'Collapse': ['fall', 'crumble', 'gravity', 'implosion', 'failure', 'collapse', 'breakdown', 'disintegrate'],
+      'Chaos': ['random', 'butterfly', 'attractor', 'sensitive', 'turbulent', 'chaos', 'entropy', 'disorder'],
+      'Interference': ['wave', 'pattern', 'conflict', 'superposition', 'resonance', 'interference', 'frequency', 'oscillation'],
+      'Grid': ['matrix', 'lattice', 'regular', 'ordered', 'systematic', 'grid', 'structure', 'framework', 'system'],
+      'Radiance': ['light', 'ray', 'radiate', 'shine', 'glow', 'bright', 'illuminate', 'radiance', 'luminous']
     };
     
     Object.entries(keywordAnalysis).forEach(([family, keywords]) => {
-      const familyClass = this.familyMap[family];
-      if (familyClass) {
-        keywords.forEach(keyword => {
-          if (content.includes(keyword)) {
-            confidences[familyClass] += 0.15;
-          }
-        });
+      keywords.forEach(keyword => {
+        if (content.includes(keyword)) {
+          confidences[family] += 0.15;
+          console.log(`    🔍 Found keyword "${keyword}" for ${family}`);
+        }
+      });
+    });
+    
+    // Special case: Check glyph ID for family hints
+    const glyphId = metadata.glyphId || '';
+    const glyphIdLower = glyphId.toLowerCase();
+    
+    // Direct family matches in glyph ID
+    Object.entries(this.familyMap).forEach(([key, family]) => {
+      if (glyphIdLower.includes(key)) {
+        confidences[family] += 0.5; // Strong hint from ID
+        console.log(`    🎯 Glyph ID contains family hint: ${key} → ${family}`);
       }
     });
+    
+    // Also check for conceptual matches in glyph ID
+    if (glyphIdLower.includes('grid') || glyphIdLower.includes('system')) {
+      confidences['Grid'] += 0.4;
+    }
+    if (glyphIdLower.includes('threshold') || glyphIdLower.includes('boundary')) {
+      confidences['Threshold'] += 0.4;
+    }
+    if (glyphIdLower.includes('flow') || glyphIdLower.includes('river')) {
+      confidences['Flow'] += 0.4;
+    }
+    
+    // Log final confidence scores
+    console.log('📊 Family confidence scores:', 
+      Object.entries(confidences)
+        .sort(([,a], [,b]) => b - a)
+        .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
+    );
     
     return confidences;
   }

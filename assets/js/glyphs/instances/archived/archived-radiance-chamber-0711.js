@@ -6,7 +6,7 @@
 // themes: 
 
 document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('glyph-canvas');
+    const canvas = document.getElementById('glyph-canvas-archived-radiance-chamber-0711');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
