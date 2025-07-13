@@ -5,7 +5,7 @@
 // Mood: urgent - the crisis of AI ethics
 // Movement: radiating - consequences spreading outward
 
-document.addEventListener('DOMContentLoaded', async () => {
+(function() {
     const canvas = document.getElementById('glyph-canvas-archived-grid-systems-change');
     if (!canvas) return;
     
@@ -111,4 +111,4 @@ window.addEventListener('beforeunload', () => {
     if (canvas && canvas.glyphRenderer) {
         canvas.glyphRenderer.destroy();
     }
-});
+})();

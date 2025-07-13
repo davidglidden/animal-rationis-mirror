@@ -4,7 +4,7 @@
 // mood: anticipatory, movement: radiating
 // themes: threshold, birth, arrival, breath, emergence
 
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
     console.log('🎨 Loading archived-radiance-threshold-birth glyph...');
     const canvas = document.getElementById('glyph-canvas-archived-radiance-threshold-birth');
     if (!canvas) {
@@ -130,4 +130,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start the radiance
     drawRadiance();
-});
+})();

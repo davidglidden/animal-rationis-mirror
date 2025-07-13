@@ -3,7 +3,7 @@
 // Visual concept: Three zones in eternal rotation with synchronized pulse rhythm
 
 // Initialize glyph when script loads
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
     const canvas = document.getElementById('glyph-canvas-archived-mushi-ken-glyph');
     if (!canvas) return;
     
@@ -228,4 +228,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         particles.length = 0;
     };
-});
+})();

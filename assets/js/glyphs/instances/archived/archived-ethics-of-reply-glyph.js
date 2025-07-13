@@ -3,7 +3,7 @@
 // Visual concept: The moment when mechanism becomes mind
 
 // Initialize glyph when script loads
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
     const canvas = document.getElementById('glyph-canvas-archived-ethics-of-reply-glyph');
     if (!canvas) return;
     
@@ -220,4 +220,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         particles.length = 0;
     };
-});
+})();

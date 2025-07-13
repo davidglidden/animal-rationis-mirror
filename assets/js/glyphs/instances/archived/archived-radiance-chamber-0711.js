@@ -5,7 +5,7 @@
 // mood: contemplative, movement: flowing
 // themes: 
 
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
     const canvas = document.getElementById('glyph-canvas-archived-radiance-chamber-0711');
     if (!canvas) return;
     
@@ -74,4 +74,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     drawRadiance();
-});
+})();
