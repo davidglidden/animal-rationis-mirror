@@ -848,10 +848,10 @@ class GlyphOrchestrator {
     console.log(`🔍 Loading glyph: ${glyphId} with family: ${parameters.family}`);
     
     // Try specific instance first
-    const instanceUrl = `/assets/js/glyphs/instances/${glyphId}.js`;
+    let instanceUrl = `/assets/js/glyphs/instances/${glyphId}.js`;
     
     try {
-      const response = await fetch(instanceUrl);
+      let response = await fetch(instanceUrl);
       if (response.ok) {
         console.log(`✅ Found specific instance: ${instanceUrl}`);
         // Specific instance exists, load it
@@ -864,6 +864,27 @@ class GlyphOrchestrator {
       }
     } catch (error) {
       console.log(`❌ Instance fetch failed: ${error.message}`);
+    }
+    
+    // Try archived instance if glyph ID starts with "archived-"
+    if (glyphId.startsWith('archived-')) {
+      instanceUrl = `/assets/js/glyphs/instances/archived/${glyphId}.js`;
+      
+      try {
+        const response = await fetch(instanceUrl);
+        if (response.ok) {
+          console.log(`✅ Found archived instance: ${instanceUrl}`);
+          // Archived instance exists, load it
+          const script = document.createElement('script');
+          script.src = instanceUrl;
+          document.head.appendChild(script);
+          return;
+        } else {
+          console.log(`❌ Archived instance not found (${response.status}): ${instanceUrl}`);
+        }
+      } catch (error) {
+        console.log(`❌ Archived instance fetch failed: ${error.message}`);
+      }
     }
     
     // Use procedural renderer with family engines
