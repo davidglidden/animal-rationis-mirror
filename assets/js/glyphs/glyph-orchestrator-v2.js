@@ -874,11 +874,33 @@ class GlyphOrchestrator {
         const response = await fetch(instanceUrl);
         if (response.ok) {
           console.log(`✅ Found archived instance: ${instanceUrl}`);
-          // Archived instance exists, load it
-          const script = document.createElement('script');
-          script.src = instanceUrl;
-          document.head.appendChild(script);
-          return;
+          
+          // Set canvas dimensions before loading archived script
+          canvas.width = 600;
+          canvas.height = 400;
+          
+          // Load archived script and wait for completion
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = instanceUrl;
+            script.onload = () => {
+              console.log(`📜 Archived script loaded: ${glyphId}`);
+              resolve();
+            };
+            script.onerror = (error) => {
+              console.error(`❌ Failed to load archived script: ${glyphId}`, error);
+              reject(error);
+            };
+            document.head.appendChild(script);
+          });
+          
+          // Verify the archived instance initialized properly
+          if (canvas.hasArchivedInstance) {
+            console.log(`🏛️ Archived instance confirmed for ${glyphId}`);
+            return;
+          } else {
+            console.warn(`⚠️ Archived script loaded but didn't set flag for ${glyphId}, falling back to procedural`);
+          }
         } else {
           console.log(`❌ Archived instance not found (${response.status}): ${instanceUrl}`);
         }
