@@ -496,9 +496,11 @@ class ThresholdRenderer {
         size += interaction.intensity * 2;
       }
       
-      // Phase-based color shift
+      // Phase-based color shift using Sacred Palette
       if (particle.phase === 'after') {
-        hue = (hue + 30) % 360;
+        // Switch to a different palette color for "after" phase
+        const phaseIndex = (Math.floor(particle.hue / 120) + 1) % colors.length;
+        particleColor = colors[phaseIndex];
       }
       
       // Draw particle using Sacred Palette threshold colors
