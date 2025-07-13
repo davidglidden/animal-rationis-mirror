@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const canvas = document.getElementById('glyph-canvas-archived-grid-systems-change');
     if (!canvas) return;
     
+    // Mark canvas as having an archived instance to prevent orchestrator interference
+    canvas.hasArchivedInstance = true;
+    
     canvas.width = 600;
     canvas.height = 400;
     

@@ -5,12 +5,16 @@
 // themes: threshold, birth, arrival, breath, emergence
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎨 Loading radiance-threshold-birth glyph...');
-    const canvas = document.getElementById('glyph-canvas-radiance-threshold-birth');
+    console.log('🎨 Loading archived-radiance-threshold-birth glyph...');
+    const canvas = document.getElementById('glyph-canvas-archived-radiance-threshold-birth');
     if (!canvas) {
-        console.log('❌ Canvas not found: glyph-canvas-radiance-threshold-birth');
+        console.log('❌ Canvas not found: glyph-canvas-archived-radiance-threshold-birth');
         return;
     }
+    
+    // Mark canvas as having an archived instance to prevent orchestrator interference
+    canvas.hasArchivedInstance = true;
+    
     console.log('✅ Canvas found, starting radiance glyph...');
     
     const ctx = canvas.getContext('2d');

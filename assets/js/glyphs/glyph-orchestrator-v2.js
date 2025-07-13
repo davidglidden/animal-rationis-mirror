@@ -943,6 +943,12 @@ class GlyphOrchestrator {
 
   // Create procedural glyph using loaded engines
   createProceduralGlyph(canvas, parameters) {
+    // Check if canvas already has an archived instance
+    if (canvas.hasArchivedInstance) {
+      console.log(`🏛️ Canvas already has archived instance, skipping procedural generation`);
+      return;
+    }
+    
     const { family, isHybrid, hybridSecondary, hybridBlend } = parameters;
     
     // Set canvas to proper contemplative dimensions (Animal Rationis Capax standard)

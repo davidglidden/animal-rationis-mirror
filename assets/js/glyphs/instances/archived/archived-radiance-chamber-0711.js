@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('glyph-canvas-archived-radiance-chamber-0711');
     if (!canvas) return;
     
+    // Mark canvas as having an archived instance to prevent orchestrator interference
+    canvas.hasArchivedInstance = true;
+    
     const ctx = canvas.getContext('2d');
     canvas.width = 600;
     canvas.height = 400;
