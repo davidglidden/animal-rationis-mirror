@@ -900,9 +900,10 @@ class GlyphOrchestrator {
     // Determine the correct file path
     let engineUrl;
     if (rendererName.startsWith('Archived')) {
-      // Archived renderer - convert CamelCase to kebab-case
+      // Archived renderer - convert CamelCase to kebab-case with special handling for numbers
       const fileName = rendererName
-        .replace(/([A-Z])/g, '-$1')
+        .replace(/([A-Z])/g, '-$1')  // Insert dashes before capital letters
+        .replace(/([a-z])(\d)/g, '$1-$2')  // Insert dashes before numbers
         .toLowerCase()
         .substring(1); // Remove leading dash
       engineUrl = `/assets/js/glyphs/engines/${fileName}-renderer.js`;
@@ -918,11 +919,19 @@ class GlyphOrchestrator {
       const response = await fetch(engineUrl);
       if (response.ok) {
         console.log(`✅ Renderer file found: ${engineUrl}`);
+        
+        // Check if script is already loaded to prevent duplicates
+        const existingScript = document.querySelector(`script[src="${engineUrl}"]`);
+        if (existingScript) {
+          console.log(`⚠️ Script already loaded, skipping: ${engineUrl}`);
+          return;
+        }
+        
         const script = document.createElement('script');
         script.src = engineUrl;
         document.head.appendChild(script);
         
-        // Wait for renderer to load and prevent duplicate loading
+        // Wait for renderer to load
         return new Promise((resolve, reject) => {
           script.onload = () => {
             console.log(`✅ Renderer script loaded: ${rendererName}`);
