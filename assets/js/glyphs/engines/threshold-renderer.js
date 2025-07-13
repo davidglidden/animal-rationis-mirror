@@ -346,6 +346,7 @@ class ThresholdRenderer {
 
   renderPortal() {
     const portal = this.thresholds[0];
+    const palette = window.SacredPalette?.families?.threshold || { primary: '#C4A183', secondary: '#E8DCC6', accent: '#7B6D8D' };
     
     // Portal rim using Sacred Palette threshold colors
     const rimGradient = this.ctx.createRadialGradient(
@@ -468,6 +469,7 @@ class ThresholdRenderer {
   }
 
   renderParticles() {
+    const palette = window.SacredPalette?.families?.threshold || { primary: '#C4A183', secondary: '#E8DCC6', accent: '#7B6D8D' };
     this.particles.forEach(particle => {
       const interaction = this.checkThresholdInteraction(particle);
       
