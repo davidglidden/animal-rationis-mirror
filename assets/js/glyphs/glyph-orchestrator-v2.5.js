@@ -39,6 +39,13 @@ class GlyphOrchestrator {
     this.interpreter = new PhilosophicalInterpreter();
     this.evolutionaryFitness = new EvolutionaryFitness();
     
+    // Enhanced semantic visual translation system
+    this.enhancedSemanticInterpreter = null;
+    this.semanticVisualTranslator = null;
+    
+    // Initialize semantic translators when available
+    this.initializeSemanticTranslators();
+    
     // Legacy emergence detection system (will be evolved)
     this.patternMemory = [];
     this.hybridThreshold = 0.15;
@@ -50,6 +57,25 @@ class GlyphOrchestrator {
     this.consciousnessLevel = 0;   // Overall system awareness
     
     console.log('🧬 Living Epistemic Glyph System initialized');
+  }
+
+  // Initialize semantic translators when classes become available
+  initializeSemanticTranslators() {
+    // Check if semantic translator classes are available
+    if (typeof window !== 'undefined' && window.GlyphSemantics) {
+      if (window.GlyphSemantics.EnhancedSemanticInterpreter) {
+        this.enhancedSemanticInterpreter = new window.GlyphSemantics.EnhancedSemanticInterpreter();
+        console.log('🔬 Enhanced Semantic Interpreter initialized');
+      }
+      
+      if (window.GlyphSemantics.SemanticVisualTranslator) {
+        this.semanticVisualTranslator = new window.GlyphSemantics.SemanticVisualTranslator();
+        console.log('🎨 Semantic Visual Translator initialized');
+      }
+    } else {
+      // Classes not yet available, will be retried during parameter generation
+      console.log('⏳ Semantic translators not yet available, will retry during parameter generation');
+    }
   }
 
   // Extract post content for genome analysis
@@ -297,9 +323,26 @@ class GlyphOrchestrator {
       
       console.log(`🧬 Enhanced with living system: ${params.family}`);
       
+      // Apply semantic visual translation enhancements
+      try {
+        this.applySemanticVisualEnhancements(params, genome, metadata);
+      } catch (semanticError) {
+        console.warn(`⚠️ Semantic visual enhancement failed: ${semanticError.message}`);
+      }
+      
     } catch (error) {
       console.warn(`⚠️ Living system failed, using legacy: ${error.message}`);
       // Continue with base parameters
+      
+      // Try semantic enhancement even without living system
+      try {
+        const fallbackGenome = this.semanticDNA ? this.semanticDNA.extractGenome(this.extractPostContent(metadata), metadata) : null;
+        if (fallbackGenome) {
+          this.applySemanticVisualEnhancements(params, fallbackGenome, metadata);
+        }
+      } catch (semanticError) {
+        console.warn(`⚠️ Fallback semantic enhancement failed: ${semanticError.message}`);
+      }
     }
 
     // Map mood to intensity and style
@@ -1996,6 +2039,188 @@ class EvolutionaryFitness {
   measureUnexpectedBeauty(glyph) {
     // Placeholder for aesthetic emergence detection
     return Math.random() * 0.5;
+  }
+  
+  // Apply semantic visual translation enhancements to parameters
+  applySemanticVisualEnhancements(params, genome, metadata) {
+    // Ensure semantic translators are initialized
+    if (!this.enhancedSemanticInterpreter || !this.semanticVisualTranslator) {
+      this.initializeSemanticTranslators();
+    }
+    
+    // If still not available, skip enhancement
+    if (!this.enhancedSemanticInterpreter || !this.semanticVisualTranslator) {
+      console.log('⏭️ Semantic translators not available, skipping visual enhancement');
+      return;
+    }
+    
+    console.log('🎨 Applying semantic visual enhancements...');
+    
+    // Phase 1: Enhanced semantic interpretation
+    const enhancedParams = this.enhancedSemanticInterpreter.interpretGenomeWithFidelity(genome, params.family);
+    
+    // Phase 2: Semantic visual translation
+    const semanticProfile = this.buildSemanticProfile(genome, metadata);
+    const visualTranslation = this.semanticVisualTranslator.translateSemanticToVisual(semanticProfile, enhancedParams);
+    
+    // Merge enhanced visual parameters back into params
+    this.mergeVisualEnhancements(params, visualTranslation);
+    
+    // Mark parameters as semantically enhanced
+    params.semanticallyEnhanced = true;
+    params.enhancementTimestamp = Date.now();
+    
+    console.log(`🎨 Semantic visual enhancements applied to ${params.family} family`);
+    console.log(`📊 Enhancement features: archetype=${visualTranslation.semanticArchetype?.primary}, layers=${visualTranslation.layers?.length || 0}, entropy=${visualTranslation.entropyDynamics?.level?.toFixed(2) || 'N/A'}`);
+  }
+  
+  // Build semantic profile for visual translation
+  buildSemanticProfile(genome, metadata) {
+    return {
+      // Topology from genome
+      topology: {
+        rhizomaticTendency: genome.topology?.rhizomaticTendency || 0.3,
+        branchingFactor: genome.topology?.branchingFactor || 2.0,
+        circularityIndex: genome.topology?.circularityIndex || 0.2,
+        conceptDensity: genome.topology?.conceptDensity || 0.5
+      },
+      
+      // Temporality from genome
+      temporality: {
+        temporalDensity: genome.temporality?.temporalDensity || 0.1,
+        cyclical: genome.temporality?.cyclical || false,
+        linear: genome.temporality?.linear || true,
+        eternal: genome.temporality?.eternal || false,
+        tenseProgression: genome.temporality?.tenseProgression || {
+          past: 0.33,
+          present: 0.33,
+          future: 0.33
+        },
+        rhythmicPattern: genome.temporality?.rhythmicPattern || {
+          averageLength: 10,
+          variance: 0.3
+        }
+      },
+      
+      // Resonance from genome
+      resonance: {
+        dominantMode: genome.resonance?.dominantMode || 'wonder',
+        frequencies: genome.resonance?.frequencies || {
+          wonder: 0.4,
+          tension: 0.2,
+          clarity: 0.2,
+          depth: 0.2
+        },
+        multimodal: genome.resonance?.multimodal || false,
+        harmonicComplexity: genome.resonance?.harmonicComplexity || 0.3
+      },
+      
+      // Complexity from genome
+      complexity: {
+        layerCount: genome.complexity?.layerCount || 2,
+        recursiveDepth: genome.complexity?.recursiveDepth || 1,
+        selfSimilarity: genome.complexity?.selfSimilarity || 0.3,
+        nestedComplexity: genome.complexity?.nestedComplexity || 0.2,
+        abstractionLevel: genome.complexity?.abstractionLevel || 0.4
+      },
+      
+      // Dynamics from genome
+      dynamics: {
+        velocity: genome.dynamics?.velocity || 0.02,
+        dominantMovement: genome.dynamics?.dominantMovement || 'flowing',
+        trajectory: genome.dynamics?.trajectory || 'stable',
+        patterns: genome.dynamics?.patterns || {
+          oscillating: 0.1,
+          radiating: 0.1,
+          spiraling: 0.1,
+          collapsing: 0.05,
+          flowing: 0.15
+        }
+      },
+      
+      // Source metadata for content analysis
+      source: {
+        title: metadata.title || '',
+        themes: metadata.themes || [],
+        mood: metadata.mood || 'contemplative',
+        movement: metadata.movement || 'stable'
+      },
+      
+      // Unique identifiers (would be populated by Phase 1)
+      uniqueIdentifiers: genome.uniqueIdentifiers || null
+    };
+  }
+  
+  // Merge visual translation results back into parameters
+  mergeVisualEnhancements(params, visualTranslation) {
+    // Color scheme enhancements
+    if (visualTranslation.colorScheme) {
+      params.colorScheme = visualTranslation.colorScheme;
+      params.emotionalColors = visualTranslation.colorScheme.secondaryColors || [];
+    }
+    
+    // Semantic color system
+    if (visualTranslation.semanticColors) {
+      params.semanticColors = visualTranslation.semanticColors;
+    }
+    
+    // Movement and animation enhancements
+    if (visualTranslation.movementSystem) {
+      params.movementSystem = visualTranslation.movementSystem;
+      params.particleSystem = visualTranslation.particleSystem;
+      params.forceFields = visualTranslation.forceFields;
+    }
+    
+    // Temporal layers for depth
+    if (visualTranslation.layers && visualTranslation.layers.length > 0) {
+      params.temporalLayers = visualTranslation.layers;
+      params.layerBlending = true;
+    }
+    
+    // Structural enhancements
+    if (visualTranslation.structuralElements) {
+      params.structuralElements = visualTranslation.structuralElements;
+    }
+    
+    // Archetype-specific rendering
+    if (visualTranslation.semanticArchetype) {
+      params.semanticArchetype = visualTranslation.semanticArchetype;
+      params.renderInstructions = visualTranslation.renderInstructions;
+    }
+    
+    // Entropy dynamics
+    if (visualTranslation.entropyDynamics) {
+      params.entropyDynamics = visualTranslation.entropyDynamics;
+      params.entropyLevel = visualTranslation.entropyDynamics.level;
+    }
+    
+    // Anaphoric references for visual callbacks
+    if (visualTranslation.anaphoricReferences) {
+      params.anaphoricReferences = visualTranslation.anaphoricReferences;
+    }
+    
+    // Performance optimization hints
+    if (visualTranslation.performanceHints) {
+      params.performanceHints = visualTranslation.performanceHints;
+    }
+    
+    // Amplification factors for dramatic differences
+    if (visualTranslation.amplificationFactors) {
+      params.amplificationFactors = visualTranslation.amplificationFactors;
+    }
+    
+    // Content-specific visual elements
+    if (visualTranslation.conceptualElements) {
+      params.conceptualElements = visualTranslation.conceptualElements;
+      params.contentSpecificHints = visualTranslation.conceptualElements.map(el => el.visualHint).filter(Boolean);
+    }
+    
+    // Unique visual markers for outliers
+    if (visualTranslation.outlierMarkers) {
+      params.outlierMarkers = visualTranslation.outlierMarkers;
+    }
+    
+    console.log(`🔗 Merged ${Object.keys(visualTranslation).length} visual enhancement categories into parameters`);
   }
 }
 

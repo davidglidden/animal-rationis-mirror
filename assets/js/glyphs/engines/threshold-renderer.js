@@ -4,20 +4,35 @@ class ThresholdRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    
+    // Apply semantic visual language enhancements first
+    this.enhancedParams = this.applySemanticEnhancements(params);
+    
     this.params = {
-      thresholdType: params.thresholdType || 'portal', // portal, membrane, phase, gateway
-      permeability: params.permeability || 0.5,
-      transitionSpeed: params.transitionSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 20,
-      dimensionalOverlap: params.dimensionalOverlap || 0.3,
-      boundaryTension: params.boundaryTension || 1.0,
-      phaseDensity: params.phaseDensity || 0.7,
-      temporalShift: params.temporalShift || 0.1,
-      ...params
+      thresholdType: this.enhancedParams.thresholdType || params.thresholdType || 'portal', // portal, membrane, phase, gateway
+      permeability: this.enhancedParams.permeability || params.permeability || 0.5,
+      transitionSpeed: this.enhancedParams.transitionSpeed || params.transitionSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 20,
+      dimensionalOverlap: this.enhancedParams.dimensionalOverlap || params.dimensionalOverlap || 0.3,
+      boundaryTension: this.enhancedParams.boundaryTension || params.boundaryTension || 1.0,
+      phaseDensity: this.enhancedParams.phaseDensity || params.phaseDensity || 0.7,
+      temporalShift: this.enhancedParams.temporalShift || params.temporalShift || 0.1,
+      ...params,
+      ...this.enhancedParams // Semantic enhancements take precedence
     };
     this.time = 0;
     this.thresholds = [];
     this.particles = [];
     this.animationId = null;
+    
+    // Store semantic data for rendering decisions
+    this.semanticData = {
+      archetype: params.semanticArchetype,
+      entropyLevel: params.entropyLevel || 0.5,
+      temporalLayers: params.temporalLayers || [],
+      anaphoricReferences: params.anaphoricReferences || [],
+      semanticallyEnhanced: params.semanticallyEnhanced || false
+    };
+    
     this.initThresholds();
     this.initTransitionParticles();
   }
@@ -572,6 +587,104 @@ class ThresholdRenderer {
         );
         break;
     }
+  }
+
+  // Apply semantic visual language enhancements to parameters
+  applySemanticEnhancements(params) {
+    const enhanced = {};
+    
+    // If not semantically enhanced, return empty enhancements
+    if (!params.semanticallyEnhanced) {
+      return enhanced;
+    }
+    
+    console.log('🎨 Applying threshold-specific semantic enhancements...');
+    
+    // Semantic archetype influences threshold type
+    if (params.semanticArchetype) {
+      switch (params.semanticArchetype.primary) {
+        case 'phenomenological':
+          enhanced.thresholdType = 'membrane';
+          enhanced.permeability = 0.7;
+          enhanced.dimensionalOverlap = 0.5;
+          break;
+        case 'existential':
+          enhanced.thresholdType = 'portal';
+          enhanced.dimensionalOverlap = 0.8;
+          enhanced.boundaryTension = 0.3;
+          break;
+        case 'dialectical':
+          enhanced.thresholdType = 'phase';
+          enhanced.phaseDensity = 0.9;
+          enhanced.transitionSpeed = 0.03;
+          break;
+        case 'contemplative':
+          enhanced.thresholdType = 'gateway';
+          enhanced.permeability = 0.3;
+          enhanced.boundaryTension = 1.2;
+          break;
+      }
+    }
+    
+    // Entropy level affects transition characteristics
+    if (params.entropyLevel !== undefined) {
+      if (params.entropyLevel > 0.7) {
+        // High entropy = chaotic, rapid transitions
+        enhanced.transitionSpeed = (params.transitionSpeed || 0.02) * (1 + params.entropyLevel);
+        enhanced.permeability = Math.min(1, (params.permeability || 0.5) + params.entropyLevel * 0.3);
+      } else if (params.entropyLevel < 0.3) {
+        // Low entropy = stable, slow transitions
+        enhanced.transitionSpeed = (params.transitionSpeed || 0.02) * (0.5 + params.entropyLevel);
+        enhanced.boundaryTension = (params.boundaryTension || 1.0) * (1 + (1 - params.entropyLevel) * 0.5);
+      }
+    }
+    
+    // Temporal layers affect dimensional overlap
+    if (params.temporalLayers && params.temporalLayers.length > 0) {
+      // More temporal layers = more dimensional overlap
+      enhanced.dimensionalOverlap = Math.min(1, 0.2 + params.temporalLayers.length * 0.15);
+      
+      // Past-heavy content gets more membrane-like behavior
+      const pastWeight = params.temporalLayers.find(l => l.type === 'memory')?.weight || 0;
+      if (pastWeight > 0.4) {
+        enhanced.temporalShift = (params.temporalShift || 0.1) + pastWeight * 0.2;
+      }
+    }
+    
+    // Movement system affects transition patterns
+    if (params.movementSystem) {
+      switch (params.movementSystem.primaryMovement?.type) {
+        case 'flowing':
+          enhanced.transitionSpeed = (params.transitionSpeed || 0.02) * 1.2;
+          enhanced.thresholdType = enhanced.thresholdType || 'membrane';
+          break;
+        case 'radiating':
+          enhanced.thresholdType = enhanced.thresholdType || 'portal';
+          enhanced.dimensionalOverlap = Math.max(enhanced.dimensionalOverlap || 0.3, 0.6);
+          break;
+        case 'spiraling':
+          enhanced.temporalShift = (params.temporalShift || 0.1) * 1.5;
+          break;
+      }
+    }
+    
+    // Content-specific hints affect visual style
+    if (params.contentSpecificHints) {
+      params.contentSpecificHints.forEach(hint => {
+        if (hint.texture === 'gradient') {
+          enhanced.permeability = Math.max(enhanced.permeability || 0.5, 0.7);
+        }
+        if (hint.edges === 'angular') {
+          enhanced.boundaryTension = (enhanced.boundaryTension || 1.0) * 1.3;
+        }
+        if (hint.motion === 'blur') {
+          enhanced.transitionSpeed = (enhanced.transitionSpeed || 0.02) * 1.4;
+        }
+      });
+    }
+    
+    console.log(`🎨 Threshold semantic enhancements applied:`, enhanced);
+    return enhanced;
   }
 
   destroy() {
