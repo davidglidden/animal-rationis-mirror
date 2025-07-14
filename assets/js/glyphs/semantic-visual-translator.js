@@ -1667,10 +1667,809 @@ class SemanticVisualTranslator {
   }
 }
 
+// === SHORT CONTENT SEMANTIC AMPLIFIER ===
+// Solves the "haiku fingerprinting" problem - making even the briefest texts visually distinct
+// "In the beginning was the Word" - every word carries semantic weight
+
+class ShortContentAmplifier {
+  constructor() {
+    // Thresholds for content length classification
+    this.contentLengths = {
+      haiku: 100,        // < 100 chars
+      fragment: 500,     // < 500 chars  
+      observation: 1500, // < 1500 chars
+      short: 3000,       // < 3000 chars
+      standard: Infinity // >= 3000 chars
+    };
+    
+    // Amplification factors by content type
+    this.amplificationFactors = {
+      haiku: 10.0,      // Maximum amplification
+      fragment: 5.0,    
+      observation: 3.0,
+      short: 1.5,
+      standard: 1.0     // No amplification needed
+    };
+    
+    // Word resonance database - each word has inherent visual properties
+    this.wordResonance = new WordResonanceLibrary();
+    
+    // Micro-variation generators
+    this.microVariations = new MicroVariationEngine();
+    
+    // Contextual enhancers
+    this.contextEnhancers = new ContextualEnhancers();
+  }
+  
+  // Main amplification method
+  amplifyShortContent(genome, metadata, contentLength) {
+    // Classify content length
+    const contentType = this.classifyContentLength(contentLength);
+    const amplificationFactor = this.amplificationFactors[contentType];
+    
+    console.log(`🔬 Short content amplification: ${contentType} (${contentLength} chars, ${amplificationFactor}x amplification)`);
+    
+    // For very short content, we need different strategies
+    if (contentType === 'haiku' || contentType === 'fragment') {
+      return this.amplifyMicroContent(genome, metadata, amplificationFactor);
+    } else if (contentType === 'observation' || contentType === 'short') {
+      return this.amplifyBriefContent(genome, metadata, amplificationFactor);
+    }
+    
+    // Standard content doesn't need amplification
+    return genome;
+  }
+  
+  // Classify content by length
+  classifyContentLength(length) {
+    for (const [type, threshold] of Object.entries(this.contentLengths)) {
+      if (length < threshold) {
+        return type;
+      }
+    }
+    return 'standard';
+  }
+  
+  // Amplify micro content (haiku, very brief fragments)
+  amplifyMicroContent(genome, metadata, factor) {
+    console.log('🌸 Amplifying micro content with maximum sensitivity');
+    
+    const amplified = JSON.parse(JSON.stringify(genome)); // Deep clone
+    
+    // 1. Word-level semantic extraction
+    const wordSemantics = this.extractWordLevelSemantics(metadata);
+    
+    // 2. Apply word resonance amplification
+    this.applyWordResonance(amplified, wordSemantics, factor);
+    
+    // 3. Extract temporal context (date/time can add meaning)
+    const temporalContext = this.extractTemporalContext(metadata);
+    this.applyTemporalAmplification(amplified, temporalContext, factor);
+    
+    // 4. Apply title amplification (titles are often the key in short content)
+    if (metadata.title) {
+      this.amplifyFromTitle(amplified, metadata.title, factor);
+    }
+    
+    // 5. Add micro-variations to ensure uniqueness
+    this.microVariations.injectVariations(amplified, factor);
+    
+    // 6. Amplify all numeric values dramatically
+    this.amplifyNumericValues(amplified, factor);
+    
+    return amplified;
+  }
+  
+  // Amplify brief content (observations, short pieces)
+  amplifyBriefContent(genome, metadata, factor) {
+    console.log('📝 Amplifying brief content with enhanced sensitivity');
+    
+    const amplified = JSON.parse(JSON.stringify(genome)); // Deep clone
+    
+    // 1. Enhance conceptual density detection
+    this.enhanceConceptualDensity(amplified, factor);
+    
+    // 2. Amplify subtle emotional variations
+    this.amplifyEmotionalNuance(amplified, factor);
+    
+    // 3. Extract and amplify structural patterns
+    this.amplifyStructuralPatterns(amplified, metadata, factor);
+    
+    // 4. Apply contextual amplification
+    const context = this.contextEnhancers.extractContext(metadata);
+    this.applyContextualAmplification(amplified, context, factor);
+    
+    // 5. Moderate numeric amplification
+    this.amplifyNumericValues(amplified, Math.sqrt(factor)); // Less aggressive than micro
+    
+    return amplified;
+  }
+  
+  // Extract word-level semantics for micro content
+  extractWordLevelSemantics(metadata) {
+    const semantics = {
+      words: [],
+      weights: new Map(),
+      resonances: new Map()
+    };
+    
+    // Extract from title
+    if (metadata.title) {
+      const titleWords = this.tokenizeText(metadata.title);
+      titleWords.forEach(word => {
+        semantics.words.push(word);
+        semantics.weights.set(word, 2.0); // Title words have high weight
+        semantics.resonances.set(word, this.wordResonance.getResonance(word));
+      });
+    }
+    
+    // Extract from content if available
+    if (metadata.content) {
+      const contentWords = this.tokenizeText(metadata.content);
+      const wordFrequency = this.calculateWordFrequency(contentWords);
+      
+      // For short content, every unique word matters
+      wordFrequency.forEach((count, word) => {
+        if (!semantics.weights.has(word)) {
+          semantics.words.push(word);
+          // Weight based on frequency and rarity
+          const weight = Math.log(count + 1) * this.wordResonance.getRarity(word);
+          semantics.weights.set(word, weight);
+          semantics.resonances.set(word, this.wordResonance.getResonance(word));
+        }
+      });
+    }
+    
+    return semantics;
+  }
+  
+  // Tokenize text into meaningful words
+  tokenizeText(text) {
+    return text.toLowerCase()
+      .split(/\s+/)
+      .map(word => word.replace(/[^a-z]/g, ''))
+      .filter(word => word.length > 2 && !this.isStopWord(word));
+  }
+  
+  // Calculate word frequency
+  calculateWordFrequency(words) {
+    const frequency = new Map();
+    words.forEach(word => {
+      frequency.set(word, (frequency.get(word) || 0) + 1);
+    });
+    return frequency;
+  }
+  
+  // Apply word resonance to genome
+  applyWordResonance(genome, wordSemantics, factor) {
+    // Each word contributes to the visual signature
+    wordSemantics.resonances.forEach((resonance, word) => {
+      const weight = wordSemantics.weights.get(word) || 1;
+      
+      // Apply resonance to topology
+      if (resonance.structural) {
+        genome.topology.branchingFactor += resonance.structural.branching * weight * factor * 0.1;
+        genome.topology.rhizomaticTendency += resonance.structural.rhizomatic * weight * factor * 0.05;
+        genome.topology.circularityIndex += resonance.structural.circular * weight * factor * 0.05;
+      }
+      
+      // Apply resonance to dynamics
+      if (resonance.movement) {
+        genome.dynamics.velocity += resonance.movement.speed * weight * factor * 0.01;
+        if (resonance.movement.pattern) {
+          genome.dynamics.patterns = genome.dynamics.patterns || {};
+          genome.dynamics.patterns[resonance.movement.pattern] = 
+            (genome.dynamics.patterns[resonance.movement.pattern] || 0) + weight * factor * 0.1;
+        }
+      }
+      
+      // Apply resonance to emotion
+      if (resonance.emotional) {
+        genome.resonance.frequencies = genome.resonance.frequencies || {};
+        Object.entries(resonance.emotional).forEach(([emotion, value]) => {
+          genome.resonance.frequencies[emotion] = 
+            (genome.resonance.frequencies[emotion] || 0) + value * weight * factor * 0.05;
+        });
+      }
+      
+      // Apply resonance to complexity
+      if (resonance.complexity) {
+        genome.complexity.recursiveDepth += resonance.complexity.depth * weight * factor * 0.2;
+        genome.complexity.abstractionLevel += resonance.complexity.abstraction * weight * factor * 0.05;
+      }
+    });
+  }
+  
+  // Extract temporal context from metadata
+  extractTemporalContext(metadata) {
+    const context = {
+      season: null,
+      timeOfDay: null,
+      dayOfWeek: null,
+      isHoliday: false,
+      moonPhase: null
+    };
+    
+    if (metadata.date) {
+      const date = new Date(metadata.date);
+      
+      // Extract season
+      const month = date.getMonth();
+      if (month >= 2 && month <= 4) context.season = 'spring';
+      else if (month >= 5 && month <= 7) context.season = 'summer';
+      else if (month >= 8 && month <= 10) context.season = 'autumn';
+      else context.season = 'winter';
+      
+      // Extract day characteristics
+      context.dayOfWeek = date.getDay();
+    }
+    
+    return context;
+  }
+  
+  // Apply temporal amplification
+  applyTemporalAmplification(genome, temporalContext, factor) {
+    // Seasonal influence
+    if (temporalContext.season) {
+      const seasonalEffects = {
+        spring: { branching: 0.3, velocity: 0.02, emotion: 'wonder' },
+        summer: { radiance: 0.4, velocity: 0.03, emotion: 'clarity' },
+        autumn: { circularity: 0.3, velocity: -0.01, emotion: 'depth' },
+        winter: { crystallization: 0.4, velocity: -0.02, emotion: 'tension' }
+      };
+      
+      const effect = seasonalEffects[temporalContext.season];
+      if (effect) {
+        if (effect.branching) genome.topology.branchingFactor += effect.branching * factor;
+        if (effect.radiance) {
+          genome.dynamics.patterns = genome.dynamics.patterns || {};
+          genome.dynamics.patterns.radiating = (genome.dynamics.patterns.radiating || 0) + effect.radiance * factor * 0.1;
+        }
+        if (effect.circularity) genome.topology.circularityIndex += effect.circularity * factor;
+        if (effect.crystallization) genome.complexity.selfSimilarity += effect.crystallization * factor * 0.1;
+        if (effect.velocity) genome.dynamics.velocity += effect.velocity * factor;
+        if (effect.emotion) {
+          genome.resonance.frequencies = genome.resonance.frequencies || {};
+          genome.resonance.frequencies[effect.emotion] = 
+            (genome.resonance.frequencies[effect.emotion] || 0) + 0.2 * factor;
+        }
+      }
+    }
+    
+    // Day of week influence (subtle but can add variation)
+    if (temporalContext.dayOfWeek !== null) {
+      const dayInfluence = temporalContext.dayOfWeek / 7; // 0-1 range
+      genome.temporality.temporalDensity += dayInfluence * factor * 0.05;
+    }
+  }
+  
+  // Amplify based on title analysis
+  amplifyFromTitle(genome, title, factor) {
+    // Title length affects complexity
+    const titleComplexity = Math.log(title.length + 1) / 10;
+    genome.complexity.layerCount = Math.max(1, Math.ceil(titleComplexity * factor));
+    
+    // Punctuation in title suggests structure
+    const punctuationCount = (title.match(/[.,!?;:—]/g) || []).length;
+    genome.topology.architecturalComplexity += punctuationCount * factor * 0.5;
+    
+    // Question marks suggest inquiry/tension
+    if (title.includes('?')) {
+      genome.resonance.frequencies = genome.resonance.frequencies || {};
+      genome.resonance.frequencies.tension = 
+        (genome.resonance.frequencies.tension || 0) + 0.3 * factor;
+      genome.dynamics.patterns = genome.dynamics.patterns || {};
+      genome.dynamics.patterns.oscillating = (genome.dynamics.patterns.oscillating || 0) + 0.2 * factor;
+    }
+    
+    // Exclamation suggests energy
+    if (title.includes('!')) {
+      genome.dynamics.velocity += 0.03 * factor;
+      genome.dynamics.patterns = genome.dynamics.patterns || {};
+      genome.dynamics.patterns.radiating = (genome.dynamics.patterns.radiating || 0) + 0.2 * factor;
+    }
+    
+    // Capitalization patterns
+    const capitalizedWords = (title.match(/[A-Z][a-z]+/g) || []).length;
+    if (capitalizedWords > 2) {
+      genome.complexity.recursiveDepth += capitalizedWords * factor * 0.1;
+    }
+  }
+  
+  // Enhance conceptual density for brief content
+  enhanceConceptualDensity(genome, factor) {
+    // For short content, each concept carries more weight
+    const currentDensity = genome.topology.conceptDensity;
+    
+    // Apply non-linear amplification - higher density gets more boost
+    genome.topology.conceptDensity = currentDensity * (1 + Math.log(factor));
+    
+    // Concept density affects branching
+    genome.topology.branchingFactor += currentDensity * factor * 0.5;
+    
+    // High concept density in short text suggests compression
+    if (currentDensity > 0.5) {
+      genome.complexity.nestedComplexity += currentDensity * factor * 0.2;
+    }
+  }
+  
+  // Amplify emotional nuance
+  amplifyEmotionalNuance(genome, factor) {
+    const emotions = genome.resonance.frequencies || {};
+    
+    // Find subtle emotional undertones
+    const emotionalSum = Object.values(emotions).reduce((a, b) => a + b, 0);
+    
+    if (emotionalSum > 0) {
+      // Amplify existing emotions
+      Object.keys(emotions).forEach(emotion => {
+        emotions[emotion] *= (1 + (factor - 1) * 0.5);
+      });
+      
+      // Add harmonic complexity for multi-emotional states
+      const activeEmotions = Object.values(emotions).filter(v => v > 0.01).length;
+      if (activeEmotions > 1) {
+        genome.resonance.harmonicComplexity *= (1 + (activeEmotions - 1) * factor * 0.1);
+      }
+    }
+  }
+  
+  // Amplify structural patterns
+  amplifyStructuralPatterns(genome, metadata, factor) {
+    // Look for structural cues in short content
+    if (metadata.content) {
+      // Line breaks suggest structure
+      const lineBreaks = (metadata.content.match(/\n/g) || []).length;
+      if (lineBreaks > 0) {
+        genome.complexity.layerCount = Math.max(genome.complexity.layerCount, lineBreaks + 1);
+        genome.topology.architecturalComplexity += lineBreaks * factor * 0.2;
+      }
+      
+      // Repetition suggests rhythm
+      const words = this.tokenizeText(metadata.content);
+      const uniqueWords = new Set(words).size;
+      const repetitionRatio = words.length > 0 ? 1 - (uniqueWords / words.length) : 0;
+      
+      if (repetitionRatio > 0.2) {
+        genome.temporality.cyclical = true;
+        genome.temporality.rhythmicPattern = genome.temporality.rhythmicPattern || {};
+        genome.temporality.rhythmicPattern.rhythmic = true;
+        genome.complexity.selfSimilarity += repetitionRatio * factor * 0.3;
+      }
+    }
+  }
+  
+  // Apply contextual amplification
+  applyContextualAmplification(genome, context, factor) {
+    // Context from metadata class (essay, observation, fragment)
+    if (context.class) {
+      const classEffects = {
+        'fragment': {
+          abstractionLevel: 0.2,
+          nestedComplexity: -0.1,
+          velocity: 0.01
+        },
+        'observation': {
+          clarity: 0.3,
+          temporalDensity: 0.1,
+          circularityIndex: 0.2
+        },
+        'glimpse': {
+          abstractionLevel: 0.3,
+          velocity: 0.02,
+          etherealness: 0.4
+        }
+      };
+      
+      const effect = classEffects[context.class];
+      if (effect) {
+        if (effect.abstractionLevel) {
+          genome.complexity.abstractionLevel += effect.abstractionLevel * factor * 0.5;
+        }
+        if (effect.clarity) {
+          genome.resonance.frequencies = genome.resonance.frequencies || {};
+          genome.resonance.frequencies.clarity = 
+            (genome.resonance.frequencies.clarity || 0) + effect.clarity * factor;
+        }
+        if (effect.temporalDensity) {
+          genome.temporality.temporalDensity += effect.temporalDensity * factor;
+        }
+      }
+    }
+  }
+  
+  // Amplify numeric values in genome
+  amplifyNumericValues(genome, factor) {
+    const amplify = (obj, path = '') => {
+      Object.keys(obj).forEach(key => {
+        const value = obj[key];
+        const fullPath = path ? `${path}.${key}` : key;
+        
+        if (typeof value === 'number' && !key.includes('generation') && !key.includes('count')) {
+          // Different amplification strategies based on the type of value
+          if (key.includes('velocity') || key.includes('speed')) {
+            obj[key] = value * Math.pow(factor, 0.5); // Moderate amplification
+          } else if (key.includes('opacity') || key.includes('alpha')) {
+            obj[key] = Math.min(1, value * factor); // Capped amplification
+          } else if (key.includes('recursiveDepth') || key.includes('layerCount')) {
+            obj[key] = Math.ceil(value * factor); // Integer amplification
+          } else {
+            obj[key] = value * factor; // Standard amplification
+          }
+        } else if (typeof value === 'object' && value !== null) {
+          amplify(value, fullPath); // Recursive amplification
+        }
+      });
+    };
+    
+    amplify(genome);
+  }
+  
+  isStopWord(word) {
+    const stopWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'this', 'that', 'these', 'those', 'a', 'an'];
+    return stopWords.includes(word);
+  }
+}
+
+// === WORD RESONANCE LIBRARY ===
+// Each word has inherent visual properties based on its meaning
+
+class WordResonanceLibrary {
+  constructor() {
+    // Core word resonances - this would be much larger in production
+    this.resonances = {
+      // Light/Dark words
+      'light': { 
+        structural: { branching: 3, rhizomatic: 0.1, circular: 0.3 },
+        movement: { speed: 0.8, pattern: 'radiating' },
+        emotional: { wonder: 0.7, clarity: 0.8 },
+        complexity: { depth: 1, abstraction: 0.3 }
+      },
+      'shadow': {
+        structural: { branching: 1.5, rhizomatic: 0.6, circular: 0.2 },
+        movement: { speed: 0.2, pattern: 'flowing' },
+        emotional: { depth: 0.8, tension: 0.3 },
+        complexity: { depth: 3, abstraction: 0.6 }
+      },
+      'dark': {
+        structural: { branching: 1, rhizomatic: 0.7, circular: 0.1 },
+        movement: { speed: 0.1, pattern: 'collapsing' },
+        emotional: { depth: 0.9, tension: 0.5 },
+        complexity: { depth: 4, abstraction: 0.7 }
+      },
+      
+      // Movement words
+      'flow': {
+        structural: { branching: 2, rhizomatic: 0.4, circular: 0.5 },
+        movement: { speed: 0.6, pattern: 'flowing' },
+        emotional: { clarity: 0.5, wonder: 0.3 },
+        complexity: { depth: 2, abstraction: 0.4 }
+      },
+      'spiral': {
+        structural: { branching: 1, rhizomatic: 0.2, circular: 0.9 },
+        movement: { speed: 0.5, pattern: 'spiraling' },
+        emotional: { depth: 0.6, wonder: 0.4 },
+        complexity: { depth: 3, abstraction: 0.5 }
+      },
+      'still': {
+        structural: { branching: 0.5, rhizomatic: 0.1, circular: 0.1 },
+        movement: { speed: 0.0, pattern: 'static' },
+        emotional: { clarity: 0.7, depth: 0.5 },
+        complexity: { depth: 1, abstraction: 0.6 }
+      },
+      
+      // Emotional words
+      'love': {
+        structural: { branching: 2.5, rhizomatic: 0.3, circular: 0.7 },
+        movement: { speed: 0.4, pattern: 'radiating' },
+        emotional: { wonder: 0.9, clarity: 0.6 },
+        complexity: { depth: 2, abstraction: 0.5 }
+      },
+      'fear': {
+        structural: { branching: 3, rhizomatic: 0.8, circular: 0.2 },
+        movement: { speed: 0.7, pattern: 'oscillating' },
+        emotional: { tension: 0.9, depth: 0.4 },
+        complexity: { depth: 2, abstraction: 0.3 }
+      },
+      'peace': {
+        structural: { branching: 1, rhizomatic: 0.1, circular: 0.8 },
+        movement: { speed: 0.1, pattern: 'flowing' },
+        emotional: { clarity: 0.9, wonder: 0.4 },
+        complexity: { depth: 1, abstraction: 0.7 }
+      },
+      
+      // Abstract concepts
+      'time': {
+        structural: { branching: 2, rhizomatic: 0.3, circular: 0.6 },
+        movement: { speed: 0.5, pattern: 'flowing' },
+        emotional: { depth: 0.7, tension: 0.3 },
+        complexity: { depth: 3, abstraction: 0.8 }
+      },
+      'memory': {
+        structural: { branching: 2.5, rhizomatic: 0.7, circular: 0.4 },
+        movement: { speed: 0.3, pattern: 'spiraling' },
+        emotional: { depth: 0.8, wonder: 0.3 },
+        complexity: { depth: 4, abstraction: 0.7 }
+      },
+      'dream': {
+        structural: { branching: 3, rhizomatic: 0.6, circular: 0.5 },
+        movement: { speed: 0.2, pattern: 'flowing' },
+        emotional: { wonder: 0.8, depth: 0.6 },
+        complexity: { depth: 3, abstraction: 0.9 }
+      }
+    };
+    
+    // Word rarity scores (inverse document frequency)
+    this.rarityScores = {
+      'the': 0.01, 'and': 0.01, 'of': 0.01, // Common words
+      'light': 0.3, 'shadow': 0.5, 'flow': 0.4, // Medium frequency
+      'spiral': 0.7, 'dream': 0.6, 'memory': 0.5, // Less common
+      'ephemeral': 0.9, 'liminal': 0.95, 'rhizomatic': 0.99 // Rare words
+    };
+  }
+  
+  // Get resonance for a word
+  getResonance(word) {
+    // Direct match
+    if (this.resonances[word]) {
+      return this.resonances[word];
+    }
+    
+    // Check for partial matches (e.g., "flowing" matches "flow")
+    for (const [key, resonance] of Object.entries(this.resonances)) {
+      if (word.includes(key) || key.includes(word)) {
+        return resonance;
+      }
+    }
+    
+    // Generate default resonance based on word characteristics
+    return this.generateDefaultResonance(word);
+  }
+  
+  // Get rarity score for a word
+  getRarity(word) {
+    if (this.rarityScores[word] !== undefined) {
+      return this.rarityScores[word];
+    }
+    
+    // Estimate rarity based on word length and complexity
+    const lengthFactor = Math.min(word.length / 10, 1);
+    const complexityFactor = (word.match(/[aeiou]/g) || []).length / word.length;
+    
+    return lengthFactor * (1 - complexityFactor);
+  }
+  
+  // Generate default resonance for unknown words
+  generateDefaultResonance(word) {
+    const length = word.length;
+    const vowelCount = (word.match(/[aeiou]/g) || []).length;
+    const consonantClusters = (word.match(/[bcdfghjklmnpqrstvwxyz]{2,}/g) || []).length;
+    
+    return {
+      structural: {
+        branching: 1 + length * 0.1,
+        rhizomatic: consonantClusters * 0.2,
+        circular: vowelCount / length
+      },
+      movement: {
+        speed: 0.3 + (vowelCount / length) * 0.4,
+        pattern: consonantClusters > 1 ? 'oscillating' : 'flowing'
+      },
+      emotional: {
+        wonder: vowelCount / length * 0.5,
+        tension: consonantClusters * 0.3,
+        clarity: 0.5 - consonantClusters * 0.1,
+        depth: length * 0.1
+      },
+      complexity: {
+        depth: 1 + length * 0.2,
+        abstraction: 0.3 + consonantClusters * 0.1
+      }
+    };
+  }
+}
+
+// === MICRO VARIATION ENGINE ===
+// Ensures even identical texts get unique visual signatures
+
+class MicroVariationEngine {
+  constructor() {
+    this.variationSeed = Date.now();
+  }
+  
+  // Inject micro-variations to ensure uniqueness
+  injectVariations(genome, factor) {
+    // Use content hash as additional seed
+    const contentHash = this.hashGenome(genome);
+    const seed = this.variationSeed + contentHash;
+    
+    // Deterministic pseudo-random based on content
+    const random = this.seededRandom(seed);
+    
+    // Apply micro-variations to all numeric values
+    this.applyMicroVariations(genome, random, factor);
+    
+    // Add unique noise signature
+    genome.uniqueNoise = {
+      seed: seed,
+      frequency: random() * 0.1 * factor,
+      amplitude: random() * 0.05 * factor,
+      octaves: Math.ceil(random() * 3 * Math.sqrt(factor))
+    };
+    
+    // Add unique phase offset
+    genome.phaseOffset = random() * Math.PI * 2;
+    
+    // Add unique color variation
+    if (genome.resonance?.frequencies) {
+      const emotionShift = (random() - 0.5) * 0.1 * factor;
+      Object.keys(genome.resonance.frequencies).forEach(emotion => {
+        genome.resonance.frequencies[emotion] = Math.max(0, 
+          genome.resonance.frequencies[emotion] + emotionShift * random()
+        );
+      });
+    }
+  }
+  
+  // Apply micro-variations throughout genome
+  applyMicroVariations(obj, random, factor, path = '') {
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      
+      if (typeof value === 'number' && !key.includes('generation')) {
+        // Apply small random variation
+        const variation = (random() - 0.5) * 0.1 * Math.sqrt(factor);
+        obj[key] = value * (1 + variation);
+      } else if (typeof value === 'object' && value !== null) {
+        this.applyMicroVariations(value, random, factor, path + '.' + key);
+      }
+    });
+  }
+  
+  // Hash genome to create deterministic seed
+  hashGenome(genome) {
+    const str = JSON.stringify(genome);
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+  
+  // Seeded random number generator
+  seededRandom(seed) {
+    let s = seed;
+    return function() {
+      s = Math.sin(s) * 10000;
+      return s - Math.floor(s);
+    };
+  }
+}
+
+// === CONTEXTUAL ENHANCERS ===
+// Extract additional context to differentiate short content
+
+class ContextualEnhancers {
+  // Extract all available context from metadata
+  extractContext(metadata) {
+    const context = {
+      class: metadata.class || null,
+      themes: metadata.themes || [],
+      mood: metadata.mood || null,
+      movement: metadata.movement || null,
+      url: metadata.url || null,
+      adjacentContent: metadata.adjacentContent || null
+    };
+    
+    // Extract additional context from URL if available
+    if (context.url) {
+      context.urlContext = this.extractUrlContext(context.url);
+    }
+    
+    // Infer context from class
+    if (context.class) {
+      context.classContext = this.getClassContext(context.class);
+    }
+    
+    return context;
+  }
+  
+  // Extract context from URL structure
+  extractUrlContext(url) {
+    const context = {};
+    
+    // Extract year/date from URL
+    const yearMatch = url.match(/\/(\d{4})\//);
+    if (yearMatch) {
+      context.year = parseInt(yearMatch[1]);
+    }
+    
+    // Extract category/section
+    const segments = url.split('/').filter(s => s.length > 0);
+    if (segments.length > 0) {
+      context.section = segments[0];
+    }
+    
+    return context;
+  }
+  
+  // Get context implications from post class
+  getClassContext(postClass) {
+    const contexts = {
+      'fragment': {
+        expectedLength: 'micro',
+        style: 'compressed',
+        depth: 'surface-with-implications'
+      },
+      'observation': {
+        expectedLength: 'brief',
+        style: 'notational',
+        depth: 'focused-insight'
+      },
+      'glimpse': {
+        expectedLength: 'brief',
+        style: 'impressionistic',
+        depth: 'ephemeral-capture'
+      },
+      'essay': {
+        expectedLength: 'extended',
+        style: 'exploratory',
+        depth: 'fully-developed'
+      }
+    };
+    
+    return contexts[postClass] || null;
+  }
+}
+
+// === ENHANCED SEMANTIC DNA CLASS ===
+// Modify the existing SemanticDNA class to use the amplifier
+
+class EnhancedSemanticDNA extends SemanticDNA {
+  constructor() {
+    super();
+    this.shortContentAmplifier = new ShortContentAmplifier();
+    console.log('🧬 Enhanced Semantic DNA initialized with Short Content Amplifier');
+  }
+  
+  extractGenome(postContent, metadata = {}) {
+    // Get base genome from parent class
+    const genome = super.extractGenome(postContent, metadata);
+    
+    // Apply short content amplification if needed
+    const contentLength = postContent.length;
+    if (contentLength < 3000) {
+      const amplifiedGenome = this.shortContentAmplifier.amplifyShortContent(
+        genome, 
+        metadata, 
+        contentLength
+      );
+      
+      console.log(`📊 Short content genome amplified:`, {
+        contentLength,
+        contentType: this.shortContentAmplifier.classifyContentLength(contentLength),
+        amplificationFactor: this.shortContentAmplifier.amplificationFactors[
+          this.shortContentAmplifier.classifyContentLength(contentLength)
+        ]
+      });
+      
+      return amplifiedGenome;
+    }
+    
+    return genome;
+  }
+}
+
 // === REGISTRATION WITH GLOBAL GLYPH SYSTEM ===
 
 if (typeof window !== 'undefined') {
   window.GlyphSemantics = window.GlyphSemantics || {};
   window.GlyphSemantics.EnhancedSemanticInterpreter = EnhancedSemanticInterpreter;
   window.GlyphSemantics.SemanticVisualTranslator = SemanticVisualTranslator;
+  window.GlyphSemantics.ShortContentAmplifier = ShortContentAmplifier;
+  window.GlyphSemantics.EnhancedSemanticDNA = EnhancedSemanticDNA;
+  
+  console.log('🌸 Short Content Amplifier loaded - even haikus will have unique fingerprints');
 }

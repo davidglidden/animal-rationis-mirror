@@ -34,7 +34,10 @@ class GlyphOrchestrator {
     };
     
     // Living epistemic organism components
-    this.semanticDNA = new SemanticDNA();
+    // Use EnhancedSemanticDNA if available (includes Short Content Amplifier)
+    this.semanticDNA = (typeof window !== 'undefined' && window.GlyphSemantics?.EnhancedSemanticDNA) 
+      ? new window.GlyphSemantics.EnhancedSemanticDNA() 
+      : new SemanticDNA();
     this.breedingGround = new SemanticBreedingGround();
     this.interpreter = new PhilosophicalInterpreter();
     this.evolutionaryFitness = new EvolutionaryFitness();
