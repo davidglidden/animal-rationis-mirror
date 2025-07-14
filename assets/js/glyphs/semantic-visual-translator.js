@@ -525,7 +525,7 @@ class EnhancedSemanticInterpreter {
       fingerprint: genome.fingerprint,
       
       // Conceptual keywords that should drive unique visuals
-      concepts: this.extractKeyConceptsFromSource(genome.source),
+      concepts: this.extractKeyConceptsFromGenome(genome),
       
       // Unique combinations of genome features
       uniqueCombinations: this.findUniqueCombinations(genome),
@@ -540,9 +540,88 @@ class EnhancedSemanticInterpreter {
     return dna;
   }
   
-  // Extract key concepts that should create visual distinctions
+  // Extract key concepts from genome data for visual differentiation
+  extractKeyConceptsFromGenome(genome) {
+    const concepts = [];
+    
+    // Extract concepts based on genome properties with semantic weighting
+    // High complexity suggests abstract/philosophical concepts
+    if (genome.complexity && genome.complexity.recursiveDepth > 2) {
+      concepts.push({ 
+        word: 'depth', 
+        source: 'complexity', 
+        weight: genome.complexity.recursiveDepth,
+        archetype: 'Strata' 
+      });
+    }
+    
+    // High resonance suggests emotional/harmonic content
+    if (genome.resonance && genome.resonance.harmonicComplexity > 0.5) {
+      concepts.push({ 
+        word: 'harmony', 
+        source: 'resonance', 
+        weight: genome.resonance.harmonicComplexity,
+        archetype: 'Radiance'
+      });
+    }
+    
+    // Temporal patterns suggest flow/rhythm concepts
+    if (genome.temporality && genome.temporality.rhythmicComplexity > 0.5) {
+      concepts.push({ 
+        word: 'rhythm', 
+        source: 'temporality', 
+        weight: genome.temporality.rhythmicComplexity,
+        archetype: 'Flow'
+      });
+    }
+    
+    // Network patterns suggest connection/threshold concepts
+    if (genome.topology && genome.topology.rhizomaticTendency > 0.5) {
+      concepts.push({ 
+        word: 'network', 
+        source: 'topology', 
+        weight: genome.topology.rhizomaticTendency,
+        archetype: 'Threshold'
+      });
+    }
+    
+    // High branching suggests constellation patterns
+    if (genome.topology && genome.topology.branchingFactor > 2) {
+      concepts.push({ 
+        word: 'branching', 
+        source: 'topology', 
+        weight: genome.topology.branchingFactor / 4,
+        archetype: 'Constellation'
+      });
+    }
+    
+    // High circularity suggests spiral patterns
+    if (genome.topology && genome.topology.circularityIndex > 0.6) {
+      concepts.push({ 
+        word: 'circular', 
+        source: 'topology', 
+        weight: genome.topology.circularityIndex,
+        archetype: 'Spiral'
+      });
+    }
+    
+    // Analytics logging for visual confirmation
+    if (concepts.length > 0) {
+      console.log('🧠 Extracted genome concepts:', concepts);
+    }
+    
+    return concepts;
+  }
+  
+  // Extract key concepts that should create visual distinctions (legacy method)
   extractKeyConceptsFromSource(source) {
     const concepts = [];
+    
+    // Ensure source exists and has required properties
+    if (!source) {
+      console.warn('⚠️ No source provided to extractKeyConceptsFromSource');
+      return concepts;
+    }
     
     // Extract from title
     if (source.title) {
