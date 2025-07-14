@@ -213,7 +213,16 @@ class GlyphOrchestrator {
       },
       
       // Unique identifiers (would be populated by Phase 1)
-      uniqueIdentifiers: genome.uniqueIdentifiers || null
+      uniqueIdentifiers: genome.uniqueIdentifiers || null,
+      
+      // Conceptual DNA with extracted concepts for archetype selection
+      conceptualDNA: {
+        concepts: genome.uniqueIdentifiers?.concepts || [],
+        fingerprint: genome.fingerprint || null,
+        uniqueCombinations: genome.uniqueIdentifiers?.uniqueCombinations || [],
+        outliers: genome.uniqueIdentifiers?.outliers || [],
+        semanticColor: genome.uniqueIdentifiers?.semanticColor || null
+      }
     };
   }
   
@@ -2310,6 +2319,11 @@ console.log('🧬 Living Epistemic Glyph System initializing...');
 try {
   const orchestrator = new GlyphOrchestrator();
   console.log('✅ Orchestrator class created');
+  
+  // Store orchestrator globally for debugging and patches
+  window.glyphOrchestrator = orchestrator;
+  console.log('🌐 Orchestrator stored globally as window.glyphOrchestrator');
+  
   orchestrator.initializeAll();
   console.log('🌟 Orchestrator initialized');
 } catch (error) {
