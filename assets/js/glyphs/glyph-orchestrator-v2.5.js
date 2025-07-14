@@ -94,11 +94,28 @@ class GlyphOrchestrator {
     console.log('🎨 Applying semantic visual enhancements...');
     
     // Phase 1: Enhanced semantic interpretation
-    const enhancedParams = this.enhancedSemanticInterpreter.interpretGenomeWithFidelity(genome, params.family);
+    let enhancedParams;
+    try {
+      console.log('🔬 Starting Phase 1: Enhanced semantic interpretation...');
+      enhancedParams = this.enhancedSemanticInterpreter.interpretGenomeWithFidelity(genome, params.family);
+      console.log('✅ Phase 1 complete:', enhancedParams);
+    } catch (error) {
+      console.error('❌ Error in Phase 1 semantic interpretation:', error);
+      enhancedParams = {}; // fallback
+    }
     
     // Phase 2: Semantic visual translation
     const semanticProfile = this.buildSemanticProfile(genome, metadata);
-    const visualTranslation = this.semanticVisualTranslator.translateSemanticToVisual(semanticProfile, enhancedParams);
+    console.log('🔍 Built semantic profile:', semanticProfile);
+    
+    let visualTranslation;
+    try {
+      visualTranslation = this.semanticVisualTranslator.translateSemanticToVisual(semanticProfile, enhancedParams);
+      console.log('🎨 Visual translation result:', visualTranslation);
+    } catch (error) {
+      console.error('❌ Error in semantic visual translation:', error);
+      visualTranslation = {}; // fallback to empty object
+    }
     
     // Merge enhanced visual parameters back into params
     this.mergeVisualEnhancements(params, visualTranslation);
@@ -514,6 +531,7 @@ class GlyphOrchestrator {
           console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(name => typeof this[name] === 'function'));
         }
       } catch (semanticError) {
+        console.error(`❌ Semantic visual enhancement failed:`, semanticError);
         console.warn(`⚠️ Semantic visual enhancement failed: ${semanticError.message}`);
       }
       
@@ -528,6 +546,7 @@ class GlyphOrchestrator {
           this.applySemanticVisualEnhancements(params, fallbackGenome, metadata);
         }
       } catch (semanticError) {
+        console.error(`❌ Fallback semantic enhancement failed:`, semanticError);
         console.warn(`⚠️ Fallback semantic enhancement failed: ${semanticError.message}`);
       }
     }

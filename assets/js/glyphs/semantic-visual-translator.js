@@ -1078,8 +1078,8 @@ class SemanticVisualTranslator {
     // Apply entropy scaling
     const entropicVisual = this.applyEntropyScaling(anaphoricVisual, semanticProfile);
     
-    // Merge with enhanced parameters from Phase 1
-    const finalVisual = this.mergeWithEnhancedParams(entropicVisual, enhancedParams);
+    // Merge with enhanced parameters from Phase 1 and include archetype
+    const finalVisual = this.mergeWithEnhancedParams(entropicVisual, enhancedParams, archetype);
     
     return finalVisual;
   }
@@ -1543,7 +1543,7 @@ class SemanticVisualTranslator {
   }
   
   // Merge semantic visual with enhanced parameters
-  mergeWithEnhancedParams(semanticVisual, enhancedParams) {
+  mergeWithEnhancedParams(semanticVisual, enhancedParams, archetype) {
     const merged = {
       ...enhancedParams,
       ...semanticVisual,
@@ -1564,8 +1564,8 @@ class SemanticVisualTranslator {
         ...(semanticVisual.temporalLayers || [])
       ],
       
-      // Add semantic-specific properties
-      semanticArchetype: semanticVisual.primary,
+      // Add semantic-specific properties - FIXED: use actual archetype data
+      semanticArchetype: archetype,
       anaphoricReferences: semanticVisual.anaphoricElements,
       entropyDynamics: semanticVisual.entropyEffects
     };
