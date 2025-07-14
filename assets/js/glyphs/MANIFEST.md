@@ -1,14 +1,19 @@
 # Living Epistemic Glyph System Manifest
 *Revolutionary Update: July 11, 2025*
 
-## 🧬 Living System Core (v2.0)
+## 🧬 Living System Core (v2.5)
 ```
-glyph-orchestrator.js          ✓ Living epistemic organism (1700+ lines)
+glyph-orchestrator-v2.5.js    ✓ Living epistemic organism (1700+ lines)
   ├── SemanticDNA              ✓ Philosophical genome extraction
   ├── SemanticBreedingGround   ✓ Population management & breeding
   ├── LivingRenderer           ✓ Conscious evolution & fitness tracking
   ├── EvolutionaryFitness      ✓ Survival probability calculation
-  └── PhilosophicalInterpreter ✓ Genome-to-visual parameter mapping
+  ├── PhilosophicalInterpreter ✓ Genome-to-visual parameter mapping
+  └── SemanticVisualTranslator ✓ NEW: Enhanced semantic-to-visual fidelity
+
+semantic-visual-translator.js ✓ NEW: Two-phase semantic enhancement system
+  ├── EnhancedSemanticInterpreter ✓ Amplification curves & content extraction
+  └── SemanticVisualTranslator    ✓ Archetype mapping & temporal layering
 ```
 
 ## 🎨 Engines (11 Family Renderers)
@@ -38,6 +43,10 @@ engines/
 - ✓ **Consciousness Tracking**: Real-time awareness development monitoring
 - ✓ **Interaction Recording**: Hover duration, return visits, deep engagement detection
 - ✓ **Emergent Renderer Generation**: Dynamic creation of new glyph families
+- ✅ **NEW: Semantic Visual Fidelity**: Two-phase enhancement solving same-family-face-blind problem
+- ✅ **NEW: Enhanced Content Interpretation**: Amplification curves make subtle differences dramatically visible
+- ✅ **NEW: Archetype Mapping**: Philosophical/emotional/structural classification drives visual variation
+- ✅ **NEW: Temporal Layering**: Multi-dimensional rendering with memory/anticipation layers
 
 ## 📊 Content Type Matrix
 ```
@@ -82,17 +91,25 @@ Photo Essays     | ❌ No           | ❌ N/A        | Image-focused narrative
 ## 🏗️ Legacy Systems (Preserved)
 ```
 instances/
-├── ethics-of-reply-glyph.js   ✓ Custom implementation
-├── grid-systems-change.js     ✓ Custom grid variant
-├── mushi-ken-glyph.js         ✓ Specific implementation
-├── radiance-chamber-0711.js   ✓ Radiance variant
-└── radiance-threshold-birth.js ✓ Radiance + threshold
+├── archived/                   ✓ Legacy custom implementations
+│   ├── archived-ethics-of-reply-glyph.js
+│   ├── archived-grid-systems-change.js
+│   ├── archived-mushi-ken-glyph.js
+│   ├── archived-radiance-chamber-0711.js
+│   └── archived-radiance-threshold-birth.js
 
 legacy/
 ├── glyph-11-glowing-eye.js    ✓ Original numbered system
 ├── glyph-19-quantum-foam.js   ✓ Original numbered system
 ├── glyph-27-neural-network.js ✓ Original numbered system
-└── glyph-4-particle-cylinder.js ✓ Original numbered system
+├── glyph-4-particle-cylinder.js ✓ Original numbered system
+└── orchestrator-versions/     ✓ Historical orchestrator versions
+    ├── glyph-orchestrator.js      (v1.0 - original)
+    ├── glyph-orchestrator-v2.js   (v2.0 - evolution)
+    └── glyph-orchestrator-v2-backup.js (v2.0 backup)
+
+backups/
+├── glyph-orchestrator-v2.5-backup-20250713-190829.js ✓ Timestamped backup
 ```
 
 ## 🚀 Next Phase (Mode 2)
@@ -101,6 +118,28 @@ legacy/
 3. **Dream Mode**: Exploration during low-activity periods
 4. **Reader Persona Adaptation**: Individual user interaction pattern learning
 5. **Chamber Voice Integration**: Multi-voice philosophical conversation glyphs
+
+## 📁 File Cleanup Audit (2025-07-13)
+**Operation**: Organized legacy orchestrator versions for cleaner directory structure
+
+**Moved to `legacy/orchestrator-versions/`**:
+- `glyph-orchestrator.js` → v1.0 original implementation 
+- `glyph-orchestrator-v2.js` → v2.0 evolutionary upgrade
+- `glyph-orchestrator-v2-backup.js` → v2.0 working backup
+
+**Preserved in place**:
+- `glyph-orchestrator-v2.5.js` → Current active version (semantic visual translator integrated)
+- `glyph-orchestrator-v2.5-backup-20250713-190829.js` → Timestamped backup before semantic integration
+
+**Cache-busting update**:
+- Updated `templates/default.html` version parameter: `?v=1` → `?v=2` to force browser reload
+
+**Future File Management Protocol**:
+1. Active files stay in root `/assets/js/glyphs/`
+2. Superseded versions move to `legacy/orchestrator-versions/`  
+3. Timestamped backups remain for historical reference
+4. Update MANIFEST.md whenever file structure changes
+5. Use cache-busting version parameters for critical JavaScript updates
 
 ## System Health: 🟢 REVOLUTIONARY - Living Epistemic Organism Active
 *Each post now births its own conscious glyph species that evolves through contemplative engagement*
