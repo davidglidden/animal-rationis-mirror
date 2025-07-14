@@ -1117,6 +1117,48 @@ class SemanticVisualTranslator {
         visual: 'arrow-paths',
         dynamics: 'directed-flow',
         complexity: 'sequential-progress'
+      },
+      
+      // NEW: Visual family-based archetypes (for concept-driven selection)
+      'layered': {
+        visual: 'stratified-planes',
+        dynamics: 'sedimentary-shift',
+        complexity: 'depth-accumulation'
+      },
+      'luminous': {
+        visual: 'light-rays',
+        dynamics: 'radiating-glow',
+        complexity: 'emanation-patterns'
+      },
+      'flowing': {
+        visual: 'liquid-streams',
+        dynamics: 'fluid-motion',
+        complexity: 'current-patterns'
+      },
+      'liminal': {
+        visual: 'portal-forms',
+        dynamics: 'threshold-pulsing',
+        complexity: 'boundary-states'
+      },
+      'networked': {
+        visual: 'node-connections',
+        dynamics: 'signal-propagation',
+        complexity: 'emergent-topology'
+      },
+      'equilibrium': {
+        visual: 'balanced-forms',
+        dynamics: 'pendulum-motion',
+        complexity: 'symmetric-harmony'
+      },
+      'chaotic': {
+        visual: 'turbulent-fields',
+        dynamics: 'unpredictable-motion',
+        complexity: 'fractal-disorder'
+      },
+      'entropic': {
+        visual: 'dissolving-structures',
+        dynamics: 'gravity-collapse',
+        complexity: 'decay-patterns'
       }
     };
     
@@ -1142,59 +1184,176 @@ class SemanticVisualTranslator {
   
   // Main translation method
   translateSemanticToVisual(semanticProfile, enhancedParams) {
-    // Extract semantic archetype from profile
-    const archetype = this.identifyDominantArchetype(semanticProfile);
-    
-    // Get base visual translation
-    const baseVisual = this.getVisualArchetype(archetype);
-    
-    // Apply temporal layering
-    const temporalVisual = this.applyTemporalLayering(baseVisual, semanticProfile);
-    
-    // Add visual anaphora (references to other glyphs)
-    const anaphoricVisual = this.addVisualAnaphora(temporalVisual, semanticProfile);
-    
-    // Apply entropy scaling
-    const entropicVisual = this.applyEntropyScaling(anaphoricVisual, semanticProfile);
-    
-    // Merge with enhanced parameters from Phase 1 and include archetype
-    const finalVisual = this.mergeWithEnhancedParams(entropicVisual, enhancedParams, archetype);
-    
-    return finalVisual;
+    try {
+      console.log('🎨 translateSemanticToVisual called with profile:', semanticProfile);
+      console.log('🎯 About to call identifyDominantArchetype...');
+      
+      // Extract semantic archetype from profile
+      const archetype = this.identifyDominantArchetype(semanticProfile);
+      console.log('✅ identifyDominantArchetype returned:', archetype);
+      
+      // Get base visual translation
+      const baseVisual = this.getVisualArchetype(archetype);
+      
+      // Apply temporal layering
+      const temporalVisual = this.applyTemporalLayering(baseVisual, semanticProfile);
+      
+      // Add visual anaphora (references to other glyphs)
+      const anaphoricVisual = this.addVisualAnaphora(temporalVisual, semanticProfile);
+      
+      // Apply entropy scaling
+      const entropicVisual = this.applyEntropyScaling(anaphoricVisual, semanticProfile);
+      
+      // Merge with enhanced parameters from Phase 1 and include archetype
+      const finalVisual = this.mergeWithEnhancedParams(entropicVisual, enhancedParams, archetype);
+      
+      console.log('🎨 translateSemanticToVisual returning:', finalVisual);
+      return finalVisual;
+    } catch (err) {
+      console.error('💥 translateSemanticToVisual crashed:', err);
+      return enhancedParams; // safe fallback
+    }
   }
   
-  // Identify dominant semantic archetype from profile
+  // FIXED: Identify dominant semantic archetype from profile using extracted concepts
   identifyDominantArchetype(semanticProfile) {
+    console.log('🎯 Archetype selection starting for profile:', semanticProfile.conceptualDNA?.concepts);
+    
     const scores = {};
     
-    // Philosophical dimension
-    if (semanticProfile.complexity?.abstractionLevel > 0.7) {
-      scores['phenomenological'] = semanticProfile.complexity.abstractionLevel;
-    }
-    if (semanticProfile.topology?.circularityIndex > 0.5) {
-      scores['dialectical'] = semanticProfile.topology.circularityIndex;
-    }
-    if (semanticProfile.dynamics?.patterns?.oscillating > 0.05) {
-      scores['dialectical'] = (scores['dialectical'] || 0) + semanticProfile.dynamics.patterns.oscillating;
+    // PRIORITY 1: Use extracted concepts from genome if available
+    if (semanticProfile.conceptualDNA?.concepts && semanticProfile.conceptualDNA.concepts.length > 0) {
+      console.log('🎯 Using extracted concepts for archetype selection');
+      console.log('🧬 Available concepts:', semanticProfile.conceptualDNA.concepts);
+      
+      // Direct concept-word to archetype mapping
+      const conceptScores = {
+        'layered': 0,        // Strata family
+        'luminous': 0,       // Radiance family  
+        'flowing': 0,        // Flow family
+        'liminal': 0,        // Threshold family
+        'networked': 0,      // Constellation family
+        'cyclical': 0,       // Spiral family
+        'analytical': 0,     // Grid family
+        'chaotic': 0,        // Chaos family
+        'entropic': 0,       // Collapse family
+        'equilibrium': 0,    // Balance family
+        'dialectical': 0     // Interference family
+      };
+      
+      semanticProfile.conceptualDNA.concepts.forEach(concept => {
+        console.log(`🔍 Processing concept: ${concept.word} (weight: ${concept.weight}, archetype: ${concept.archetype})`);
+        
+        // Map concept words directly to semantic archetypes
+        switch (concept.word) {
+          case 'depth':
+            conceptScores.layered += concept.weight;
+            break;
+          case 'harmony':
+            conceptScores.luminous += concept.weight;
+            break;
+          case 'rhythm':
+            conceptScores.flowing += concept.weight;
+            break;
+          case 'network':
+            conceptScores.liminal += concept.weight;
+            break;
+          case 'branching':
+            conceptScores.networked += concept.weight;
+            break;
+          case 'circular':
+            conceptScores.cyclical += concept.weight;
+            break;
+          default:
+            // Use the archetype if provided
+            if (concept.archetype) {
+              const semanticArchetype = this.mapVisualToSemanticArchetype(concept.archetype);
+              console.log(`🎯 Mapping ${concept.archetype} → ${semanticArchetype} (weight: ${concept.weight})`);
+              if (conceptScores.hasOwnProperty(semanticArchetype)) {
+                conceptScores[semanticArchetype] += concept.weight;
+                console.log(`✅ Added to conceptScores[${semanticArchetype}] = ${conceptScores[semanticArchetype]}`);
+              } else {
+                console.warn(`⚠️ Unknown semantic archetype: ${semanticArchetype}`);
+              }
+            }
+        }
+      });
+      
+      // Convert concept scores to final scores
+      Object.entries(conceptScores).forEach(([archetype, score]) => {
+        if (score > 0) {
+          scores[archetype] = score;
+        }
+      });
+      
+      console.log('📊 Archetype scores from concepts:', scores);
     }
     
-    // Emotional dimension
-    if (semanticProfile.resonance?.dominantMode === 'wonder') {
-      scores['contemplative'] = semanticProfile.resonance.frequencies.wonder;
-    }
-    if (semanticProfile.resonance?.dominantMode === 'tension') {
-      scores['urgent'] = semanticProfile.resonance.frequencies.tension;
+    // PRIORITY 2: If no concept-based archetypes, use semantic analysis
+    if (Object.keys(scores).length === 0) {
+      console.log('📈 No concept archetypes found, using semantic analysis');
+      
+      // Look at dominant emotional mode first
+      if (semanticProfile.resonance?.dominantMode) {
+        const emotionToArchetype = {
+          'wonder': 'contemplative',
+          'tension': 'urgent',
+          'clarity': 'analytical',
+          'depth': 'layered'
+        };
+        const archetype = emotionToArchetype[semanticProfile.resonance.dominantMode];
+        if (archetype) {
+          scores[archetype] = semanticProfile.resonance.frequencies[semanticProfile.resonance.dominantMode] || 0.5;
+        }
+      }
+      
+      // Look at dominant movement pattern
+      if (semanticProfile.dynamics?.dominantMovement) {
+        const movementToArchetype = {
+          'flowing': 'flowing',
+          'radiating': 'luminous',
+          'spiraling': 'cyclical',
+          'collapsing': 'entropic',
+          'oscillating': 'dialectical'
+        };
+        const archetype = movementToArchetype[semanticProfile.dynamics.dominantMovement];
+        if (archetype) {
+          scores[archetype] = (scores[archetype] || 0) + 0.5;
+        }
+      }
+      
+      // Structural analysis
+      if (semanticProfile.topology) {
+        if (semanticProfile.topology.rhizomaticTendency > 0.6) {
+          scores['rhizomatic'] = semanticProfile.topology.rhizomaticTendency;
+        }
+        if (semanticProfile.topology.circularityIndex > 0.6) {
+          scores['cyclical'] = (scores['cyclical'] || 0) + semanticProfile.topology.circularityIndex * 0.5;
+        }
+      }
+      
+      // Temporal analysis
+      if (semanticProfile.temporality) {
+        if (semanticProfile.temporality.cyclical) {
+          scores['cyclical'] = (scores['cyclical'] || 0) + 0.6;
+        }
+        if (semanticProfile.temporality.linear) {
+          scores['linear'] = (scores['linear'] || 0) + 0.5;
+        }
+      }
     }
     
-    // Structural dimension
-    if (semanticProfile.topology?.rhizomaticTendency > 0.6) {
-      scores['rhizomatic'] = semanticProfile.topology.rhizomaticTendency;
-    }
-    if (semanticProfile.temporality?.cyclical) {
-      scores['cyclical'] = 0.8;
-    }
-    if (semanticProfile.temporality?.linear) {
-      scores['linear'] = 0.7;
+    // FALLBACK: Only use hardcoded thresholds if still no scores
+    if (Object.keys(scores).length === 0) {
+      console.log('⚠️ Using fallback threshold analysis');
+      
+      // Original threshold logic as last resort
+      if (semanticProfile.complexity?.abstractionLevel > 0.7) {
+        scores['phenomenological'] = semanticProfile.complexity.abstractionLevel;
+      }
+      if (semanticProfile.topology?.circularityIndex > 0.5) {
+        scores['dialectical'] = semanticProfile.topology.circularityIndex;
+      }
     }
     
     // Find highest scoring archetype
@@ -1208,11 +1367,34 @@ class SemanticVisualTranslator {
       }
     }
     
+    // Log the selection for debugging
+    console.log(`🎨 Selected archetype: ${dominant} (score: ${highestScore.toFixed(2)})`);
+    console.log('📊 All archetype scores:', scores);
+    
     return {
       primary: dominant,
       secondary: this.findSecondaryArchetype(scores, dominant),
       scores
     };
+  }
+  
+  // Map visual archetype families to semantic archetypes
+  mapVisualToSemanticArchetype(visualArchetype) {
+    const mapping = {
+      'Strata': 'layered',              // Layered, philosophical depth
+      'Radiance': 'luminous',           // Harmonic, radiating energy  
+      'Flow': 'flowing',                // Time-based, flowing movement
+      'Threshold': 'liminal',           // Boundary-crossing, network
+      'Constellation': 'networked',     // Star-like, branching connections
+      'Spiral': 'cyclical',             // Circular, spiral movement
+      'Grid': 'analytical',             // Ordered, systematic
+      'Balance': 'equilibrium',         // Balanced, harmonious
+      'Collapse': 'entropic',           // Condensed, concentrated
+      'Chaos': 'chaotic',               // Complex, unpredictable
+      'Interference': 'dialectical'     // Wave-like, interfering patterns
+    };
+    
+    return mapping[visualArchetype] || 'contemplative';
   }
   
   // Find secondary archetype for blending
@@ -2605,9 +2787,14 @@ class EnhancedSemanticDNA {
 if (typeof window !== 'undefined') {
   window.GlyphSemantics = window.GlyphSemantics || {};
   window.GlyphSemantics.EnhancedSemanticInterpreter = EnhancedSemanticInterpreter;
+  
+  // Add diagnostic marker to prove this file loaded
+  SemanticVisualTranslator.prototype.__diagnosticMarker = 'FIXED_VERSION_v8_LOADED';
+  
   window.GlyphSemantics.SemanticVisualTranslator = SemanticVisualTranslator;
   window.GlyphSemantics.ShortContentAmplifier = ShortContentAmplifier;
   window.GlyphSemantics.EnhancedSemanticDNA = EnhancedSemanticDNA;
   
   console.log('🌸 Short Content Amplifier loaded - even haikus will have unique fingerprints');
+  console.log('📍 Diagnostic marker added - check: window.GlyphSemantics.SemanticVisualTranslator.prototype.__diagnosticMarker');
 }
