@@ -2427,16 +2427,30 @@ class ContextualEnhancers {
 // === ENHANCED SEMANTIC DNA CLASS ===
 // Modify the existing SemanticDNA class to use the amplifier
 
-class EnhancedSemanticDNA extends SemanticDNA {
+class EnhancedSemanticDNA {
   constructor() {
-    super();
+    // Always use fallback implementation - we'll check for SemanticDNA availability later
+    this.baseSemanticDNA = null;
     this.shortContentAmplifier = new ShortContentAmplifier();
     console.log('🧬 Enhanced Semantic DNA initialized with Short Content Amplifier');
   }
   
   extractGenome(postContent, metadata = {}) {
-    // Get base genome from parent class
-    const genome = super.extractGenome(postContent, metadata);
+    // Try to get SemanticDNA at runtime if we haven't initialized it yet
+    if (!this.baseSemanticDNA && typeof window !== 'undefined' && window.SemanticDNA) {
+      this.baseSemanticDNA = new window.SemanticDNA();
+      console.log('🧬 Late-initialized SemanticDNA as base');
+    }
+    
+    // Get base genome from SemanticDNA if available, otherwise create minimal genome
+    let genome;
+    
+    if (this.baseSemanticDNA) {
+      genome = this.baseSemanticDNA.extractGenome(postContent, metadata);
+    } else {
+      // Fallback minimal genome structure
+      genome = this.createFallbackGenome(postContent, metadata);
+    }
     
     // Apply short content amplification if needed
     const contentLength = postContent.length;
@@ -2459,6 +2473,51 @@ class EnhancedSemanticDNA extends SemanticDNA {
     }
     
     return genome;
+  }
+  
+  // Create fallback genome structure when SemanticDNA is not available
+  createFallbackGenome(postContent, metadata) {
+    const contentLength = postContent.length;
+    const words = postContent.split(/\s+/).length;
+    
+    return {
+      topology: {
+        branchingFactor: Math.min(words / 10, 3),
+        rhizomaticTendency: 0.3,
+        circularityIndex: 0.2,
+        conceptDensity: Math.min(words / contentLength * 10, 1),
+        architecturalComplexity: 0.5
+      },
+      temporality: {
+        rhythmicComplexity: 0.4,
+        temporalDensity: 0.3,
+        cyclical: false,
+        rhythmicPattern: { rhythmic: false },
+        presentMomentFocus: 0.6,
+        durationCharacter: 0.5
+      },
+      resonance: {
+        harmonicComplexity: 0.4,
+        dissonanceLevel: 0.2,
+        resonantFrequency: 0.5,
+        frequencies: {}
+      },
+      complexity: {
+        recursiveDepth: Math.ceil(Math.log(words + 1)),
+        nestingLevel: 2,
+        layerCount: 1,
+        selfSimilarity: 0.3,
+        nestedComplexity: 0.4,
+        abstractionLevel: 0.5
+      },
+      dynamics: {
+        velocity: 0.3,
+        processualCharacter: 0.4,
+        emergentCharacter: 0.3,
+        energeticFlow: 0.5,
+        patterns: {}
+      }
+    };
   }
 }
 

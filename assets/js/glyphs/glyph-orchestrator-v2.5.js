@@ -35,9 +35,18 @@ class GlyphOrchestrator {
     
     // Living epistemic organism components
     // Use EnhancedSemanticDNA if available (includes Short Content Amplifier)
-    this.semanticDNA = (typeof window !== 'undefined' && window.GlyphSemantics?.EnhancedSemanticDNA) 
-      ? new window.GlyphSemantics.EnhancedSemanticDNA() 
-      : new SemanticDNA();
+    if (typeof window !== 'undefined' && window.GlyphSemantics?.EnhancedSemanticDNA) {
+      this.semanticDNA = new window.GlyphSemantics.EnhancedSemanticDNA();
+      console.log('🧬 Using EnhancedSemanticDNA with Short Content Amplifier');
+    } else if (typeof SemanticDNA !== 'undefined') {
+      this.semanticDNA = new SemanticDNA();
+      console.log('🧬 Using base SemanticDNA');
+    } else {
+      console.warn('⚠️ No SemanticDNA available, creating minimal fallback');
+      this.semanticDNA = {
+        extractGenome: (content, metadata) => this.createMinimalGenome(content, metadata)
+      };
+    }
     this.breedingGround = new SemanticBreedingGround();
     this.interpreter = new PhilosophicalInterpreter();
     this.evolutionaryFitness = new EvolutionaryFitness();
@@ -1345,6 +1354,51 @@ class GlyphOrchestrator {
   applySeasonalMutations(params) {
     // Placeholder - will implement seasonal mutations in Mode 2
     return params;
+  }
+  
+  // Create minimal genome when SemanticDNA is not available
+  createMinimalGenome(postContent, metadata = {}) {
+    const contentLength = postContent.length;
+    const words = postContent.split(/\s+/).length;
+    
+    return {
+      topology: {
+        branchingFactor: Math.min(words / 10, 3),
+        rhizomaticTendency: 0.3,
+        circularityIndex: 0.2,
+        conceptDensity: Math.min(words / contentLength * 10, 1),
+        architecturalComplexity: 0.5
+      },
+      temporality: {
+        rhythmicComplexity: 0.4,
+        temporalDensity: 0.3,
+        cyclical: false,
+        rhythmicPattern: { rhythmic: false },
+        presentMomentFocus: 0.6,
+        durationCharacter: 0.5
+      },
+      resonance: {
+        harmonicComplexity: 0.4,
+        dissonanceLevel: 0.2,
+        resonantFrequency: 0.5,
+        frequencies: {}
+      },
+      complexity: {
+        recursiveDepth: Math.ceil(Math.log(words + 1)),
+        nestingLevel: 2,
+        layerCount: 1,
+        selfSimilarity: 0.3,
+        nestedComplexity: 0.4,
+        abstractionLevel: 0.5
+      },
+      dynamics: {
+        velocity: 0.3,
+        processualCharacter: 0.4,
+        emergentCharacter: 0.3,
+        energeticFlow: 0.5,
+        patterns: {}
+      }
+    };
   }
 }
 
