@@ -2693,6 +2693,7 @@ class EnhancedSemanticDNA {
     // Always use fallback implementation - we'll check for SemanticDNA availability later
     this.baseSemanticDNA = null;
     this.shortContentAmplifier = new ShortContentAmplifier();
+    this.enhancedSemanticInterpreter = new EnhancedSemanticInterpreter();
     console.log('🧬 Enhanced Semantic DNA initialized with Short Content Amplifier');
   }
   
@@ -2731,14 +2732,14 @@ class EnhancedSemanticDNA {
       });
       
       // CRITICAL FIX: Add unique identifiers with extracted concepts
-      amplifiedGenome.uniqueIdentifiers = this.extractUniqueConceptualDNA(amplifiedGenome);
+      amplifiedGenome.uniqueIdentifiers = this.enhancedSemanticInterpreter.extractUniqueConceptualDNA(amplifiedGenome);
       console.log(`🧬 Added uniqueIdentifiers with ${amplifiedGenome.uniqueIdentifiers.concepts.length} concepts`);
       
       return amplifiedGenome;
     }
     
     // CRITICAL FIX: Add unique identifiers for non-amplified genomes too
-    genome.uniqueIdentifiers = this.extractUniqueConceptualDNA(genome);
+    genome.uniqueIdentifiers = this.enhancedSemanticInterpreter.extractUniqueConceptualDNA(genome);
     console.log(`🧬 Added uniqueIdentifiers with ${genome.uniqueIdentifiers.concepts.length} concepts`);
     
     return genome;
