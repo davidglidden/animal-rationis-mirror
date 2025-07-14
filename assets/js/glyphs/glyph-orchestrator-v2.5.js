@@ -142,6 +142,10 @@ class GlyphOrchestrator {
   
   // Build semantic profile for visual translation
   buildSemanticProfile(genome, metadata) {
+    console.log('🔍 buildSemanticProfile received genome:', genome);
+    console.log('🔍 genome.uniqueIdentifiers:', genome.uniqueIdentifiers);
+    console.log('🔍 genome.uniqueIdentifiers?.concepts:', genome.uniqueIdentifiers?.concepts);
+    
     return {
       // Topology from genome
       topology: {
