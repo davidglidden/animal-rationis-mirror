@@ -5,15 +5,19 @@ class GridRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      gridType: params.gridType || 'cartesian', // cartesian, polar, hexagonal, triangular
-      density: params.density || 8,
-      regularity: params.regularity || 0.9,
-      perturbation: params.perturbation || 0.1,
-      connectionProbability: params.connectionProbability || 0.3,
-      geometricComplexity: params.geometricComplexity || 0.5,
-      logicalDepth: params.logicalDepth || 3,
-      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001),
+      gridType: this.semanticParams.gridType,
+      density: this.semanticParams.density,
+      regularity: this.semanticParams.regularity,
+      perturbation: this.semanticParams.perturbation,
+      connectionProbability: this.semanticParams.connectionProbability,
+      geometricComplexity: this.semanticParams.geometricComplexity,
+      logicalDepth: this.semanticParams.logicalDepth,
+      animationSpeed: this.semanticParams.animationSpeed,
       ...params
     };
     this.time = 0;
@@ -21,9 +25,101 @@ class GridRenderer {
     this.connections = [];
     this.animationId = null;
     
-    // Semantic integration initialized
+    console.log(`🎨 Grid renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.gridType,
+      density: this.semanticParams.density,
+      regularity: this.semanticParams.regularity,
+      logicalDepth: this.semanticParams.logicalDepth,
+      entropy: this.semanticParams.entropyScore
+    });
     
     this.initGrid();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'logical';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001);
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Grid type based on structural topology and conceptual DNA
+      gridType: this.selectGridType(genome, conceptualDNA),
+      
+      // Density based on conceptual complexity
+      density: Math.floor(4 + (entropyScore * 12)), // 4-16 density
+      
+      // Regularity based on logical structure
+      regularity: 0.7 + (genome.complexity?.selfSimilarity || 0.2) * 0.3, // 0.7-1.0
+      
+      // Perturbation based on chaos and disorder
+      perturbation: (genome.dynamics?.acceleration || 0.1) * 0.3, // 0-0.3
+      
+      // Connection probability based on rhizomatic tendency
+      connectionProbability: 0.2 + (genome.topology?.rhizomaticTendency || 0.1) * 0.6, // 0.2-0.8
+      
+      // Geometric complexity based on nested complexity
+      geometricComplexity: genome.complexity?.nestedComplexity || 0.5,
+      
+      // Logical depth based on recursive depth
+      logicalDepth: Math.min(Math.floor(genome.complexity?.recursiveDepth || 3), 6), // 1-6
+      
+      // Animation speed based on temporal dynamics
+      animationSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 2),
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select grid type based on semantic content
+  selectGridType(genome, conceptualDNA) {
+    const topology = genome.topology || {};
+    const complexity = genome.complexity || {};
+    
+    // Analyze conceptual DNA for grid type hints
+    const hasPolar = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['circular', 'radial', 'center', 'polar', 'orbit', 'spiral'].includes(concept.toLowerCase())
+    );
+    const hasHexagonal = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['hexagonal', 'organic', 'natural', 'honeycomb', 'cellular'].includes(concept.toLowerCase())
+    );
+    const hasTriangular = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['triangular', 'sharp', 'angular', 'geometric', 'faceted'].includes(concept.toLowerCase())
+    );
+    
+    // Grid type selection based on semantic analysis
+    if (hasPolar || topology.circularityIndex > 0.4) {
+      return 'polar';
+    } else if (hasHexagonal || (complexity.selfSimilarity > 0.3 && topology.branchingFactor > 1.5)) {
+      return 'hexagonal';
+    } else if (hasTriangular || topology.branchingFactor > 2.0) {
+      return 'triangular';
+    } else {
+      // Default based on structural characteristics
+      if (topology.circularityIndex > 0.2) {
+        return 'polar';
+      } else if (complexity.nestingLevel > 4) {
+        return 'hexagonal';
+      } else if (topology.branchingFactor > 1.8) {
+        return 'triangular';
+      } else {
+        return 'cartesian';
+      }
+    }
   }
 
   initGrid() {
