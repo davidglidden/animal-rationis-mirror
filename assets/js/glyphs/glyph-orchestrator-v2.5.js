@@ -664,9 +664,18 @@ class GlyphOrchestrator {
       }
     }
     
+    // Debug the final family assignment before creating params
+    console.log('🔍 PRIME DIRECTIVE DEBUG - Final family assignment:');
+    console.log('  emergentCandidate:', emergentCandidate);
+    console.log('  hybridCandidate:', hybridCandidate);
+    console.log('  chosenFamily:', chosenFamily);
+    
+    const finalFamily = emergentCandidate || (hybridCandidate ? hybridCandidate.primary : chosenFamily);
+    console.log('  finalFamily will be:', finalFamily);
+    
     // Base parameters
     const params = {
-      family: emergentCandidate || (hybridCandidate ? hybridCandidate.primary : chosenFamily),
+      family: finalFamily,
       descriptors: parsed.descriptors,
       isHybrid: !!hybridCandidate,
       hybridSecondary: hybridCandidate?.secondary,
