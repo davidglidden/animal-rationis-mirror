@@ -373,11 +373,6 @@ class RadianceRenderer {
       // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
       primaryColor = this.visualParams.getHarmonizedRgba(coreAlpha);
       accentColor = this.visualParams.getHarmonizedRgba(coreAlpha * 0.5);
-      console.log('🎨 Using AldineXXI harmonized semantic colors:', { 
-        archetype: this.visualParams.archetype,
-        rawSemantic: this.visualParams.semanticColor,
-        harmonizedColors: { primaryColor, accentColor }
-      });
     } else {
       // Fallback to Sacred Palette radiance colors
       const palette = window.SacredPalette || { families: { radiance: {} } };
