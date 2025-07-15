@@ -621,6 +621,10 @@ class GlyphOrchestrator {
       const postContent = this.extractPostContent(metadata);
       const genome = this.semanticDNA.extractGenome(postContent, metadata);
       
+      // 🔍 DEBUG OVERLAY - Show genome source, archetype, semantic color, and renderer
+      const debugInfo = this.createDebugOverlay(genome, params.family, metadata);
+      console.log(`🔍 GLYPH DEBUG:`, debugInfo);
+      
       // Find or create living renderer
       let livingRenderer = this.breedingGround.findBestMatch(genome);
       
@@ -1535,6 +1539,34 @@ class GlyphOrchestrator {
         patterns: {}
       }
     };
+  }
+
+  // Create debug overlay showing genome source, archetype, semantic color, and renderer
+  createDebugOverlay(genome, renderer, metadata) {
+    const debugInfo = {
+      genomeSource: genome.debug?.source || 'unknown',
+      genomeUsing: genome.debug?.using || 'unknown',
+      archetype: 'unknown',
+      semanticColor: 'unknown',
+      renderer: renderer,
+      title: metadata.title || 'untitled'
+    };
+
+    // Try to extract semantic color and archetype from genome
+    if (window.GlyphSemantics?.SemanticVisualTranslator) {
+      try {
+        const translator = new window.GlyphSemantics.SemanticVisualTranslator();
+        const derivedColor = translator.deriveSemanticColor(genome);
+        const selectedArchetype = translator.selectArchetype(genome);
+        
+        debugInfo.semanticColor = `h:${derivedColor.primary.h.toFixed(0)}, s:${derivedColor.primary.s.toFixed(0)}, l:${derivedColor.primary.l.toFixed(0)}`;
+        debugInfo.archetype = selectedArchetype;
+      } catch (e) {
+        console.warn('Could not extract semantic color/archetype:', e);
+      }
+    }
+
+    return debugInfo;
   }
 }
 

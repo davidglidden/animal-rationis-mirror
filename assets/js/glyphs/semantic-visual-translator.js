@@ -3143,9 +3143,15 @@ class EnhancedSemanticDNA {
   
   extractGenome(postContent, metadata = {}) {
     // Try to get SemanticDNA at runtime if we haven't initialized it yet
-    if (!this.baseSemanticDNA && typeof window !== 'undefined' && window.SemanticDNA) {
-      this.baseSemanticDNA = new window.SemanticDNA();
-      console.log('🧬 Late-initialized SemanticDNA as base');
+    if (!this.baseSemanticDNA && typeof window !== 'undefined') {
+      // Check for EnhancedSemanticDNA first (preferred)
+      if (window.GlyphSemantics?.EnhancedSemanticDNA) {
+        this.baseSemanticDNA = new window.GlyphSemantics.EnhancedSemanticDNA();
+        console.log('🧬 Late-initialized EnhancedSemanticDNA as base');
+      } else if (window.SemanticDNA) {
+        this.baseSemanticDNA = new window.SemanticDNA();
+        console.log('🧬 Late-initialized SemanticDNA as base');
+      }
     }
     
     // Get base genome from SemanticDNA if available, otherwise create minimal genome
@@ -3153,9 +3159,13 @@ class EnhancedSemanticDNA {
     
     if (this.baseSemanticDNA) {
       genome = this.baseSemanticDNA.extractGenome(postContent, metadata);
+      console.log('🧬 Using real SemanticDNA extraction (not fallback)');
+      genome.debug = { source: 'semantic', using: 'real SemanticDNA' };
     } else {
       // Fallback minimal genome structure
       genome = this.createFallbackGenome(postContent, metadata);
+      console.log('⚠️ Using fallback genome - SemanticDNA not available');
+      genome.debug = { source: 'fallback', using: 'hardcoded values' };
     }
     
     // Apply short content amplification if needed
