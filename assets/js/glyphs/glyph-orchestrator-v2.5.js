@@ -623,6 +623,7 @@ class GlyphOrchestrator {
       // Select renderer family based on Multi-Modal archetype
       chosenFamily = this.selectRendererFromArchetype(genome);
       console.log(`🎭 Multi-Modal archetype selected renderer: ${chosenFamily}`);
+      console.log(`🔍 chosenFamily is: ${chosenFamily} (type: ${typeof chosenFamily})`);
     } catch (genomeError) {
       console.warn('⚠️ Genome extraction failed, falling back to keyword analysis:', genomeError.message);
     }
@@ -633,6 +634,7 @@ class GlyphOrchestrator {
     const emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
     
     // If no archetype-based family, use keyword analysis
+    console.log(`🔍 Before keyword check - chosenFamily: ${chosenFamily} (type: ${typeof chosenFamily})`);
     if (!chosenFamily) {
       chosenFamily = parsed.family;
       
