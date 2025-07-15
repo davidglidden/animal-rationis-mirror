@@ -370,10 +370,14 @@ class RadianceRenderer {
     let primaryColor, accentColor;
     
     if (this.visualParams && this.visualParams.semanticColor) {
-      // Use semantic colors from content analysis
-      primaryColor = this.visualParams.getSemanticRgba(coreAlpha);
-      accentColor = this.visualParams.getSemanticRgba(coreAlpha * 0.5);
-      console.log('🎨 Using semantic colors:', { primaryColor, accentColor });
+      // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+      primaryColor = this.visualParams.getHarmonizedRgba(coreAlpha);
+      accentColor = this.visualParams.getHarmonizedRgba(coreAlpha * 0.5);
+      console.log('🎨 Using AldineXXI harmonized semantic colors:', { 
+        archetype: this.visualParams.archetype,
+        rawSemantic: this.visualParams.semanticColor,
+        harmonizedColors: { primaryColor, accentColor }
+      });
     } else {
       // Fallback to Sacred Palette radiance colors
       const palette = window.SacredPalette || { families: { radiance: {} } };
@@ -387,7 +391,7 @@ class RadianceRenderer {
     
     gradient.addColorStop(0, primaryColor);
     gradient.addColorStop(0.3, accentColor);
-    gradient.addColorStop(0.7, this.visualParams?.getSemanticRgba(coreAlpha * 0.2) || 
+    gradient.addColorStop(0.7, this.visualParams?.getHarmonizedRgba(coreAlpha * 0.2) || 
                                 `rgba(212, 165, 116, ${coreAlpha * 0.2})`);
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     
@@ -412,10 +416,10 @@ class RadianceRenderer {
       let rayPrimaryColor, rayAccentColor, rayEndColor;
       
       if (this.visualParams && this.visualParams.semanticColor) {
-        // Use semantic colors from content analysis
-        rayPrimaryColor = this.visualParams.getSemanticRgba(alpha);
-        rayAccentColor = this.visualParams.getSemanticRgba(alpha * 0.6);
-        rayEndColor = this.visualParams.getSemanticRgba(0);
+        // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+        rayPrimaryColor = this.visualParams.getHarmonizedRgba(alpha);
+        rayAccentColor = this.visualParams.getHarmonizedRgba(alpha * 0.6);
+        rayEndColor = this.visualParams.getHarmonizedRgba(0);
       } else {
         // Fallback to Sacred Palette radiance colors
         const palette = window.SacredPalette || { families: { radiance: {} } };

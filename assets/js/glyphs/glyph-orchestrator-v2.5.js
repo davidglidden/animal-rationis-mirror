@@ -136,23 +136,31 @@ class GlyphOrchestrator {
       // Visual enhancement data
       archetypeColorMod: archetypeColorMod,
       
-      // Helper methods for renderers
-      getSemanticRgba: function(alpha = 1) {
+      // Helper methods for renderers - using harmonizer as aesthetic filter
+      getHarmonizedRgba: function(alpha = 1) {
         if (!this.semanticColor) return 'rgba(120, 120, 120, 0.5)';
-        return window.SacredPalette?.semantic?.hslToRgba(
-          this.semanticColor.h, 
-          this.semanticColor.s, 
-          this.semanticColor.l, 
-          alpha * this.semanticColor.a
+        
+        // Use Sacred Palette harmonizer to filter semantic color through AldineXXI aesthetic
+        return window.SacredPalette?.harmonizer?.harmonizeAndRender(
+          this.semanticColor, 
+          this.archetype, 
+          alpha
         ) || 'rgba(120, 120, 120, 0.5)';
       },
       
-      getSymbolicRgba: function(alpha = 1) {
-        const color = window.SacredPalette?.semantic?.getSymbolicColor(this.symbolicColor);
-        if (!color) return 'rgba(120, 120, 120, 0.5)';
-        return window.SacredPalette?.semantic?.hslToRgba(
-          color.h, color.s, color.l, alpha
-        ) || 'rgba(120, 120, 120, 0.5)';
+      // Legacy method for backward compatibility
+      getSemanticRgba: function(alpha = 1) {
+        return this.getHarmonizedRgba(alpha);
+      },
+      
+      // Get harmonized color as HSL object for further processing
+      getHarmonizedHSL: function() {
+        if (!this.semanticColor) return { h: 36, s: 0.4, l: 0.5 };
+        
+        return window.SacredPalette?.harmonizer?.harmonizeSemanticColor(
+          this.semanticColor, 
+          this.archetype
+        ) || { h: 36, s: 0.4, l: 0.5 };
       }
     };
     

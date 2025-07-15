@@ -166,88 +166,201 @@ const SacredPalette = {
     candleFlicker: 0.003    // Gentle variation
   },
   
-  // Semantic lookup helpers for renderer architecture
-  semantic: {
-    // Map HSL hue to symbolic color name
-    mapHueToSymbol(h) {
-      const hueRanges = {
-        'crimson': [0, 30],      // Red-orange
-        'amber': [30, 60],       // Orange-yellow
-        'ochre': [60, 90],       // Yellow-green
-        'sage': [90, 150],       // Green
-        'teal': [150, 210],      // Blue-green
-        'indigo': [210, 270],    // Blue-purple
-        'violet': [270, 330],    // Purple-magenta
-        'ash': [330, 360]        // Magenta-red
+  // AESTHETIC HARMONIZER - AldineXXI Framework
+  // Sacred Palette as final aesthetic arbiter, not color definer
+  harmonizer: {
+    // Main harmonization function - takes semantic color and makes it Aldine-compatible
+    harmonizeSemanticColor(rawColor, archetype = 'default') {
+      // Parse input color safely
+      const hsl = this.parseToHSL(rawColor);
+      
+      // Clamp values to safe ranges
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+      
+      // Apply AldineXXI aesthetic discipline
+      const h = clamp(hsl.h, 0, 360);
+      const s = clamp(hsl.s * 0.4, 0.1, 0.6);     // Desaturate for contemplative aesthetic
+      const l = clamp(hsl.l * 0.9, 0.3, 0.7);     // Soften brightness for readability
+      
+      // Archetype-specific warmth shift
+      const warmthShift = {
+        "liminal": -10,
+        "collapse": -5,
+        "radiant": +5,
+        "luminous": +8,
+        "chaos": -15,
+        "dialectical": -8,
+        "layered": +3,
+        "flowing": +2,
+        "networked": 0,
+        "cyclical": -3,
+        "default": 0
       };
       
-      for (const [symbol, [min, max]] of Object.entries(hueRanges)) {
-        if (h >= min && h < max) return symbol;
-      }
-      return 'ash'; // Default fallback
+      const shift = warmthShift[archetype] || 0;
+      const adjustedHue = (h + shift + 360) % 360;
+      
+      return {
+        h: adjustedHue,
+        s: s,
+        l: l
+      };
     },
     
-    // Get symbolic color with semantic adjustments
-    getSymbolicColor(symbol, semanticColor = null) {
-      const baseColors = {
-        'crimson': { h: 15, s: 0.4, l: 0.5 },
-        'amber': { h: 45, s: 0.6, l: 0.6 },
-        'ochre': { h: 75, s: 0.5, l: 0.5 },
-        'sage': { h: 120, s: 0.3, l: 0.5 },
-        'teal': { h: 180, s: 0.5, l: 0.5 },
-        'indigo': { h: 240, s: 0.6, l: 0.4 },
-        'violet': { h: 300, s: 0.4, l: 0.5 },
-        'ash': { h: 0, s: 0.1, l: 0.6 }
-      };
+    // Parse various color inputs to HSL
+    parseToHSL(color) {
+      if (!color) return { h: 36, s: 0.4, l: 0.5 }; // Default ochre
       
-      const base = baseColors[symbol] || baseColors.ash;
-      
-      // If semantic color provided, blend with base
-      if (semanticColor) {
+      // If already HSL object
+      if (typeof color === 'object' && color.h !== undefined) {
         return {
-          h: semanticColor.h || base.h,
-          s: Math.min(1, (semanticColor.s || base.s) * 0.8), // Muted
-          l: Math.min(0.8, (semanticColor.l || base.l) * 0.9) // Contemplative
+          h: color.h || 0,
+          s: Math.min(1, Math.max(0, color.s || 0)),
+          l: Math.min(1, Math.max(0, color.l || 0))
         };
       }
       
-      return base;
+      // If CSS color string, attempt basic parsing
+      if (typeof color === 'string') {
+        // Very basic HSL parsing - could be enhanced
+        const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+        if (hslMatch) {
+          return {
+            h: parseInt(hslMatch[1]),
+            s: parseInt(hslMatch[2]) / 100,
+            l: parseInt(hslMatch[3]) / 100
+          };
+        }
+      }
+      
+      // Fallback to default
+      return { h: 36, s: 0.4, l: 0.5 };
     },
     
-    // Convert HSL to contemplative rgba string
-    hslToRgba(h, s, l, alpha = 1) {
-      const c = (1 - Math.abs(2 * l - 1)) * s;
-      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-      const m = l - c / 2;
-      
-      let r, g, b;
-      if (h < 60) { [r, g, b] = [c, x, 0]; }
-      else if (h < 120) { [r, g, b] = [x, c, 0]; }
-      else if (h < 180) { [r, g, b] = [0, c, x]; }
-      else if (h < 240) { [r, g, b] = [0, x, c]; }
-      else if (h < 300) { [r, g, b] = [x, 0, c]; }
-      else { [r, g, b] = [c, 0, x]; }
-      
-      r = Math.round((r + m) * 255);
-      g = Math.round((g + m) * 255);
-      b = Math.round((b + m) * 255);
-      
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    },
-    
-    // Get archetype-specific color modifications
-    getArchetypeColorMod(archetype) {
-      const mods = {
-        'flowing': { saturation: 0.9, lightness: 1.1, alpha: 0.8 },
-        'liminal': { saturation: 0.7, lightness: 0.9, alpha: 0.6 },
-        'layered': { saturation: 1.0, lightness: 0.8, alpha: 0.9 },
-        'luminous': { saturation: 1.2, lightness: 1.3, alpha: 1.0 },
-        'dialectical': { saturation: 0.8, lightness: 0.7, alpha: 0.7 },
-        'networked': { saturation: 0.9, lightness: 1.0, alpha: 0.8 },
-        'cyclical': { saturation: 1.1, lightness: 1.0, alpha: 0.9 }
+    // Shift hues to contemplative ranges suitable for manuscript aesthetic
+    shiftHueToContemplative(hue, archetype) {
+      const contemplativeRanges = {
+        // Archetype-specific contemplative hues
+        'collapse': [24, 32],     // Burnt umber, ash
+        'radiance': [42, 48],     // Soft gold, amber
+        'spiral': [210, 220],     // Dusky blue, indigo
+        'threshold': [180, 190],  // Muted teal, sage
+        'flowing': [200, 210],    // Cool blue, contemplative
+        'liminal': [30, 40],      // Warm ochre, parchment
+        'layered': [35, 45],      // Golden ochre, manuscript
+        'luminous': [40, 50],     // Bright ochre, illuminated
+        'dialectical': [25, 35],  // Burnt ochre, aged
+        'networked': [190, 200],  // Sage, muted teal
+        'cyclical': [220, 230],   // Deep indigo, contemplative
+        
+        // General contemplative range
+        'default': [32, 48, 210, 230] // Ochres and indigos
       };
       
-      return mods[archetype] || { saturation: 1.0, lightness: 1.0, alpha: 1.0 };
+      const ranges = contemplativeRanges[archetype] || contemplativeRanges.default;
+      return this.nearestHueInRanges(hue, ranges);
+    },
+    
+    // Find nearest hue within contemplative ranges
+    nearestHueInRanges(hue, ranges) {
+      return ranges.reduce((nearest, current) =>
+        Math.abs(hue - current) < Math.abs(hue - nearest) ? current : nearest
+      );
+    },
+    
+    // Adjust lightness for archetype-specific aesthetic
+    adjustLightnessForArchetype(lightness, archetype) {
+      const adjustments = {
+        'collapse': Math.max(lightness - 0.1, 0.2),    // Darker, subdued
+        'threshold': Math.max(lightness - 0.05, 0.25), // Slightly darker
+        'radiance': Math.min(lightness + 0.1, 0.8),    // Lighter, luminous
+        'luminous': Math.min(lightness + 0.15, 0.85),  // Brightest
+        'liminal': Math.max(lightness - 0.1, 0.3),     // Muted, transitional
+        'flowing': lightness,                           // Unchanged
+        'layered': Math.min(lightness + 0.05, 0.75),   // Slightly brighter
+        'dialectical': Math.max(lightness - 0.05, 0.35), // Slightly darker
+        'networked': lightness,                         // Unchanged
+        'cyclical': Math.max(lightness - 0.05, 0.4)    // Slightly darker
+      };
+      
+      return adjustments[archetype] || lightness;
+    },
+    
+    // Apply subtle manuscript warmth (slight ochre tint)
+    applyManuscriptWarmth(hue, saturation) {
+      // Only apply warmth to colors that aren't already warm
+      if (hue > 60 && hue < 180) {
+        // Cool colors get slight ochre shift
+        const warmthFactor = saturation * 0.1; // Subtle shift
+        return hue + (40 - hue) * warmthFactor;
+      }
+      return hue;
+    },
+    
+    // Ensure readability against vellum background
+    ensureReadability(lightness, saturation) {
+      // Ensure sufficient contrast with vellum (#FAF8F3)
+      const vellumLightness = 0.96;
+      const minContrast = 0.3;
+      
+      if (Math.abs(lightness - vellumLightness) < minContrast) {
+        return lightness < vellumLightness ? 
+               Math.max(lightness - minContrast, 0.1) : 
+               Math.min(lightness + minContrast, 0.9);
+      }
+      
+      return lightness;
+    },
+    
+    // Convert HSL to CSS-compatible rgba string using canonical algorithm
+    toRGBA(hsl, alpha = 1) {
+      const { h, s, l } = hsl;
+      
+      // Ensure valid inputs
+      const hueNorm = ((h % 360) + 360) % 360 / 360;  // Normalize to 0-1
+      const satNorm = Math.min(1, Math.max(0, s));
+      const lightNorm = Math.min(1, Math.max(0, l));
+      
+      let r, g, b;
+      
+      if (satNorm === 0) {
+        // Achromatic (gray)
+        r = g = b = lightNorm;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        
+        const q = lightNorm < 0.5 ? lightNorm * (1 + satNorm) : lightNorm + satNorm - lightNorm * satNorm;
+        const p = 2 * lightNorm - q;
+        
+        r = hue2rgb(p, q, hueNorm + 1/3);
+        g = hue2rgb(p, q, hueNorm);
+        b = hue2rgb(p, q, hueNorm - 1/3);
+      }
+      
+      // Convert to 0-255 range and clamp
+      const rInt = Math.round(Math.min(255, Math.max(0, r * 255)));
+      const gInt = Math.round(Math.min(255, Math.max(0, g * 255)));
+      const bInt = Math.round(Math.min(255, Math.max(0, b * 255)));
+      const alphaClamp = Math.min(1, Math.max(0, alpha));
+      
+      return `rgba(${rInt}, ${gInt}, ${bInt}, ${alphaClamp})`;
+    },
+    
+    // Convenience method for renderers
+    harmonizeAndRender(rawColor, archetype, alpha = 1) {
+      console.log(`🎨 Sacred Palette harmonizing:`, { rawColor, archetype, alpha });
+      const harmonized = this.harmonizeSemanticColor(rawColor, archetype);
+      console.log(`🎨 Harmonized HSL:`, harmonized);
+      const rgba = this.toRGBA(harmonized, alpha);
+      console.log(`🎨 Final RGBA for archetype ${archetype}:`, rgba);
+      return rgba;
     }
   }
 };
