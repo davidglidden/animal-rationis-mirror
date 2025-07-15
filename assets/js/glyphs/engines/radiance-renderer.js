@@ -4,25 +4,24 @@ class RadianceRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    
-    // SEMANTIC-AWARE RENDERER ARCHITECTURE
-    // Extract visualParams for semantic behavior
     this.visualParams = params.visualParams || null;
     
-    // Apply semantic modifications to base parameters
-    this.params = this.applySemanticModifications({
-      rayCount: params.rayCount || 12,
-      coreRadius: params.coreRadius || 20,
-      maxRadius: params.maxRadius || 200,
-      pulseFrequency: params.pulseFrequency || (window.SacredPalette?.timing?.breathRate || 0.001),
-      rayType: params.rayType || 'classic', // classic, spiral, fibonacci, burst
-      intensity: params.intensity || 0.8,
-      centerStrength: params.centerStrength || 1.0,
-      breathingAmplitude: params.breathingAmplitude || 0.3,
-      emanationSpeed: params.emanationSpeed || 0.5,
-      spiritualResonance: params.spiritualResonance || 0.7,
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
+    this.params = {
+      rayCount: this.semanticParams.rayCount,
+      coreRadius: this.semanticParams.coreRadius,
+      maxRadius: this.semanticParams.maxRadius,
+      pulseFrequency: this.semanticParams.pulseFrequency,
+      rayType: this.semanticParams.rayType,
+      intensity: this.semanticParams.intensity,
+      centerStrength: this.semanticParams.centerStrength,
+      breathingAmplitude: this.semanticParams.breathingAmplitude,
+      emanationSpeed: this.semanticParams.emanationSpeed,
+      spiritualResonance: this.semanticParams.spiritualResonance,
       ...params
-    });
+    };
     
     this.time = 0;
     this.rays = [];
@@ -30,88 +29,107 @@ class RadianceRenderer {
     this.animationId = null;
     this.center = { x: 0, y: 0 };
     
-    // Semantic integration initialized
+    console.log(`🎨 Radiance renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.rayType,
+      count: this.semanticParams.rayCount,
+      intensity: this.semanticParams.intensity,
+      centerStrength: this.semanticParams.centerStrength,
+      entropy: this.semanticParams.entropyScore
+    });
     
     this.initRadiance();
   }
   
-  // Apply semantic modifications to renderer parameters
-  applySemanticModifications(baseParams) {
-    if (!this.visualParams) return baseParams;
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'luminous';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
     
-    const { archetype, entropyScore, conceptualDNA } = this.visualParams;
+    // Base parameters influenced by semantic content
+    const baseFrequency = (window.SacredPalette?.timing?.breathRate || 0.001);
     
-    // Archetype-specific parameter modifications
-    const archetypeModifications = {
-      'flowing': {
-        rayType: 'spiral',
-        rayCount: baseParams.rayCount * 1.2,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.5,
-        emanationSpeed: baseParams.emanationSpeed * 1.3,
-        spiritualResonance: baseParams.spiritualResonance * 1.1
-      },
-      'liminal': {
-        rayType: 'classic',
-        rayCount: Math.max(6, baseParams.rayCount * 0.7),
-        intensity: baseParams.intensity * 0.6,
-        centerStrength: baseParams.centerStrength * 0.8,
-        breathingAmplitude: baseParams.breathingAmplitude * 0.7,
-        spiritualResonance: baseParams.spiritualResonance * 1.2
-      },
-      'layered': {
-        rayType: 'fibonacci',
-        rayCount: baseParams.rayCount * 1.1,
-        intensity: baseParams.intensity * 0.9,
-        centerStrength: baseParams.centerStrength * 1.2,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.1
-      },
-      'luminous': {
-        rayType: 'burst',
-        rayCount: baseParams.rayCount * 1.3,
-        intensity: baseParams.intensity * 1.4,
-        centerStrength: baseParams.centerStrength * 1.5,
-        spiritualResonance: baseParams.spiritualResonance * 1.3
-      },
-      'dialectical': {
-        rayType: 'classic',
-        rayCount: Math.floor(baseParams.rayCount / 2) * 2, // Ensure even number
-        intensity: baseParams.intensity * 0.8,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.2
-      }
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Ray type based on structural patterns and conceptual DNA
+      rayType: this.selectRayType(genome, conceptualDNA),
+      
+      // Ray count based on complexity and branching
+      rayCount: Math.floor(6 + (genome.topology?.branchingFactor || 1) * 8), // 6-22 rays
+      
+      // Core radius based on centrality and focus
+      coreRadius: 15 + (genome.complexity?.selfSimilarity || 0.5) * 20, // 15-35 radius
+      
+      // Max radius based on reach and scope
+      maxRadius: 150 + (entropyScore * 100), // 150-250 radius
+      
+      // Pulse frequency based on temporal dynamics
+      pulseFrequency: baseFrequency * (1 + (genome.temporality?.velocity || 0) * 3),
+      
+      // Intensity based on resonance and harmony
+      intensity: 0.6 + (genome.resonance?.harmonicComplexity || 0.1) * 0.5, // 0.6-1.1
+      
+      // Center strength based on conceptual focus
+      centerStrength: 0.8 + (genome.dynamics?.acceleration || 0.1) * 0.4, // 0.8-1.2
+      
+      // Breathing amplitude based on temporal flow
+      breathingAmplitude: 0.2 + (genome.temporality?.sequentialFlow || 0.2) * 0.4, // 0.2-0.6
+      
+      // Emanation speed based on dynamic movement
+      emanationSpeed: 0.3 + (genome.dynamics?.velocity || 0) * 0.7, // 0.3-1.0
+      
+      // Spiritual resonance based on harmonic complexity
+      spiritualResonance: 0.5 + (genome.resonance?.resonantFrequency || 0.5) * 0.5, // 0.5-1.0
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
     };
     
-    // Apply archetype modifications
-    const mods = archetypeModifications[archetype] || {};
-    const semanticParams = { ...baseParams, ...mods };
+    return semanticInfluences;
+  }
+  
+  // Select ray type based on semantic content
+  selectRayType(genome, conceptualDNA) {
+    const topology = genome.topology || {};
+    const dynamics = genome.dynamics || {};
     
-    // Apply entropy-based chaos/order modulation
-    if (entropyScore > 0.7) {
-      // High entropy - more chaos
-      semanticParams.rayCount = Math.floor(semanticParams.rayCount * (1 + entropyScore * 0.3));
-      semanticParams.breathingAmplitude *= (1 + entropyScore * 0.4);
-      semanticParams.emanationSpeed *= (1 + entropyScore * 0.3);
-    } else if (entropyScore < 0.3) {
-      // Low entropy - more order
-      semanticParams.rayCount = Math.max(6, Math.floor(semanticParams.rayCount * (1 - entropyScore * 0.2)));
-      semanticParams.breathingAmplitude *= (1 - entropyScore * 0.3);
-      semanticParams.spiritualResonance *= (1 + entropyScore * 0.2);
-    }
+    // Analyze conceptual DNA for ray type hints
+    const hasSpiral = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['spiral', 'helical', 'twist', 'vortex', 'coil'].includes(concept.toLowerCase())
+    );
+    const hasBurst = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['burst', 'explosion', 'sudden', 'flash', 'intensity'].includes(concept.toLowerCase())
+    );
+    const hasFibonacci = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['natural', 'organic', 'growth', 'pattern', 'sequence'].includes(concept.toLowerCase())
+    );
     
-    // Conceptual DNA influences
-    if (conceptualDNA.includes('contemplative')) {
-      semanticParams.pulseFrequency *= 0.7; // Slower, more meditative
-      semanticParams.intensity *= 0.8;
+    // Ray type selection based on semantic analysis
+    if (hasSpiral || topology.circularityIndex > 0.4) {
+      return 'spiral';
+    } else if (hasBurst || dynamics.acceleration > 0.3) {
+      return 'burst';
+    } else if (hasFibonacci || (topology.branchingFactor > 1.6 && topology.branchingFactor < 2.0)) {
+      return 'fibonacci';
+    } else {
+      // Default based on structural characteristics
+      if (topology.circularityIndex > 0.2) {
+        return 'spiral';
+      } else if (dynamics.acceleration > 0.2) {
+        return 'burst';
+      } else if (topology.branchingFactor > 1.4) {
+        return 'fibonacci';
+      } else {
+        return 'classic';
+      }
     }
-    if (conceptualDNA.includes('radiant') || conceptualDNA.includes('bright')) {
-      semanticParams.intensity *= 1.2;
-      semanticParams.centerStrength *= 1.3;
-    }
-    if (conceptualDNA.includes('flow') || conceptualDNA.includes('temporal')) {
-      semanticParams.emanationSpeed *= 1.4;
-      semanticParams.rayType = 'spiral';
-    }
-    
-    return semanticParams;
   }
 
   initRadiance() {
