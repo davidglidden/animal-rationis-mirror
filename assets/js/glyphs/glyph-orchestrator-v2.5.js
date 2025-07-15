@@ -611,39 +611,58 @@ class GlyphOrchestrator {
     console.log(`🧬 Generating parameters for: ${glyphId}`);
     console.log("🔍 Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(this)));
     
-    // Start with legacy system for guaranteed compatibility
+    // PRIME DIRECTIVE: Extract genome FIRST to determine true archetype
+    let genome = null;
+    let chosenFamily = null;
+    
+    try {
+      // Extract full semantic genome from post content
+      const postContent = this.extractPostContent(metadata);
+      genome = this.semanticDNA.extractGenome(postContent, metadata);
+      
+      // Select renderer family based on Multi-Modal archetype
+      chosenFamily = this.selectRendererFromArchetype(genome);
+      console.log(`🎭 Multi-Modal archetype selected renderer: ${chosenFamily}`);
+    } catch (genomeError) {
+      console.warn('⚠️ Genome extraction failed, falling back to keyword analysis:', genomeError.message);
+    }
+    
+    // Parse glyph ID for fallback information
     const parsed = this.parseGlyphId(glyphId);
     const hybridCandidate = this.detectHybridFamily(glyphId, metadata);
     const emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
     
-    // Determine family - use semantic analysis if no valid family from glyph_id
-    let chosenFamily = parsed.family;
+    // If no archetype-based family, use keyword analysis
     if (!chosenFamily) {
-      // Use semantic analysis to determine family
-      const familyConfidences = this.calculateFamilyConfidences(metadata);
-      const topFamily = Object.entries(familyConfidences)
-        .sort(([,a], [,b]) => b - a)[0];
+      chosenFamily = parsed.family;
       
-      if (topFamily && topFamily[1] > 0.2) {
-        chosenFamily = topFamily[0];
-        console.log(`🧠 Semantic analysis selected family: ${chosenFamily} (confidence: ${topFamily[1].toFixed(2)}) for raw family: ${parsed.rawFamily}`);
-        console.log(`📊 All family confidences:`, Object.entries(familyConfidences)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 5)
-          .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
-          .join(', '));
-      } else {
-        chosenFamily = 'Radiance'; // Final fallback
-        console.log(`⚠️ No confident family match found, defaulting to Radiance for: ${parsed.rawFamily}`);
-        console.log(`📊 Top confidences were:`, Object.entries(familyConfidences)
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 3)
-          .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
-          .join(', '));
+      if (!chosenFamily) {
+        // Use semantic analysis to determine family
+        const familyConfidences = this.calculateFamilyConfidences(metadata);
+        const topFamily = Object.entries(familyConfidences)
+          .sort(([,a], [,b]) => b - a)[0];
+        
+        if (topFamily && topFamily[1] > 0.2) {
+          chosenFamily = topFamily[0];
+          console.log(`🧠 Keyword analysis selected family: ${chosenFamily} (confidence: ${topFamily[1].toFixed(2)}) for raw family: ${parsed.rawFamily}`);
+          console.log(`📊 All family confidences:`, Object.entries(familyConfidences)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
+            .join(', '));
+        } else {
+          chosenFamily = 'Radiance'; // Final fallback
+          console.log(`⚠️ No confident family match found, defaulting to Radiance for: ${parsed.rawFamily}`);
+          console.log(`📊 Top confidences were:`, Object.entries(familyConfidences)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 3)
+            .map(([family, conf]) => `${family}: ${conf.toFixed(2)}`)
+            .join(', '));
+        }
       }
     }
     
-    // Base parameters from legacy system
+    // Base parameters
     const params = {
       family: emergentCandidate || (hybridCandidate ? hybridCandidate.primary : chosenFamily),
       descriptors: parsed.descriptors,
@@ -654,11 +673,13 @@ class GlyphOrchestrator {
       rawFamily: parsed.rawFamily // For debugging
     };
     
-    // Try to enhance with living system if available
+    // Continue with living system enhancement
     try {
-      // Extract full semantic genome from post content
-      const postContent = this.extractPostContent(metadata);
-      const genome = this.semanticDNA.extractGenome(postContent, metadata);
+      // If we already have a genome, use it; otherwise extract it
+      if (!genome) {
+        const postContent = this.extractPostContent(metadata);
+        genome = this.semanticDNA.extractGenome(postContent, metadata);
+      }
       
       // 🔍 DEBUG OVERLAY - Show genome source, archetype, semantic color, and renderer
       const debugInfo = this.createDebugOverlay(genome, params.family, metadata);
@@ -1861,6 +1882,84 @@ class SemanticDNA {
       variance: variance,
       rhythmic: variance < avgLength * 0.5 // Low variance indicates rhythm
     };
+  }
+  
+  // PRIME DIRECTIVE: Select renderer family based on Multi-Modal archetype
+  selectRendererFromArchetype(genome) {
+    if (!genome?.archetypeProfile?.primary) {
+      return null;
+    }
+    
+    const archetype = genome.archetypeProfile.primary;
+    const contentType = genome.contentAnalysis?.contentType;
+    
+    console.log(`🎭 PRIME DIRECTIVE: Selecting renderer for archetype: ${archetype} (content type: ${contentType})`);
+    
+    // Map archetypes to renderer families based on their essential nature
+    const archetypeToRenderer = {
+      // Temporal/narrative archetypes → Flow (movement through time)
+      'temporal': 'Flow',
+      'flowing': 'Flow',
+      'unfolding': 'Flow',
+      'sequential': 'Flow',
+      
+      // Analytical/systematic archetypes → Grid (structured analysis)
+      'logical': 'Grid',
+      'analytical': 'Grid',
+      'systematic': 'Grid',
+      'methodical': 'Grid',
+      'mechanical': 'Grid',
+      'functional': 'Grid',
+      
+      // Philosophical/layered archetypes → Strata (depth of thought)
+      'contemplative': 'Strata',
+      'layered': 'Strata',
+      'abstract': 'Strata',
+      'archival': 'Strata',
+      'sedimentary': 'Strata',
+      
+      // Emotional/experiential archetypes → Radiance (emanating feeling)
+      'intimate': 'Radiance',
+      'emotional': 'Radiance',
+      'experiential': 'Radiance',
+      'radiant': 'Radiance',
+      'luminous': 'Radiance',
+      
+      // Boundary/transformation archetypes → Threshold (crossing over)
+      'liminal': 'Threshold',
+      'boundary-crossing': 'Threshold',
+      'transformative': 'Threshold',
+      'ethereal': 'Threshold',
+      'transcendent': 'Threshold',
+      
+      // Conflicting/dialogical archetypes → Interference (wave patterns)
+      'dialectical': 'Interference',
+      'hybrid': 'Interference',
+      
+      // Cyclical/recursive archetypes → Spiral (returning patterns)
+      'cyclical': 'Spiral',
+      'reflective': 'Spiral',
+      
+      // Networked/connected archetypes → Constellation (nodes and links)
+      'networked': 'Constellation',
+      'modular': 'Constellation',
+      
+      // Chaotic archetypes → Chaos (unpredictable systems)
+      'chaotic': 'Chaos',
+      
+      // Entropic archetypes → Collapse (systems breaking down)
+      'entropic': 'Collapse'
+    };
+    
+    const renderer = archetypeToRenderer[archetype];
+    
+    if (renderer) {
+      console.log(`🎯 Selected renderer: ${renderer} for archetype: ${archetype}`);
+      return renderer;
+    }
+    
+    console.log(`⚠️ No renderer mapping for archetype: ${archetype}, will use keyword fallback`);
+    return null;
   }
   
   calculateHarmonicComplexity(resonances) {
