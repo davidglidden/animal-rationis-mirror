@@ -82,13 +82,13 @@ class FlowRenderer {
     
     // Analyze conceptual DNA for flow pattern hints
     const hasCircular = conceptualDNA.some(concept => 
-      ['circular', 'cycle', 'spiral', 'orbit', 'rotation'].includes(concept.toLowerCase())
+      concept && typeof concept === 'string' && ['circular', 'cycle', 'spiral', 'orbit', 'rotation'].includes(concept.toLowerCase())
     );
     const hasLinear = conceptualDNA.some(concept => 
-      ['linear', 'stream', 'flow', 'sequence', 'progression'].includes(concept.toLowerCase())
+      concept && typeof concept === 'string' && ['linear', 'stream', 'flow', 'sequence', 'progression'].includes(concept.toLowerCase())
     );
     const hasChaotic = conceptualDNA.some(concept => 
-      ['chaotic', 'turbulent', 'random', 'disorder', 'complex'].includes(concept.toLowerCase())
+      concept && typeof concept === 'string' && ['chaotic', 'turbulent', 'random', 'disorder', 'complex'].includes(concept.toLowerCase())
     );
     
     // Pattern selection based on semantic analysis

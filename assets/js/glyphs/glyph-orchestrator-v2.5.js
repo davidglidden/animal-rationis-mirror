@@ -768,7 +768,7 @@ class GlyphOrchestrator {
         params.genome = genome;
         params.archetype = genome?.archetype || 'flowing';
         params.entropyScore = genome?.uniqueness ? (genome.uniqueness % 1000) / 1000 : 0.5;
-        params.conceptualDNA = genome?.uniqueIdentifiers?.concepts?.map(c => c.term) || [];
+        params.conceptualDNA = genome?.uniqueIdentifiers?.concepts?.map(c => c?.term).filter(term => term) || [];
         
         console.log('🎨 Added semantic parameters for structural differentiation:', {
           archetype: params.archetype,
