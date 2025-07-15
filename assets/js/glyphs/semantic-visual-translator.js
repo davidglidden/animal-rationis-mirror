@@ -1161,8 +1161,26 @@ class SemanticVisualTranslator {
     
     const scores = {};
     
-    // PRIORITY 1: Use enhanced concepts from GenomeConceptExtractor
-    if (semanticProfile.conceptualDNA?.concepts && semanticProfile.conceptualDNA.concepts.length > 0) {
+    // PRIME DIRECTIVE: Multi-Modal Analysis Engine archetype is the source of truth
+    if (semanticProfile.archetypeProfile?.primary) {
+      const multiModalArchetype = semanticProfile.archetypeProfile.primary;
+      const multiModalConfidence = semanticProfile.archetypeProfile.confidence || 0.9;
+      
+      console.log('🎭 PRIME DIRECTIVE: Using Multi-Modal archetype as source of truth:', multiModalArchetype);
+      console.log('🎯 Multi-Modal confidence:', multiModalConfidence);
+      
+      // Map Multi-Modal archetype to semantic archetype for rendering
+      const semanticArchetype = this.mapMultiModalToSemanticArchetype(multiModalArchetype);
+      console.log('🎯 Multi-Modal mapping:', multiModalArchetype, '→', semanticArchetype);
+      
+      if (semanticArchetype) {
+        scores[semanticArchetype] = multiModalConfidence;
+        console.log('✅ Multi-Modal archetype set as canonical:', semanticArchetype, '=', multiModalConfidence);
+      }
+    }
+    
+    // PRIORITY 2: Use enhanced concepts from GenomeConceptExtractor (only if no Multi-Modal)
+    if (Object.keys(scores).length === 0 && semanticProfile.conceptualDNA?.concepts && semanticProfile.conceptualDNA.concepts.length > 0) {
       console.log('🎯 Using enhanced concepts for archetype selection');
       console.log('🧬 Available enhanced concepts:', semanticProfile.conceptualDNA.concepts);
       
@@ -1222,9 +1240,9 @@ class SemanticVisualTranslator {
       console.log('📊 Enhanced archetype scores from concepts:', scores);
     }
     
-    // PRIORITY 2: If no concept-based archetypes, use semantic analysis
+    // PRIORITY 3: If no Multi-Modal or concept-based archetypes, use semantic analysis
     if (Object.keys(scores).length === 0) {
-      console.log('📈 No concept archetypes found, using semantic analysis');
+      console.log('📈 No Multi-Modal or concept archetypes found, using semantic analysis');
       
       // Look at dominant emotional mode first
       if (semanticProfile.resonance?.dominantMode) {
@@ -1410,6 +1428,67 @@ class SemanticVisualTranslator {
     };
     
     return mapping[visualArchetype] || 'contemplative';
+  }
+  
+  // PRIME DIRECTIVE: Map Multi-Modal archetype to semantic archetype
+  mapMultiModalToSemanticArchetype(multiModalArchetype) {
+    // Multi-Modal archetypes from AdvancedArchetypeSelector
+    const mapping = {
+      // Narrative archetypes
+      'flowing': 'flowing',
+      'temporal': 'flowing',           // Temporal narratives flow through time
+      'sequential': 'flowing',         // Sequential narratives have flow
+      'unfolding': 'luminous',         // Unfolding narratives radiate discovery
+      
+      // Philosophical archetypes  
+      'dialectical': 'dialectical',
+      'contemplative': 'layered',      // Contemplative thought has layers
+      'analytical': 'analytical',
+      'abstract': 'liminal',           // Abstract thought crosses boundaries
+      
+      // Historical archetypes
+      'layered': 'layered',
+      'archival': 'layered',           // Archives have sedimentary layers
+      'sedimentary': 'layered',        // Sedimentary history accumulates
+      
+      // Personal archetypes
+      'intimate': 'luminous',          // Intimacy radiates warmth
+      'experiential': 'flowing',       // Experience flows
+      'emotional': 'dialectical',      // Emotions create interference patterns
+      'reflective': 'cyclical',        // Reflection cycles back
+      
+      // Analytical archetypes
+      'systematic': 'analytical',
+      'logical': 'analytical',         // Logic creates grids
+      'structured': 'analytical',
+      'methodical': 'analytical',
+      
+      // Technical archetypes
+      'mechanical': 'analytical',      // Mechanical = grid-like
+      'functional': 'analytical',
+      'modular': 'networked',          // Modular systems network
+      
+      // Lyrical archetypes
+      'ethereal': 'liminal',           // Ethereal crosses boundaries
+      'radiant': 'luminous',
+      'transcendent': 'liminal',
+      
+      // Experimental archetypes
+      'liminal': 'liminal',
+      'chaotic': 'chaotic',
+      'hybrid': 'dialectical',         // Hybrids create interference
+      'boundary-crossing': 'liminal',
+      'transformative': 'entropic'     // Transformation involves collapse/rebirth
+    };
+    
+    const semanticArchetype = mapping[multiModalArchetype];
+    
+    if (!semanticArchetype) {
+      console.warn(`⚠️ No mapping found for Multi-Modal archetype: ${multiModalArchetype}, defaulting to layered`);
+      return 'layered';
+    }
+    
+    return semanticArchetype;
   }
   
   // Find secondary archetype for blending

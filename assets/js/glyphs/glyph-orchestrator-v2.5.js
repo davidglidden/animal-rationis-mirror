@@ -333,7 +333,10 @@ class GlyphOrchestrator {
         uniqueCombinations: genome.uniqueIdentifiers?.uniqueCombinations || [],
         outliers: genome.uniqueIdentifiers?.outliers || [],
         semanticColor: genome.uniqueIdentifiers?.semanticColor || null
-      }
+      },
+      
+      // PRIME DIRECTIVE: Include Multi-Modal archetype profile as source of truth
+      archetypeProfile: genome.archetypeProfile || null
     };
   }
   
