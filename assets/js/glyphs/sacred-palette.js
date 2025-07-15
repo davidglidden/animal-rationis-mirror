@@ -355,11 +355,8 @@ const SacredPalette = {
     
     // Convenience method for renderers
     harmonizeAndRender(rawColor, archetype, alpha = 1) {
-      console.log(`🎨 Sacred Palette harmonizing:`, { rawColor, archetype, alpha });
       const harmonized = this.harmonizeSemanticColor(rawColor, archetype);
-      console.log(`🎨 Harmonized HSL:`, harmonized);
       const rgba = this.toRGBA(harmonized, alpha);
-      console.log(`🎨 Final RGBA for archetype ${archetype}:`, rgba);
       return rgba;
     }
   }
