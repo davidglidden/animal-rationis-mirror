@@ -3,6 +3,7 @@
 
 class GlyphOrchestrator {
   constructor() {
+    // Only initialize basic mappings - no complex systems yet
     this.familyMap = {
       'radiance': 'Radiance',
       'interference': 'Interference', 
@@ -33,20 +34,25 @@ class GlyphOrchestrator {
       '▽': 'autumn'    // Autumn
     };
     
+    // Mark as not ready - will initialize on DOMContentLoaded
+    this.ready = false;
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.initialize());
+    } else {
+      // DOM already loaded
+      this.initialize();
+    }
+  }
+
+  // Initialize the living epistemic organism components when DOM is ready
+  initialize() {
+    console.log('🧬 Initializing Living Epistemic Glyph System...');
+    
     // Living epistemic organism components
     // Use EnhancedSemanticDNA if available (includes Short Content Amplifier)
-    if (typeof window !== 'undefined' && window.GlyphSemantics?.EnhancedSemanticDNA) {
-      this.semanticDNA = new window.GlyphSemantics.EnhancedSemanticDNA();
-      console.log('🧬 Using EnhancedSemanticDNA with Short Content Amplifier');
-    } else if (typeof SemanticDNA !== 'undefined') {
-      this.semanticDNA = new SemanticDNA();
-      console.log('🧬 Using base SemanticDNA');
-    } else {
-      console.warn('⚠️ No SemanticDNA available, creating minimal fallback');
-      this.semanticDNA = {
-        extractGenome: (content, metadata) => this.createMinimalGenome(content, metadata)
-      };
-    }
+    this.initializeSemanticDNA();
     this.breedingGround = new SemanticBreedingGround();
     this.interpreter = new PhilosophicalInterpreter();
     this.evolutionaryFitness = new EvolutionaryFitness();
@@ -68,7 +74,31 @@ class GlyphOrchestrator {
     this.glyphMemory = new Map();  // Generational memory
     this.consciousnessLevel = 0;   // Overall system awareness
     
-    console.log('🧬 Living Epistemic Glyph System initialized');
+    this.ready = true;
+    console.log('🧬 Living Epistemic Glyph System initialized and ready');
+  }
+
+  // Initialize SemanticDNA - now that DOM is ready, enhanced version should be available
+  initializeSemanticDNA() {
+    // Check for EnhancedSemanticDNA first (our elegant Multi-Modal Content Analysis Engine)
+    if (typeof window !== 'undefined' && window.GlyphSemantics?.EnhancedSemanticDNA) {
+      this.semanticDNA = new window.GlyphSemantics.EnhancedSemanticDNA();
+      console.log('🧬 Using EnhancedSemanticDNA with Multi-Modal Content Analysis Engine');
+      return;
+    }
+    
+    // Fallback to base SemanticDNA if available
+    if (typeof SemanticDNA !== 'undefined') {
+      this.semanticDNA = new SemanticDNA();
+      console.log('🧬 Using base SemanticDNA');
+      return;
+    }
+    
+    // Last resort: minimal fallback
+    console.warn('⚠️ No SemanticDNA available, creating minimal fallback');
+    this.semanticDNA = {
+      extractGenome: (content, metadata) => this.createMinimalGenome(content, metadata)
+    };
   }
 
   // Initialize semantic translators when classes become available
@@ -569,6 +599,12 @@ class GlyphOrchestrator {
 
   // Generate rendering parameters from glyph_id and metadata
   generateParameters(glyphId, metadata = {}) {
+    // Ensure orchestrator is ready before acting
+    if (!this.ready) {
+      console.log('⏳ Orchestrator not ready, initializing...');
+      this.initialize();
+    }
+    
     console.log(`🧬 Generating parameters for: ${glyphId}`);
     console.log("🔍 Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(this)));
     
@@ -1562,12 +1598,19 @@ class GlyphOrchestrator {
       }
     }
     
-    // Try to extract archetype from visual translation
-    if (window.GlyphSemantics?.SemanticVisualTranslator) {
+    // Extract archetypal insight directly from genome concepts
+    if (genome.uniqueIdentifiers?.concepts && Array.isArray(genome.uniqueIdentifiers.concepts)) {
       try {
-        const translator = new window.GlyphSemantics.SemanticVisualTranslator();
-        const visualTranslation = translator.translateSemanticToVisual(genome.uniqueIdentifiers?.concepts || []);
-        debugInfo.archetype = visualTranslation.archetype?.primary || 'unknown';
+        // Use the Multi-Modal Content Analysis Engine's archetype selector directly
+        if (window.GlyphSemantics?.SemanticVisualTranslator) {
+          const translator = new window.GlyphSemantics.SemanticVisualTranslator();
+          const archetype = translator.identifyDominantArchetype(genome.uniqueIdentifiers.concepts);
+          debugInfo.archetype = archetype?.primary || 'unknown';
+        } else {
+          // Fallback: simple heuristic from concepts
+          const firstConcept = genome.uniqueIdentifiers.concepts[0];
+          debugInfo.archetype = firstConcept?.archetype || 'unknown';
+        }
       } catch (e) {
         console.warn('Could not extract archetype:', e);
       }

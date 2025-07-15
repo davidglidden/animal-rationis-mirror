@@ -3129,6 +3129,939 @@ class GenomeConceptExtractor {
   }
 }
 
+// === PRIME DIRECTIVE: MULTI-MODAL CONTENT ANALYSIS ENGINE ===
+// Root cause fix: Recognize true content diversity instead of homogenization
+
+class MultiModalContentAnalysisEngine {
+  constructor() {
+    this.contentTypeDetectors = {
+      narrative: new NarrativeDetector(),
+      philosophical: new PhilosophicalDetector(),
+      analytical: new AnalyticalDetector(),
+      personal: new PersonalDetector(),
+      historical: new HistoricalDetector(),
+      technical: new TechnicalDetector(),
+      lyrical: new LyricalDetector(),
+      experimental: new ExperimentalDetector()
+    };
+    
+    console.log('🎯 Multi-Modal Content Analysis Engine initialized');
+  }
+  
+  analyzeContent(postContent, metadata) {
+    console.log('🔍 Analyzing content for type detection...');
+    
+    // Multi-detector content analysis
+    const detectionResults = {};
+    const contentSignatures = {};
+    
+    Object.entries(this.contentTypeDetectors).forEach(([type, detector]) => {
+      const result = detector.analyze(postContent, metadata);
+      detectionResults[type] = result.confidence;
+      contentSignatures[type] = result.signature;
+    });
+    
+    // Find dominant content type
+    const dominantType = Object.entries(detectionResults)
+      .sort(([,a], [,b]) => b - a)[0][0];
+    
+    // Find secondary type
+    const secondaryType = Object.entries(detectionResults)
+      .filter(([type]) => type !== dominantType)
+      .sort(([,a], [,b]) => b - a)[0]?.[0];
+    
+    console.log('📊 Content type detection results:', detectionResults);
+    console.log('🎯 Dominant type:', dominantType, 'Secondary:', secondaryType);
+    
+    return {
+      contentType: dominantType,
+      secondaryType: secondaryType,
+      confidence: detectionResults[dominantType],
+      allScores: detectionResults,
+      signatures: contentSignatures[dominantType],
+      textLength: postContent.length,
+      uniqueFingerprint: this.createUniqueFingerprint(postContent, metadata)
+    };
+  }
+  
+  createUniqueFingerprint(postContent, metadata) {
+    // Create a unique fingerprint for this specific content
+    const components = [
+      metadata.title || '',
+      postContent.substring(0, 100),
+      postContent.length.toString(),
+      (postContent.match(/[.!?]/g) || []).length.toString(),
+      (postContent.match(/\b\w+\b/g) || []).length.toString()
+    ];
+    
+    return this.simpleHash(components.join('|'));
+  }
+  
+  simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+}
+
+// Base detector class for content type detection
+class ContentTypeDetector {
+  analyze(postContent, metadata) {
+    const signals = this.getSignals(postContent, metadata);
+    const confidence = this.calculateConfidence(signals);
+    const signature = this.extractSignature(signals);
+    
+    return { confidence, signature, signals };
+  }
+  
+  getSignals(postContent, metadata) {
+    // Override in subclasses
+    return {};
+  }
+  
+  calculateConfidence(signals) {
+    // Override in subclasses
+    return 0;
+  }
+  
+  extractSignature(signals) {
+    // Override in subclasses
+    return {};
+  }
+}
+
+// Narrative content detector
+class NarrativeDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const title = metadata.title || '';
+    const text = postContent.toLowerCase();
+    
+    return {
+      // Narrative markers
+      timeMarkers: (text.match(/\b(then|next|later|meanwhile|after|before|when|once|suddenly)\b/g) || []).length,
+      pastTense: (text.match(/\b\w+ed\b/g) || []).length,
+      characterMarkers: (text.match(/\b(he|she|they|him|her|them)\b/g) || []).length,
+      dialogueMarkers: (text.match(/["""]/g) || []).length,
+      
+      // Discovery/research narrative markers
+      discoveryWords: (text.match(/\b(discovered|found|revealed|uncovered|explored|investigation|research|study)\b/g) || []).length,
+      historicalMarkers: (text.match(/\b(century|year|period|era|ancient|medieval|modern|historical)\b/g) || []).length,
+      
+      // Story structure indicators
+      sequentialFlow: this.detectSequentialFlow(text),
+      characterDevelopment: this.detectCharacterDevelopment(text),
+      
+      // Title indicators
+      titleNarrative: /\b(discovery|story|tale|journey|adventure|chronicle|account)\b/i.test(title)
+    };
+  }
+  
+  calculateConfidence(signals) {
+    let confidence = 0;
+    
+    // Time-based narrative flow
+    confidence += Math.min(signals.timeMarkers * 0.1, 0.3);
+    confidence += Math.min(signals.pastTense * 0.001, 0.2);
+    confidence += Math.min(signals.characterMarkers * 0.005, 0.2);
+    confidence += Math.min(signals.dialogueMarkers * 0.05, 0.2);
+    
+    // Discovery/research narrative boost
+    confidence += Math.min(signals.discoveryWords * 0.15, 0.4);
+    confidence += Math.min(signals.historicalMarkers * 0.08, 0.3);
+    
+    // Structural indicators
+    confidence += signals.sequentialFlow * 0.3;
+    confidence += signals.characterDevelopment * 0.2;
+    
+    // Title boost
+    if (signals.titleNarrative) confidence += 0.3;
+    
+    return Math.min(confidence, 1.0);
+  }
+  
+  detectSequentialFlow(text) {
+    // Detect sequential narrative structure
+    const paragraphs = text.split('\n\n');
+    let sequentialScore = 0;
+    
+    for (let i = 0; i < paragraphs.length - 1; i++) {
+      const current = paragraphs[i];
+      const next = paragraphs[i + 1];
+      
+      if (this.hasTemporalConnection(current, next)) {
+        sequentialScore += 0.1;
+      }
+    }
+    
+    return Math.min(sequentialScore, 1.0);
+  }
+  
+  hasTemporalConnection(para1, para2) {
+    const temporalWords = /\b(then|next|later|meanwhile|after|subsequently|following|eventually)\b/i;
+    return temporalWords.test(para2.substring(0, 100));
+  }
+  
+  detectCharacterDevelopment(text) {
+    // Simple character development detection
+    const pronouns = text.match(/\b(he|she|they|him|her|them)\b/g) || [];
+    const names = text.match(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g) || [];
+    
+    return Math.min((pronouns.length + names.length * 5) / 1000, 1.0);
+  }
+  
+  extractSignature(signals) {
+    return {
+      narrativeFlow: signals.sequentialFlow,
+      temporalDensity: signals.timeMarkers / 100,
+      characterFocus: signals.characterDevelopment,
+      discoveryOriented: signals.discoveryWords > 5,
+      historicalContext: signals.historicalMarkers > 3
+    };
+  }
+}
+
+// Philosophical content detector
+class PhilosophicalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const title = metadata.title || '';
+    const text = postContent.toLowerCase();
+    
+    return {
+      // Philosophical vocabulary
+      abstractConcepts: (text.match(/\b(being|existence|reality|truth|knowledge|consciousness|meaning|purpose|ethics|morality|freedom|justice|beauty|good|evil)\b/g) || []).length,
+      philosophicalTerms: (text.match(/\b(ontology|epistemology|phenomenology|dialectical|metaphysical|ethical|moral|philosophical|existential|transcendental)\b/g) || []).length,
+      
+      // Argumentative structure
+      argumentMarkers: (text.match(/\b(therefore|thus|hence|consequently|however|nevertheless|furthermore|moreover|indeed|certainly)\b/g) || []).length,
+      questionsAsked: (text.match(/\?/g) || []).length,
+      
+      // Contemplative indicators
+      contemplativeWords: (text.match(/\b(consider|contemplate|reflect|ponder|meditate|think|wonder|examine|explore|understand)\b/g) || []).length,
+      
+      // References to thinkers
+      thinkerReferences: (text.match(/\b(plato|aristotle|kant|hegel|nietzsche|heidegger|wittgenstein|sartre|foucault|derrida)\b/g) || []).length,
+      
+      // Title indicators
+      titlePhilosophical: /\b(ethics|philosophy|being|existence|truth|meaning|reality|consciousness|moral|ethical)\b/i.test(title)
+    };
+  }
+  
+  calculateConfidence(signals) {
+    let confidence = 0;
+    
+    // Philosophical vocabulary
+    confidence += Math.min(signals.abstractConcepts * 0.02, 0.4);
+    confidence += Math.min(signals.philosophicalTerms * 0.1, 0.3);
+    confidence += Math.min(signals.contemplativeWords * 0.05, 0.3);
+    
+    // Argumentative structure
+    confidence += Math.min(signals.argumentMarkers * 0.03, 0.3);
+    confidence += Math.min(signals.questionsAsked * 0.02, 0.2);
+    
+    // Authority references
+    confidence += Math.min(signals.thinkerReferences * 0.15, 0.3);
+    
+    // Title boost
+    if (signals.titlePhilosophical) confidence += 0.4;
+    
+    return Math.min(confidence, 1.0);
+  }
+  
+  extractSignature(signals) {
+    return {
+      abstractionLevel: signals.abstractConcepts / 50,
+      argumentativeStructure: signals.argumentMarkers / 20,
+      contemplativeDepth: signals.contemplativeWords / 30,
+      authorityBased: signals.thinkerReferences > 0,
+      questionDriven: signals.questionsAsked > 5
+    };
+  }
+}
+
+// Analytical content detector
+class AnalyticalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const title = metadata.title || '';
+    const text = postContent.toLowerCase();
+    
+    return {
+      // Analytical vocabulary
+      analyticalTerms: (text.match(/\b(analysis|examine|investigate|study|research|method|approach|framework|model|theory|hypothesis|data|evidence|result|conclusion)\b/g) || []).length,
+      systematicLanguage: (text.match(/\b(first|second|third|initially|subsequently|finally|step|phase|stage|process|procedure|systematic)\b/g) || []).length,
+      
+      // Structural indicators
+      numberedSections: (text.match(/\b\d+\./g) || []).length,
+      bulletPoints: (text.match(/[•\-\*]/g) || []).length,
+      
+      // Objective tone
+      objectiveLanguage: (text.match(/\b(objective|subjective|empirical|theoretical|practical|logical|rational|systematic|comprehensive)\b/g) || []).length,
+      
+      // Title indicators
+      titleAnalytical: /\b(analysis|study|research|investigation|examination|approach|method|framework|model)\b/i.test(title)
+    };
+  }
+  
+  calculateConfidence(signals) {
+    let confidence = 0;
+    
+    confidence += Math.min(signals.analyticalTerms * 0.05, 0.4);
+    confidence += Math.min(signals.systematicLanguage * 0.03, 0.3);
+    confidence += Math.min(signals.numberedSections * 0.1, 0.2);
+    confidence += Math.min(signals.bulletPoints * 0.02, 0.2);
+    confidence += Math.min(signals.objectiveLanguage * 0.04, 0.3);
+    
+    if (signals.titleAnalytical) confidence += 0.3;
+    
+    return Math.min(confidence, 1.0);
+  }
+  
+  extractSignature(signals) {
+    return {
+      systematicApproach: signals.systematicLanguage / 20,
+      structuralOrganization: (signals.numberedSections + signals.bulletPoints) / 10,
+      objectiveTone: signals.objectiveLanguage / 15,
+      methodological: signals.analyticalTerms > 10
+    };
+  }
+}
+
+// Personal content detector
+class PersonalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const title = metadata.title || '';
+    const text = postContent.toLowerCase();
+    
+    return {
+      // Personal pronouns
+      firstPerson: (text.match(/\b(i|me|my|mine|myself)\b/g) || []).length,
+      personalExperience: (text.match(/\b(felt|experienced|realized|understood|learned|discovered|remembered|forgot|hoped|feared|loved|hated)\b/g) || []).length,
+      
+      // Emotional language
+      emotionalWords: (text.match(/\b(happy|sad|angry|frustrated|excited|disappointed|confused|surprised|worried|relieved|grateful|proud)\b/g) || []).length,
+      
+      // Informal tone
+      conversationalMarkers: (text.match(/\b(well|so|anyway|actually|really|just|maybe|perhaps|probably|definitely)\b/g) || []).length,
+      
+      // Title indicators
+      titlePersonal: /\b(my|personal|reflection|thoughts|experience|journey|diary|memoir)\b/i.test(title)
+    };
+  }
+  
+  calculateConfidence(signals) {
+    let confidence = 0;
+    
+    confidence += Math.min(signals.firstPerson * 0.01, 0.4);
+    confidence += Math.min(signals.personalExperience * 0.03, 0.3);
+    confidence += Math.min(signals.emotionalWords * 0.05, 0.3);
+    confidence += Math.min(signals.conversationalMarkers * 0.02, 0.2);
+    
+    if (signals.titlePersonal) confidence += 0.4;
+    
+    return Math.min(confidence, 1.0);
+  }
+  
+  extractSignature(signals) {
+    return {
+      personalIntimacy: signals.firstPerson / 100,
+      emotionalResonance: signals.emotionalWords / 20,
+      experientialDepth: signals.personalExperience / 30,
+      conversationalTone: signals.conversationalMarkers / 50
+    };
+  }
+}
+
+// Historical content detector
+class HistoricalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const title = metadata.title || '';
+    const text = postContent.toLowerCase();
+    
+    return {
+      // Historical markers
+      timeReferences: (text.match(/\b(\d{4}|\d{1,2}th century|ancient|medieval|renaissance|modern|contemporary|era|period|age|dynasty)\b/g) || []).length,
+      historicalFigures: (text.match(/\b[A-Z][a-z]+ [A-Z][a-z]+\b/g) || []).length,
+      
+      // Research language
+      researchTerms: (text.match(/\b(discovered|found|evidence|source|document|record|archive|manuscript|artifact|excavation|research|study|investigation)\b/g) || []).length,
+      
+      // Past tense narrative
+      pastTense: (text.match(/\b\w+ed\b/g) || []).length,
+      
+      // Title indicators
+      titleHistorical: /\b(history|historical|discovery|ancient|medieval|century|era|period|chronicle|archive)\b/i.test(title)
+    };
+  }
+  
+  calculateConfidence(signals) {
+    let confidence = 0;
+    
+    confidence += Math.min(signals.timeReferences * 0.1, 0.4);
+    confidence += Math.min(signals.historicalFigures * 0.02, 0.3);
+    confidence += Math.min(signals.researchTerms * 0.05, 0.3);
+    confidence += Math.min(signals.pastTense * 0.001, 0.2);
+    
+    if (signals.titleHistorical) confidence += 0.4;
+    
+    return Math.min(confidence, 1.0);
+  }
+  
+  extractSignature(signals) {
+    return {
+      temporalScope: signals.timeReferences / 10,
+      researchOriented: signals.researchTerms / 20,
+      figureOriented: signals.historicalFigures / 50,
+      archivalDepth: signals.researchTerms > 10
+    };
+  }
+}
+
+// Stub classes for other detectors
+class TechnicalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const text = postContent.toLowerCase();
+    return {
+      technicalTerms: (text.match(/\b(algorithm|function|method|process|system|implementation|framework|architecture|design|code|technical|engineering)\b/g) || []).length
+    };
+  }
+  
+  calculateConfidence(signals) {
+    return Math.min(signals.technicalTerms * 0.05, 0.8);
+  }
+  
+  extractSignature(signals) {
+    return { technicalDepth: signals.technicalTerms / 20 };
+  }
+}
+
+class LyricalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const text = postContent.toLowerCase();
+    return {
+      poeticLanguage: (text.match(/\b(beautiful|sublime|ethereal|transcendent|luminous|radiant|gentle|flowing|whispered|echoed)\b/g) || []).length
+    };
+  }
+  
+  calculateConfidence(signals) {
+    return Math.min(signals.poeticLanguage * 0.08, 0.6);
+  }
+  
+  extractSignature(signals) {
+    return { lyricalIntensity: signals.poeticLanguage / 15 };
+  }
+}
+
+class ExperimentalDetector extends ContentTypeDetector {
+  getSignals(postContent, metadata) {
+    const text = postContent.toLowerCase();
+    return {
+      experimentalMarkers: (text.match(/\b(experiment|innovative|novel|unique|unconventional|hybrid|mixed|boundary|liminal|threshold)\b/g) || []).length
+    };
+  }
+  
+  calculateConfidence(signals) {
+    return Math.min(signals.experimentalMarkers * 0.1, 0.7);
+  }
+  
+  extractSignature(signals) {
+    return { experimentalNature: signals.experimentalMarkers / 10 };
+  }
+}
+
+// === ADVANCED ARCHETYPE SELECTOR ===
+// Breaks the "layered" homogenization by mapping content types to diverse archetypes
+
+class AdvancedArchetypeSelector {
+  constructor() {
+    // Content-type to archetype mapping - NO MORE "layered" for everything!
+    this.contentTypeArchetypes = {
+      narrative: {
+        primary: ['flowing', 'temporal', 'sequential', 'unfolding'],
+        secondary: ['layered', 'networked', 'cyclical'],
+        colorRange: [20, 60], // Warm oranges to yellows
+        characteristics: ['temporal_flow', 'character_development', 'story_arc']
+      },
+      philosophical: {
+        primary: ['dialectical', 'contemplative', 'analytical', 'abstract'],
+        secondary: ['layered', 'networked', 'liminal'],
+        colorRange: [200, 280], // Blues to purples
+        characteristics: ['abstract_reasoning', 'argument_structure', 'concept_exploration']
+      },
+      historical: {
+        primary: ['layered', 'archival', 'temporal', 'sedimentary'],
+        secondary: ['networked', 'flowing', 'cyclical'],
+        colorRange: [40, 100], // Yellows to yellow-greens
+        characteristics: ['temporal_depth', 'evidence_based', 'contextual']
+      },
+      personal: {
+        primary: ['intimate', 'experiential', 'emotional', 'reflective'],
+        secondary: ['flowing', 'radiant', 'liminal'],
+        colorRange: [300, 360], // Magentas to reds
+        characteristics: ['first_person', 'emotional_resonance', 'subjective_experience']
+      },
+      analytical: {
+        primary: ['systematic', 'logical', 'structured', 'methodical'],
+        secondary: ['networked', 'layered', 'grid-like'],
+        colorRange: [120, 180], // Greens to cyans
+        characteristics: ['systematic_approach', 'evidence_based', 'objective_tone']
+      },
+      technical: {
+        primary: ['mechanical', 'systematic', 'structured', 'functional'],
+        secondary: ['networked', 'grid-like', 'modular'],
+        colorRange: [160, 220], // Cyans to blues
+        characteristics: ['technical_precision', 'implementation_focused', 'systematic']
+      },
+      lyrical: {
+        primary: ['ethereal', 'flowing', 'radiant', 'luminous'],
+        secondary: ['cyclical', 'liminal', 'transcendent'],
+        colorRange: [260, 320], // Purples to magentas
+        characteristics: ['aesthetic_language', 'emotional_resonance', 'transcendent_themes']
+      },
+      experimental: {
+        primary: ['liminal', 'chaotic', 'hybrid', 'boundary-crossing'],
+        secondary: ['networked', 'dialectical', 'transformative'],
+        colorRange: [0, 360], // Full spectrum
+        characteristics: ['boundary_crossing', 'unconventional_structure', 'innovative_approach']
+      }
+    };
+    
+    console.log('🎭 Advanced Archetype Selector initialized - breaking "layered" homogenization');
+  }
+  
+  selectArchetypes(contentAnalysis, baseGenome) {
+    const contentType = contentAnalysis.contentType;
+    const secondaryType = contentAnalysis.secondaryType;
+    const confidence = contentAnalysis.confidence;
+    
+    console.log(`🎯 Selecting archetype for ${contentType} content (confidence: ${confidence.toFixed(2)})`);
+    
+    // Get archetype options for primary content type
+    const primaryOptions = this.contentTypeArchetypes[contentType] || this.contentTypeArchetypes.philosophical;
+    
+    // Select primary archetype based on content characteristics
+    const primaryArchetype = this.selectPrimaryArchetype(contentType, contentAnalysis, baseGenome, primaryOptions);
+    
+    // Select secondary archetype for blending
+    const secondaryArchetype = this.selectSecondaryArchetype(contentType, secondaryType, primaryArchetype, primaryOptions);
+    
+    // Calculate archetype confidence
+    const archetypeConfidence = this.calculateArchetypeConfidence(contentAnalysis, primaryArchetype);
+    
+    const archetypeProfile = {
+      primary: primaryArchetype,
+      secondary: secondaryArchetype,
+      confidence: archetypeConfidence,
+      contentType: contentType,
+      colorRange: primaryOptions.colorRange,
+      characteristics: primaryOptions.characteristics,
+      reasoning: this.explainSelection(contentType, primaryArchetype, contentAnalysis)
+    };
+    
+    console.log('🎭 Archetype Profile:', archetypeProfile);
+    
+    return archetypeProfile;
+  }
+  
+  selectPrimaryArchetype(contentType, contentAnalysis, baseGenome, options) {
+    const primaryCandidates = options.primary;
+    
+    // Content-specific archetype selection logic
+    switch (contentType) {
+      case 'narrative':
+        // For narrative content, prioritize temporal flow
+        if (contentAnalysis.signatures.discoveryOriented) {
+          return 'unfolding'; // Discovery narratives unfold
+        }
+        if (contentAnalysis.signatures.historicalContext) {
+          return 'temporal'; // Historical narratives are temporal
+        }
+        return 'flowing'; // Default narrative flow
+        
+      case 'philosophical':
+        // For philosophical content, check argument structure
+        if (contentAnalysis.signatures.argumentativeStructure > 0.5) {
+          return 'dialectical'; // Strong argumentation
+        }
+        if (contentAnalysis.signatures.contemplativeDepth > 0.6) {
+          return 'contemplative'; // Deep contemplation
+        }
+        return 'analytical'; // Default philosophical analysis
+        
+      case 'historical':
+        // Historical content has temporal layers
+        if (contentAnalysis.signatures.archivalDepth) {
+          return 'archival'; // Deep archival research
+        }
+        if (contentAnalysis.signatures.temporalScope > 0.5) {
+          return 'temporal'; // Broad temporal scope
+        }
+        return 'layered'; // Default historical layering
+        
+      case 'personal':
+        // Personal content emphasizes experience
+        if (contentAnalysis.signatures.emotionalResonance > 0.5) {
+          return 'emotional'; // Strong emotional content
+        }
+        if (contentAnalysis.signatures.experientialDepth > 0.6) {
+          return 'experiential'; // Deep personal experience
+        }
+        return 'intimate'; // Default personal intimacy
+        
+      case 'analytical':
+        // Analytical content is systematic
+        if (contentAnalysis.signatures.systematicApproach > 0.6) {
+          return 'systematic'; // Highly systematic
+        }
+        if (contentAnalysis.signatures.methodological) {
+          return 'methodical'; // Methodological approach
+        }
+        return 'logical'; // Default analytical logic
+        
+      default:
+        // Fallback to first primary option
+        return primaryCandidates[0];
+    }
+  }
+  
+  selectSecondaryArchetype(contentType, secondaryType, primaryArchetype, options) {
+    // If there's a secondary content type, blend with it
+    if (secondaryType && this.contentTypeArchetypes[secondaryType]) {
+      const secondaryOptions = this.contentTypeArchetypes[secondaryType];
+      // Choose a secondary archetype that complements the primary
+      const secondaryCandidates = secondaryOptions.primary.filter(arch => arch !== primaryArchetype);
+      return secondaryCandidates[0] || options.secondary[0];
+    }
+    
+    // Otherwise, use secondary options for the primary type
+    const secondaryCandidates = options.secondary.filter(arch => arch !== primaryArchetype);
+    return secondaryCandidates[0] || null;
+  }
+  
+  calculateArchetypeConfidence(contentAnalysis, archetype) {
+    const baseConfidence = contentAnalysis.confidence;
+    
+    // Boost confidence for strong content-type matches
+    const confidenceBoosts = {
+      'flowing': contentAnalysis.signatures.narrativeFlow || 0,
+      'dialectical': contentAnalysis.signatures.argumentativeStructure || 0,
+      'temporal': contentAnalysis.signatures.temporalScope || 0,
+      'intimate': contentAnalysis.signatures.personalIntimacy || 0,
+      'systematic': contentAnalysis.signatures.systematicApproach || 0
+    };
+    
+    const boost = confidenceBoosts[archetype] || 0;
+    return Math.min(baseConfidence + boost * 0.2, 1.0);
+  }
+  
+  explainSelection(contentType, archetype, contentAnalysis) {
+    const reasons = [];
+    
+    reasons.push(`Content type: ${contentType} (confidence: ${contentAnalysis.confidence.toFixed(2)})`);
+    reasons.push(`Selected archetype: ${archetype}`);
+    
+    // Add content-specific reasoning
+    switch (contentType) {
+      case 'narrative':
+        if (contentAnalysis.signatures.discoveryOriented) {
+          reasons.push('Discovery-oriented narrative structure detected');
+        }
+        if (contentAnalysis.signatures.historicalContext) {
+          reasons.push('Historical context provides temporal anchoring');
+        }
+        break;
+        
+      case 'philosophical':
+        if (contentAnalysis.signatures.argumentativeStructure > 0.5) {
+          reasons.push('Strong argumentative structure suggests dialectical approach');
+        }
+        if (contentAnalysis.signatures.contemplativeDepth > 0.6) {
+          reasons.push('Deep contemplative language indicates reflective mode');
+        }
+        break;
+        
+      case 'historical':
+        if (contentAnalysis.signatures.archivalDepth) {
+          reasons.push('Archival research methodology detected');
+        }
+        break;
+    }
+    
+    return reasons;
+  }
+}
+
+// === SEMANTIC DIVERSITY ENGINE ===
+// Enhances genome diversity based on content analysis and archetype profile
+
+class SemanticDiversityEngine {
+  constructor() {
+    console.log('🌈 Semantic Diversity Engine initialized - enhancing genome uniqueness');
+  }
+  
+  enhanceDiversity(baseGenome, contentAnalysis, archetypeProfile) {
+    console.log('🌈 Enhancing semantic diversity...');
+    
+    // Start with base genome
+    const diversified = JSON.parse(JSON.stringify(baseGenome)); // Deep copy
+    
+    // Apply content-type specific enhancements
+    this.applyContentTypeEnhancements(diversified, contentAnalysis);
+    
+    // Apply archetype-specific modifications
+    this.applyArchetypeModifications(diversified, archetypeProfile);
+    
+    // Add unique fingerprinting
+    this.addUniqueFingerprinting(diversified, contentAnalysis, archetypeProfile);
+    
+    // Ensure visual distinctiveness
+    this.ensureVisualDistinctiveness(diversified, contentAnalysis);
+    
+    console.log('🌈 Diversity enhancement complete:', {
+      contentType: contentAnalysis.contentType,
+      archetype: archetypeProfile.primary,
+      uniqueFingerprint: diversified.fingerprint
+    });
+    
+    return diversified;
+  }
+  
+  applyContentTypeEnhancements(genome, contentAnalysis) {
+    const contentType = contentAnalysis.contentType;
+    const signatures = contentAnalysis.signatures;
+    
+    switch (contentType) {
+      case 'narrative':
+        // Enhance temporal flow characteristics
+        genome.temporality.flowType = 'sequential';
+        genome.temporality.narrativeStructure = signatures.narrativeFlow || 0.8;
+        genome.dynamics.dominantMovement = 'flowing';
+        genome.dynamics.direction = 'forward';
+        
+        // Discovery narratives have unfolding patterns
+        if (signatures.discoveryOriented) {
+          genome.topology.branchingFactor += 0.5;
+          genome.dynamics.velocity *= 1.3;
+        }
+        
+        // Historical narratives have layered depth
+        if (signatures.historicalContext) {
+          genome.complexity.layerCount += 2;
+          genome.temporality.temporalDensity += 0.3;
+        }
+        break;
+        
+      case 'philosophical':
+        // Enhance abstract reasoning characteristics
+        genome.complexity.abstractionLevel += 0.3;
+        genome.resonance.contemplativeDepth = signatures.contemplativeDepth || 0.7;
+        genome.topology.rhizomaticTendency += 0.2;
+        
+        // Dialectical content has opposing structures
+        if (signatures.argumentativeStructure > 0.5) {
+          genome.topology.dialecticalTension = signatures.argumentativeStructure;
+          genome.dynamics.direction = 'bidirectional';
+        }
+        
+        // Question-driven content has exploratory patterns
+        if (signatures.questionDriven) {
+          genome.dynamics.exploration = 0.8;
+          genome.topology.circularityIndex += 0.3;
+        }
+        break;
+        
+      case 'historical':
+        // Enhance temporal and archival characteristics
+        genome.temporality.temporalLayers = signatures.temporalScope || 0.6;
+        genome.complexity.sedimentaryStructure = 0.8;
+        genome.topology.stratification = signatures.archivalDepth ? 0.9 : 0.6;
+        
+        // Research-oriented content has methodical patterns
+        if (signatures.archivalDepth) {
+          genome.dynamics.methodology = 0.8;
+          genome.complexity.evidenceWeaving = 0.7;
+        }
+        break;
+        
+      case 'personal':
+        // Enhance subjective and experiential characteristics
+        genome.resonance.personalIntimacy = signatures.personalIntimacy || 0.8;
+        genome.resonance.emotionalResonance = signatures.emotionalResonance || 0.6;
+        genome.dynamics.subjectivity = 0.9;
+        
+        // Emotional content has radiant patterns
+        if (signatures.emotionalResonance > 0.5) {
+          genome.dynamics.dominantMovement = 'radiating';
+          genome.resonance.emotionalAmplitude = signatures.emotionalResonance;
+        }
+        break;
+        
+      case 'analytical':
+        // Enhance systematic and logical characteristics
+        genome.topology.systematicStructure = signatures.systematicApproach || 0.7;
+        genome.complexity.methodicalDepth = 0.8;
+        genome.dynamics.precision = signatures.objectiveTone || 0.6;
+        
+        // Methodological content has grid-like patterns
+        if (signatures.methodological) {
+          genome.topology.gridAlignment = 0.8;
+          genome.dynamics.dominantMovement = 'systematic';
+        }
+        break;
+        
+      default:
+        // Generic enhancement for other types
+        genome.complexity.diversity = 0.7;
+    }
+  }
+  
+  applyArchetypeModifications(genome, archetypeProfile) {
+    const archetype = archetypeProfile.primary;
+    const characteristics = archetypeProfile.characteristics;
+    
+    // Set archetype in genome
+    genome.archetype = archetype;
+    genome.archetypeProfile = archetypeProfile;
+    
+    // Apply archetype-specific modifications
+    switch (archetype) {
+      case 'flowing':
+        genome.dynamics.fluidDynamics = 0.9;
+        genome.temporality.continuity = 0.8;
+        genome.topology.streamlineFlow = 0.7;
+        break;
+        
+      case 'dialectical':
+        genome.topology.opposition = 0.8;
+        genome.dynamics.dialecticalTension = 0.9;
+        genome.complexity.synthesisDrive = 0.7;
+        break;
+        
+      case 'temporal':
+        genome.temporality.temporalDominance = 0.9;
+        genome.dynamics.chronologicalFlow = 0.8;
+        genome.complexity.temporalLayers = 0.7;
+        break;
+        
+      case 'unfolding':
+        genome.dynamics.revelatory = 0.9;
+        genome.temporality.unfoldingPattern = 0.8;
+        genome.complexity.discoveryArc = 0.7;
+        break;
+        
+      case 'contemplative':
+        genome.resonance.contemplativeDepth = 0.9;
+        genome.dynamics.reflectiveFlow = 0.8;
+        genome.complexity.introspectiveDepth = 0.7;
+        break;
+        
+      case 'analytical':
+        genome.topology.analyticalStructure = 0.9;
+        genome.dynamics.systematicFlow = 0.8;
+        genome.complexity.logicalDepth = 0.7;
+        break;
+        
+      case 'layered':
+        genome.complexity.stratification = 0.9;
+        genome.topology.layeredStructure = 0.8;
+        genome.temporality.sedimentaryTime = 0.7;
+        break;
+        
+      case 'intimate':
+        genome.resonance.intimacyLevel = 0.9;
+        genome.dynamics.personalFlow = 0.8;
+        genome.complexity.subjectiveDepth = 0.7;
+        break;
+        
+      case 'systematic':
+        genome.topology.systematicOrder = 0.9;
+        genome.dynamics.methodicalFlow = 0.8;
+        genome.complexity.structuralPrecision = 0.7;
+        break;
+        
+      default:
+        // Apply generic archetype characteristics
+        genome.archetypeIntensity = 0.7;
+    }
+  }
+  
+  addUniqueFingerprinting(genome, contentAnalysis, archetypeProfile) {
+    // Create unique fingerprint based on content and archetype
+    const fingerprintComponents = [
+      contentAnalysis.contentType,
+      archetypeProfile.primary,
+      contentAnalysis.uniqueFingerprint.toString(),
+      Date.now().toString().slice(-6) // Last 6 digits of timestamp for uniqueness
+    ];
+    
+    genome.fingerprint = this.hashFingerprint(fingerprintComponents.join('|'));
+    genome.contentFingerprint = contentAnalysis.uniqueFingerprint;
+    genome.archetypeFingerprint = this.hashFingerprint(archetypeProfile.primary + archetypeProfile.secondary);
+    
+    // Add content-specific metadata
+    genome.textLength = contentAnalysis.textLength;
+    genome.contentTypeConfidence = contentAnalysis.confidence;
+    genome.archetypeConfidence = archetypeProfile.confidence;
+  }
+  
+  ensureVisualDistinctiveness(genome, contentAnalysis) {
+    // Add visual distinctiveness factors
+    const contentType = contentAnalysis.contentType;
+    
+    // Content-type specific visual modifiers
+    const visualModifiers = {
+      narrative: {
+        hueShift: 20, // Warm oranges
+        saturationBoost: 0.1,
+        movementStyle: 'flowing'
+      },
+      philosophical: {
+        hueShift: 240, // Blues/purples
+        saturationBoost: -0.1,
+        movementStyle: 'dialectical'
+      },
+      historical: {
+        hueShift: 60, // Yellows/greens
+        saturationBoost: -0.2,
+        movementStyle: 'layered'
+      },
+      personal: {
+        hueShift: 320, // Magentas/reds
+        saturationBoost: 0.2,
+        movementStyle: 'radiant'
+      },
+      analytical: {
+        hueShift: 150, // Greens/cyans
+        saturationBoost: 0,
+        movementStyle: 'systematic'
+      }
+    };
+    
+    const modifier = visualModifiers[contentType] || visualModifiers.philosophical;
+    
+    // Apply visual modifiers to genome
+    genome.visualModifiers = modifier;
+    genome.visualDistinctiveness = {
+      contentBased: true,
+      hueRange: [modifier.hueShift - 20, modifier.hueShift + 20],
+      saturationModifier: modifier.saturationBoost,
+      movementCharacter: modifier.movementStyle
+    };
+  }
+  
+  hashFingerprint(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+}
+
 // === ENHANCED SEMANTIC DNA CLASS ===
 // Modify the existing SemanticDNA class to use the amplifier
 
@@ -3138,63 +4071,372 @@ class EnhancedSemanticDNA {
     this.baseSemanticDNA = null;
     this.shortContentAmplifier = new ShortContentAmplifier();
     this.enhancedSemanticInterpreter = new EnhancedSemanticInterpreter();
-    console.log('🧬 Enhanced Semantic DNA initialized with Short Content Amplifier');
+    
+    // PRIME DIRECTIVE: Multi-Modal Content Analysis Engine
+    this.contentAnalysisEngine = new MultiModalContentAnalysisEngine();
+    this.archetypeSelector = new AdvancedArchetypeSelector();
+    this.diversityEngine = new SemanticDiversityEngine();
+    
+    console.log('🧬 Enhanced Semantic DNA initialized with Multi-Modal Content Analysis Engine');
   }
   
   extractGenome(postContent, metadata = {}) {
-    // Try to get base SemanticDNA at runtime if we haven't initialized it yet
-    // IMPORTANT: Don't create EnhancedSemanticDNA recursively - only look for base SemanticDNA
-    if (!this.baseSemanticDNA && typeof window !== 'undefined' && window.SemanticDNA) {
-      this.baseSemanticDNA = new window.SemanticDNA();
-      console.log('🧬 Late-initialized base SemanticDNA');
-    }
+    console.log('🧬 PRIME DIRECTIVE: Multi-Modal Semantic Analysis Starting...');
     
-    // Get base genome from SemanticDNA if available, otherwise create minimal genome
-    let genome;
+    // Phase 1: Get base genome
+    let baseGenome = this.getBaseGenome(postContent, metadata);
     
-    if (this.baseSemanticDNA) {
-      genome = this.baseSemanticDNA.extractGenome(postContent, metadata);
-      console.log('🧬 Using real SemanticDNA extraction (not fallback)');
-      genome.debug = { source: 'semantic', using: 'real SemanticDNA' };
+    // Phase 2: PRIME DIRECTIVE - Multi-Modal Content Analysis  
+    const contentAnalysis = this.contentAnalysisEngine.analyzeContent(postContent, metadata);
+    console.log('📊 Content Analysis:', contentAnalysis);
+    
+    // Phase 3: Advanced Archetype Selection (not just "layered")
+    const archetypeProfile = this.archetypeSelector.selectArchetypes(contentAnalysis, baseGenome);
+    console.log('🎭 Archetype Profile:', archetypeProfile);
+    
+    // Phase 4: Semantic Diversity Enhancement 
+    const diversifiedGenome = this.diversityEngine.enhanceDiversity(baseGenome, contentAnalysis, archetypeProfile);
+    console.log('🌈 Diversified Genome:', diversifiedGenome);
+    
+    // Phase 5: Add unique identifiers with enhanced concepts
+    diversifiedGenome.uniqueIdentifiers = this.enhancedSemanticInterpreter.extractUniqueConceptualDNA(diversifiedGenome);
+    diversifiedGenome.contentAnalysis = contentAnalysis;
+    diversifiedGenome.archetypeProfile = archetypeProfile;
+    
+    console.log('🎯 Final Enhanced Genome:', {
+      archetype: diversifiedGenome.archetype,
+      contentType: contentAnalysis.contentType,
+      semanticColor: diversifiedGenome.uniqueIdentifiers.semanticColor,
+      uniqueness: diversifiedGenome.uniqueIdentifiers.fingerprint
+    });
+    
+    return diversifiedGenome;
+  }
+  
+  getBaseGenome(postContent, metadata) {
+    console.log('🧬 ELEGANT: Creating native content-aware genome...');
+    
+    // PRIME DIRECTIVE: Create genome directly from content analysis
+    // No fallbacks, no old system dependencies - pure elegance
+    
+    const contentLength = postContent.length;
+    const wordCount = (postContent.match(/\b\w+\b/g) || []).length;
+    const uniqueWords = new Set(postContent.toLowerCase().match(/\b\w+\b/g) || []).size;
+    
+    // Phase 1: Basic content characteristics
+    const basicCharacteristics = this.analyzeBasicCharacteristics(postContent, metadata);
+    console.log('📊 Basic characteristics:', basicCharacteristics);
+    
+    // Phase 2: Structural analysis
+    const structuralProfile = this.analyzeStructuralProfile(postContent);
+    console.log('🏗️ Structural profile:', structuralProfile);
+    
+    // Phase 3: Temporal analysis  
+    const temporalProfile = this.analyzeTemporalProfile(postContent, basicCharacteristics);
+    console.log('⏰ Temporal profile:', temporalProfile);
+    
+    // Phase 4: Resonance analysis
+    const resonanceProfile = this.analyzeResonanceProfile(postContent, basicCharacteristics);
+    console.log('🎵 Resonance profile:', resonanceProfile);
+    
+    // Phase 5: Complexity analysis
+    const complexityProfile = this.analyzeComplexityProfile(postContent, structuralProfile);
+    console.log('🧩 Complexity profile:', complexityProfile);
+    
+    // Phase 6: Dynamic analysis
+    const dynamicsProfile = this.analyzeDynamicsProfile(postContent, basicCharacteristics);
+    console.log('⚡ Dynamics profile:', dynamicsProfile);
+    
+    // Create elegant native genome
+    const nativeGenome = {
+      topology: structuralProfile,
+      temporality: temporalProfile,
+      resonance: resonanceProfile,
+      complexity: complexityProfile,
+      dynamics: dynamicsProfile,
       
-      // Ensure metadata is available for color derivation
-      genome.metadata = metadata;
-    } else {
-      // Fallback minimal genome structure
-      genome = this.createFallbackGenome(postContent, metadata);
-      console.log('⚠️ Using fallback genome - SemanticDNA not available');
-      genome.debug = { source: 'fallback', using: 'hardcoded values' };
-    }
+      // Content metadata
+      textContent: postContent,
+      textLength: contentLength,
+      wordCount: wordCount,
+      uniqueWords: uniqueWords,
+      source: metadata,
+      
+      // Unique fingerprint for this content
+      fingerprint: this.createContentFingerprint(postContent, metadata),
+      
+      // Debug info
+      debug: { 
+        source: 'native', 
+        using: 'Multi-Modal Content Analysis Engine',
+        elegant: true,
+        prime_directive: true
+      }
+    };
     
     // Apply short content amplification if needed
-    const contentLength = postContent.length;
     if (contentLength < 3000) {
-      const amplifiedGenome = this.shortContentAmplifier.amplifyShortContent(
-        genome, 
-        metadata, 
-        contentLength
-      );
-      
-      console.log(`📊 Short content genome amplified:`, {
-        contentLength,
-        contentType: this.shortContentAmplifier.classifyContentLength(contentLength),
-        amplificationFactor: this.shortContentAmplifier.amplificationFactors[
-          this.shortContentAmplifier.classifyContentLength(contentLength)
-        ]
-      });
-      
-      // CRITICAL FIX: Add unique identifiers with extracted concepts
-      amplifiedGenome.uniqueIdentifiers = this.enhancedSemanticInterpreter.extractUniqueConceptualDNA(amplifiedGenome);
-      console.log(`🧬 Added uniqueIdentifiers with ${amplifiedGenome.uniqueIdentifiers.concepts.length} concepts`);
-      
+      const amplifiedGenome = this.shortContentAmplifier.amplifyShortContent(nativeGenome, metadata, contentLength);
+      console.log(`📊 Short content amplified (${contentLength} chars) with elegant efficiency`);
       return amplifiedGenome;
     }
     
-    // CRITICAL FIX: Add unique identifiers for non-amplified genomes too
-    genome.uniqueIdentifiers = this.enhancedSemanticInterpreter.extractUniqueConceptualDNA(genome);
-    console.log(`🧬 Added uniqueIdentifiers with ${genome.uniqueIdentifiers.concepts.length} concepts`);
+    console.log('✨ Native content-aware genome created with elegant efficiency');
+    return nativeGenome;
+  }
+  
+  // ELEGANT: Basic content characteristic analysis
+  analyzeBasicCharacteristics(postContent, metadata) {
+    const text = postContent.toLowerCase();
+    const sentences = postContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    const paragraphs = postContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
     
-    return genome;
+    return {
+      contentType: this.detectContentType(text, metadata),
+      writingStyle: this.detectWritingStyle(text),
+      emotionalTone: this.detectEmotionalTone(text),
+      formalityLevel: this.detectFormalityLevel(text),
+      sentenceCount: sentences.length,
+      paragraphCount: paragraphs.length,
+      averageSentenceLength: sentences.reduce((sum, s) => sum + s.length, 0) / sentences.length || 0
+    };
+  }
+  
+  // ELEGANT: Structural pattern analysis
+  analyzeStructuralProfile(postContent) {
+    const text = postContent.toLowerCase();
+    const sentences = postContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    
+    // Branching analysis - how ideas connect
+    const branchingFactor = this.calculateBranchingFactor(sentences);
+    
+    // Rhizomatic tendencies - non-linear thought patterns
+    const rhizomaticTendency = this.calculateRhizomaticTendency(text);
+    
+    // Circularity - recurring themes and concepts
+    const circularityIndex = this.calculateCircularityIndex(text);
+    
+    // Concept density - how packed with ideas
+    const conceptDensity = this.calculateConceptDensity(text);
+    
+    return {
+      branchingFactor: Math.min(branchingFactor, 5),
+      rhizomaticTendency: Math.min(rhizomaticTendency, 1),
+      circularityIndex: Math.min(circularityIndex, 1),
+      conceptDensity: Math.min(conceptDensity, 1),
+      architecturalComplexity: (branchingFactor + rhizomaticTendency + circularityIndex + conceptDensity) / 4
+    };
+  }
+  
+  // ELEGANT: Temporal flow analysis
+  analyzeTemporalProfile(postContent, basicCharacteristics) {
+    const text = postContent.toLowerCase();
+    
+    // Temporal markers analysis
+    const pastTenseCount = (text.match(/\b\w+ed\b/g) || []).length;
+    const presentTenseCount = (text.match(/\b(am|is|are|being)\b/g) || []).length;
+    const futureMarkers = (text.match(/\b(will|shall|going to|future)\b/g) || []).length;
+    
+    // Temporal flow type
+    let flowType = 'present';
+    if (pastTenseCount > presentTenseCount * 2) flowType = 'narrative';
+    if (futureMarkers > 5) flowType = 'prospective';
+    if (basicCharacteristics.contentType === 'philosophical') flowType = 'cyclical';
+    
+    return {
+      flowType: flowType,
+      temporalDensity: Math.min((pastTenseCount + futureMarkers) / 100, 1),
+      presentMomentFocus: Math.min(presentTenseCount / 50, 1),
+      sequentialFlow: basicCharacteristics.contentType === 'narrative' ? 0.8 : 0.3,
+      cyclical: flowType === 'cyclical',
+      rhythmicPattern: { rhythmic: this.detectRhythmicPattern(text) },
+      rhythmicComplexity: Math.random() * 0.5 + 0.3,
+      durationCharacter: Math.min(postContent.length / 10000, 1)
+    };
+  }
+  
+  // ELEGANT: Resonance and emotional frequency analysis
+  analyzeResonanceProfile(postContent, basicCharacteristics) {
+    const text = postContent.toLowerCase();
+    
+    // Emotional frequency analysis
+    const wonderWords = (text.match(/\b(wonder|awe|amazing|beautiful|mystery|curious)\b/g) || []).length;
+    const urgencyWords = (text.match(/\b(urgent|immediate|now|quickly|crisis|critical)\b/g) || []).length;
+    const melancholyWords = (text.match(/\b(sad|melancholy|loss|grief|sorrow|lonely)\b/g) || []).length;
+    const joyWords = (text.match(/\b(joy|happy|celebration|delight|pleasure|bliss)\b/g) || []).length;
+    const anxietyWords = (text.match(/\b(anxiety|worry|fear|stress|concern|nervous)\b/g) || []).length;
+    
+    return {
+      harmonicComplexity: (wonderWords + joyWords) / 20 + Math.random() * 0.3,
+      dissonanceLevel: (urgencyWords + anxietyWords) / 20 + Math.random() * 0.2,
+      resonantFrequency: Math.random() * 0.5 + 0.3,
+      frequencies: {
+        wonder: Math.min(wonderWords / 10, 1),
+        urgency: Math.min(urgencyWords / 10, 1),
+        melancholy: Math.min(melancholyWords / 10, 1),
+        joy: Math.min(joyWords / 10, 1),
+        anxiety: Math.min(anxietyWords / 10, 1)
+      }
+    };
+  }
+  
+  // ELEGANT: Complexity pattern analysis
+  analyzeComplexityProfile(postContent, structuralProfile) {
+    const sentences = postContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    const words = postContent.match(/\b\w+\b/g) || [];
+    
+    // Calculate recursive depth based on nested structures
+    const nestedStructures = (postContent.match(/[()[\]{}]/g) || []).length;
+    const recursiveDepth = Math.min(Math.ceil(nestedStructures / 5) + 2, 8);
+    
+    // Calculate abstraction level
+    const abstractWords = (postContent.toLowerCase().match(/\b(concept|idea|theory|abstract|meaning|essence|being|existence)\b/g) || []).length;
+    const abstractionLevel = Math.min(abstractWords / 20, 1);
+    
+    return {
+      recursiveDepth: recursiveDepth,
+      nestingLevel: Math.min(Math.ceil(sentences.length / 10), 5),
+      layerCount: Math.min(Math.ceil(postContent.split(/\n\s*\n/).length / 2), 6),
+      selfSimilarity: structuralProfile.circularityIndex,
+      nestedComplexity: Math.min(nestedStructures / 20, 1),
+      abstractionLevel: abstractionLevel,
+      modalDiversity: Math.min(words.length / postContent.length * 5, 1)
+    };
+  }
+  
+  // ELEGANT: Dynamic movement analysis
+  analyzeDynamicsProfile(postContent, basicCharacteristics) {
+    const text = postContent.toLowerCase();
+    
+    // Movement words analysis
+    const movementWords = (text.match(/\b(flow|move|shift|change|transform|evolve|emerge|develop)\b/g) || []).length;
+    const staticWords = (text.match(/\b(static|still|fixed|permanent|stable|constant)\b/g) || []).length;
+    
+    // Determine dominant movement
+    let dominantMovement = 'contemplative';
+    if (movementWords > 5) dominantMovement = 'flowing';
+    if (basicCharacteristics.contentType === 'narrative') dominantMovement = 'sequential';
+    if (basicCharacteristics.contentType === 'analytical') dominantMovement = 'systematic';
+    if (basicCharacteristics.emotionalTone === 'intense') dominantMovement = 'radiating';
+    
+    return {
+      velocity: Math.min(movementWords / 20, 1),
+      direction: this.determineDirection(basicCharacteristics),
+      dominantMovement: dominantMovement,
+      acceleration: Math.random() * 0.3 + 0.1,
+      patterns: {
+        oscillating: Math.min((text.match(/\b(back|forth|cycle|repeat|rhythm)\b/g) || []).length / 10, 1),
+        spiraling: Math.min((text.match(/\b(spiral|recursive|self|loop)\b/g) || []).length / 10, 1),
+        radiating: Math.min((text.match(/\b(spread|radiate|expand|reach)\b/g) || []).length / 10, 1),
+        collapsing: Math.min((text.match(/\b(collapse|concentrate|focus|center)\b/g) || []).length / 10, 1),
+        flowing: Math.min(movementWords / 20, 1)
+      }
+    };
+  }
+  
+  // Helper methods for elegant analysis
+  detectContentType(text, metadata) {
+    // Simple but effective content type detection
+    if ((text.match(/\b(died|death|obituary|funeral|memorial|passed away)\b/g) || []).length > 0) return 'obituary';
+    if ((text.match(/\b(technical|system|implementation|code|algorithm)\b/g) || []).length > 3) return 'technical';
+    if ((text.match(/\b(philosophy|ethics|meaning|existence|consciousness)\b/g) || []).length > 2) return 'philosophical';
+    if ((text.match(/\b(story|narrative|character|plot|journey)\b/g) || []).length > 2) return 'narrative';
+    if ((text.match(/\b(I|me|my|personal|experience|felt)\b/g) || []).length > 10) return 'personal';
+    return 'essay';
+  }
+  
+  detectWritingStyle(text) {
+    const formalWords = (text.match(/\b(furthermore|consequently|therefore|moreover|nevertheless)\b/g) || []).length;
+    const casualWords = (text.match(/\b(so|well|anyway|really|actually|just)\b/g) || []).length;
+    return formalWords > casualWords ? 'formal' : 'conversational';
+  }
+  
+  detectEmotionalTone(text) {
+    const positiveWords = (text.match(/\b(good|great|wonderful|amazing|beautiful|love|joy)\b/g) || []).length;
+    const negativeWords = (text.match(/\b(bad|terrible|awful|sad|hate|pain|suffer)\b/g) || []).length;
+    const intensityWords = (text.match(/\b(very|extremely|incredibly|absolutely|completely)\b/g) || []).length;
+    
+    if (intensityWords > 5) return 'intense';
+    if (positiveWords > negativeWords * 2) return 'positive';
+    if (negativeWords > positiveWords * 2) return 'negative';
+    return 'neutral';
+  }
+  
+  detectFormalityLevel(text) {
+    const formalMarkers = (text.match(/\b(shall|ought|furthermore|nevertheless|consequently)\b/g) || []).length;
+    const informalMarkers = (text.match(/\b(gonna|wanna|yeah|ok|cool|awesome)\b/g) || []).length;
+    return Math.max(0, Math.min(1, (formalMarkers - informalMarkers) / 10 + 0.5));
+  }
+  
+  calculateBranchingFactor(sentences) {
+    // Calculate how ideas branch based on conjunctions and transitions
+    const branchingWords = sentences.reduce((count, sentence) => {
+      return count + (sentence.match(/\b(and|but|however|although|because|since|if|when|while)\b/g) || []).length;
+    }, 0);
+    return Math.min(branchingWords / sentences.length * 3, 5);
+  }
+  
+  calculateRhizomaticTendency(text) {
+    // Non-linear thought patterns
+    const nonLinearMarkers = (text.match(/\b(meanwhile|elsewhere|on the other hand|suddenly|by the way)\b/g) || []).length;
+    const questionMarkers = (text.match(/\?/g) || []).length;
+    return Math.min((nonLinearMarkers + questionMarkers) / 50, 1);
+  }
+  
+  calculateCircularityIndex(text) {
+    // Recurring themes and self-reference
+    const selfRefMarkers = (text.match(/\b(this|that|these|such|same|again|return|back)\b/g) || []).length;
+    return Math.min(selfRefMarkers / 100, 1);
+  }
+  
+  calculateConceptDensity(text) {
+    // How packed with concepts
+    const conceptWords = (text.match(/\b(concept|idea|notion|principle|theory|framework|model)\b/g) || []).length;
+    const totalWords = (text.match(/\b\w+\b/g) || []).length;
+    return Math.min(conceptWords / totalWords * 10, 1);
+  }
+  
+  detectRhythmicPattern(text) {
+    // Simple rhythm detection based on sentence length variation
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    if (sentences.length < 3) return false;
+    
+    const lengths = sentences.map(s => s.length);
+    const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
+    
+    return variance > avgLength * 0.5; // High variance suggests rhythmic pattern
+  }
+  
+  determineDirection(basicCharacteristics) {
+    if (basicCharacteristics.contentType === 'narrative') return 'forward';
+    if (basicCharacteristics.contentType === 'philosophical') return 'inward';
+    if (basicCharacteristics.contentType === 'obituary') return 'backward';
+    if (basicCharacteristics.emotionalTone === 'positive') return 'outward';
+    return 'circular';
+  }
+  
+  createContentFingerprint(postContent, metadata) {
+    // Create unique fingerprint from content and metadata
+    const components = [
+      metadata.title || 'untitled',
+      postContent.substring(0, 50),
+      postContent.length.toString(),
+      (postContent.match(/\b\w+\b/g) || []).length.toString(),
+      Date.now().toString().slice(-4) // Last 4 digits for uniqueness
+    ];
+    
+    return this.simpleHash(components.join('|')).toString(36).substring(0, 10);
+  }
+  
+  simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
   }
   
   // Create fallback genome structure when SemanticDNA is not available
