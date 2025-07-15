@@ -4,6 +4,8 @@ class InterferenceRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       waveCount: params.waveCount || 3,
       frequency: params.frequency || 0.02,
@@ -63,33 +65,52 @@ class InterferenceRenderer {
           }
         }
         
-        // Normalize and apply Sacred Palette interference colors - "necessary discord, weathered"
+        // Normalize and apply interference colors
         const intensity = Math.abs(amplitude) / this.params.waveCount;
-        const palette = window.SacredPalette?.families?.interference || {
-          primary: '#A67373', secondary: '#6B6B6B', accent: '#8B7D8B'
-        };
+        const alpha = intensity * this.params.colorIntensity;
         
-        // Choose color based on interference pattern intensity
-        let baseColor;
-        if (intensity > 0.7) {
-          baseColor = palette.primary; // Muted crimson for high intensity
-        } else if (intensity > 0.4) {
-          baseColor = palette.accent;   // Bruised plum for medium
+        // SEMANTIC COLOR INTEGRATION
+        let pixelColor;
+        if (this.visualParams && this.visualParams.semanticColor) {
+          // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+          if (intensity > 0.7) {
+            pixelColor = this.visualParams.getHarmonizedRgba(alpha);
+          } else if (intensity > 0.4) {
+            pixelColor = this.visualParams.getHarmonizedRgba(alpha * 0.8);
+          } else {
+            pixelColor = this.visualParams.getHarmonizedRgba(alpha * 0.6);
+          }
         } else {
-          baseColor = palette.secondary; // Graphite for low
+          // Fallback to Sacred Palette interference colors - "necessary discord, weathered"
+          const palette = window.SacredPalette?.families?.interference || {
+            primary: '#A67373', secondary: '#6B6B6B', accent: '#8B7D8B'
+          };
+          
+          // Choose color based on interference pattern intensity
+          let baseColor;
+          if (intensity > 0.7) {
+            baseColor = palette.primary; // Muted crimson for high intensity
+          } else if (intensity > 0.4) {
+            baseColor = palette.accent;   // Bruised plum for medium
+          } else {
+            baseColor = palette.secondary; // Graphite for low
+          }
+          
+          // Apply breathing and weathering effects
+          const weathered = window.SacredPalette?.utils?.weather ?
+            window.SacredPalette.utils.weather(baseColor, 0.3) : baseColor;
+          const breathed = window.SacredPalette?.utils?.breathe ?
+            window.SacredPalette.utils.breathe(weathered, this.time, intensity * 0.1) : weathered;
+          
+          // Convert hex to rgba with intensity-based alpha
+          const rgb = window.SacredPalette?.utils?.hexToRgb(breathed);
+          if (rgb) {
+            pixelColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+          }
         }
         
-        // Apply breathing and weathering effects
-        const weathered = window.SacredPalette?.utils?.weather ?
-          window.SacredPalette.utils.weather(baseColor, 0.3) : baseColor;
-        const breathed = window.SacredPalette?.utils?.breathe ?
-          window.SacredPalette.utils.breathe(weathered, this.time, intensity * 0.1) : weathered;
-        
-        // Convert hex to rgba with intensity-based alpha
-        const rgb = window.SacredPalette?.utils?.hexToRgb(breathed);
-        if (rgb) {
-          const alpha = intensity * this.params.colorIntensity;
-          this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        if (pixelColor) {
+          this.ctx.fillStyle = pixelColor;
           this.ctx.fillRect(x, y, 2, 2);
         }
       }

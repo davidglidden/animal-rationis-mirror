@@ -4,6 +4,8 @@ class BalanceRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       balanceType: params.balanceType || 'scales', // scales, pendulum, harmonic, orbital
       elements: params.elements || 3,
@@ -203,14 +205,22 @@ class BalanceRenderer {
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // Draw central pivot/anchor using Sacred Palette
-    const palette = window.SacredPalette?.families?.balance || {
-      primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE'
-    };
-    const pivotColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
-    const rgb = window.SacredPalette?.utils?.hexToRgb(pivotColor);
-    if (rgb) {
-      this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`;
+    // Draw central pivot/anchor
+    // SEMANTIC COLOR INTEGRATION for pivot
+    let pivotFillColor;
+    if (this.visualParams && this.visualParams.semanticColor) {
+      pivotFillColor = this.visualParams.getHarmonizedRgba(0.8);
+    } else {
+      // Fallback to Sacred Palette
+      const pivotColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
+      const rgb = window.SacredPalette?.utils?.hexToRgb(pivotColor);
+      if (rgb) {
+        pivotFillColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`;
+      }
+    }
+    
+    if (pivotFillColor) {
+      this.ctx.fillStyle = pivotFillColor;
       this.ctx.beginPath();
       this.ctx.arc(centerX, centerY, 4, 0, Math.PI * 2);
       this.ctx.fill();
@@ -236,15 +246,26 @@ class BalanceRenderer {
   }
 
   renderScales(centerX, centerY) {
-    // Draw balance beam using Sacred Palette
+    // Draw balance beam
     const beam = this.balanceElements[0];
     const beamTilt = beam ? Math.atan2(beam.y - centerY, beam.x - centerX) : 0;
     
-    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
-    const beamColor = palette.secondary; // Warm taupe
-    const beamRgb = window.SacredPalette?.utils?.hexToRgb(beamColor);
-    if (beamRgb) {
-      this.ctx.strokeStyle = `rgba(${beamRgb.r}, ${beamRgb.g}, ${beamRgb.b}, 0.8)`;
+    // SEMANTIC COLOR INTEGRATION for beam
+    let beamStrokeColor;
+    if (this.visualParams && this.visualParams.semanticColor) {
+      beamStrokeColor = this.visualParams.getHarmonizedRgba(0.8);
+    } else {
+      // Fallback to Sacred Palette
+      const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+      const beamColor = palette.secondary; // Warm taupe
+      const beamRgb = window.SacredPalette?.utils?.hexToRgb(beamColor);
+      if (beamRgb) {
+        beamStrokeColor = `rgba(${beamRgb.r}, ${beamRgb.g}, ${beamRgb.b}, 0.8)`;
+      }
+    }
+    
+    if (beamStrokeColor) {
+      this.ctx.strokeStyle = beamStrokeColor;
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
       this.ctx.moveTo(centerX - 120, centerY);
@@ -252,28 +273,50 @@ class BalanceRenderer {
       this.ctx.stroke();
     }
     
-    // Draw weights using Sacred Palette balance colors
+    // Draw weights
     this.balanceElements.forEach((element, index) => {
-      // Use primary for left side, accent for right side
-      const weightColor = element.side < 0 ? palette.primary : palette.accent;
-      const breathing = window.SacredPalette?.utils?.breathe ?
-        window.SacredPalette.utils.breathe(weightColor, this.time + index, 0.1) : weightColor;
+      // SEMANTIC COLOR INTEGRATION for weights
+      let weightFillColor, weightLineColor, weightStrokeColor;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use different alpha values for left and right sides
+        const weightAlpha = element.side < 0 ? 0.8 : 0.6;
+        weightFillColor = this.visualParams.getHarmonizedRgba(weightAlpha);
+        weightLineColor = this.visualParams.getHarmonizedRgba(0.6);
+        weightStrokeColor = this.visualParams.getHarmonizedRgba(0.8);
+      } else {
+        // Fallback to Sacred Palette balance colors
+        const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+        const weightColor = element.side < 0 ? palette.primary : palette.accent;
+        const breathing = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(weightColor, this.time + index, 0.1) : weightColor;
+        
+        const weightRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+        if (weightRgb) {
+          weightFillColor = `rgba(${weightRgb.r}, ${weightRgb.g}, ${weightRgb.b}, 0.8)`;
+          
+          // Draw connecting line
+          const lineColor = palette.secondary;
+          const lineRgb = window.SacredPalette?.utils?.hexToRgb(lineColor);
+          if (lineRgb) {
+            weightLineColor = `rgba(${lineRgb.r}, ${lineRgb.g}, ${lineRgb.b}, 0.6)`;
+          }
+          
+          // Outline with darker version
+          const darkRgb = { r: weightRgb.r * 0.6, g: weightRgb.g * 0.6, b: weightRgb.b * 0.6 };
+          weightStrokeColor = `rgba(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b}, 0.8)`;
+        }
+      }
       
-      const weightRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
-      if (weightRgb) {
-        this.ctx.fillStyle = `rgba(${weightRgb.r}, ${weightRgb.g}, ${weightRgb.b}, 0.8)`;
+      if (weightFillColor && weightLineColor && weightStrokeColor) {
+        this.ctx.fillStyle = weightFillColor;
         
         // Draw connecting line
-        const lineColor = palette.secondary;
-        const lineRgb = window.SacredPalette?.utils?.hexToRgb(lineColor);
-        if (lineRgb) {
-          this.ctx.strokeStyle = `rgba(${lineRgb.r}, ${lineRgb.g}, ${lineRgb.b}, 0.6)`;
-          this.ctx.lineWidth = 2;
-          this.ctx.beginPath();
-          this.ctx.moveTo(element.x, centerY);
-          this.ctx.lineTo(element.x, element.y);
-          this.ctx.stroke();
-        }
+        this.ctx.strokeStyle = weightLineColor;
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(element.x, centerY);
+        this.ctx.lineTo(element.x, element.y);
+        this.ctx.stroke();
         
         // Draw weight
         const size = 8 + element.weight * 10;
@@ -282,8 +325,7 @@ class BalanceRenderer {
         this.ctx.fill();
         
         // Outline with darker version
-        const darkRgb = { r: weightRgb.r * 0.6, g: weightRgb.g * 0.6, b: weightRgb.b * 0.6 };
-        this.ctx.strokeStyle = `rgba(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b}, 0.8)`;
+        this.ctx.strokeStyle = weightStrokeColor;
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
       }
@@ -291,24 +333,39 @@ class BalanceRenderer {
   }
 
   renderPendulum(centerX, centerY) {
-    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
       const x = centerX + Math.sin(element.angle) * element.length;
       const y = centerY + Math.cos(element.angle) * element.length;
       
-      // Use Sacred Palette balance colors for pendulum
-      const colors = [palette.primary, palette.secondary, palette.accent];
-      const pendulumColor = colors[index % colors.length];
+      // SEMANTIC COLOR INTEGRATION for pendulum
+      let pendulumStrokeColor, pendulumFillColor;
       const alpha = 0.7 + Math.sin(this.time + index) * 0.3;
       
-      // Breathe the color
-      const breathing = window.SacredPalette?.utils?.breathe ?
-        window.SacredPalette.utils.breathe(pendulumColor, this.time + index, 0.1) : pendulumColor;
-      const rgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use different alpha variations for different pendulum elements
+        const pendulumAlpha = alpha * (0.6 + (index * 0.1));
+        pendulumStrokeColor = this.visualParams.getHarmonizedRgba(pendulumAlpha);
+        pendulumFillColor = this.visualParams.getHarmonizedRgba(pendulumAlpha);
+      } else {
+        // Fallback to Sacred Palette balance colors
+        const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+        const colors = [palette.primary, palette.secondary, palette.accent];
+        const pendulumColor = colors[index % colors.length];
+        
+        // Breathe the color
+        const breathing = window.SacredPalette?.utils?.breathe ?
+          window.SacredPalette.utils.breathe(pendulumColor, this.time + index, 0.1) : pendulumColor;
+        const rgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+        
+        if (rgb) {
+          pendulumStrokeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+          pendulumFillColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+      }
       
-      if (rgb) {
+      if (pendulumStrokeColor && pendulumFillColor) {
         // Draw pendulum rod
-        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        this.ctx.strokeStyle = pendulumStrokeColor;
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.moveTo(centerX, centerY);
@@ -316,7 +373,7 @@ class BalanceRenderer {
         this.ctx.stroke();
         
         // Draw pendulum bob
-        this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        this.ctx.fillStyle = pendulumFillColor;
         this.ctx.beginPath();
         this.ctx.arc(x, y, 6 + element.mass * 3, 0, Math.PI * 2);
         this.ctx.fill();
@@ -325,16 +382,38 @@ class BalanceRenderer {
   }
 
   renderHarmonic(centerX, centerY) {
-    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
-      // Use Sacred Palette balance colors for harmonic oscillators
-      const colors = [palette.primary, palette.secondary, palette.accent];
-      const oscColor = colors[index % colors.length];
-      const rgb = window.SacredPalette?.utils?.hexToRgb(oscColor);
+      // SEMANTIC COLOR INTEGRATION for harmonic oscillators
+      let harmonicStrokeColor, harmonicFillColor;
       
-      if (rgb) {
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use different alpha variations for different harmonic elements
+        const harmonicAlpha = 0.6 + (index * 0.05);
+        harmonicStrokeColor = this.visualParams.getHarmonizedRgba(harmonicAlpha);
+        harmonicFillColor = this.visualParams.getHarmonizedRgba(harmonicAlpha + 0.2);
+      } else {
+        // Fallback to Sacred Palette balance colors
+        const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+        const colors = [palette.primary, palette.secondary, palette.accent];
+        const oscColor = colors[index % colors.length];
+        const rgb = window.SacredPalette?.utils?.hexToRgb(oscColor);
+        
+        if (rgb) {
+          harmonicStrokeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`;
+          
+          // Draw oscillator with breathing
+          const breathing = window.SacredPalette?.utils?.breathe ?
+            window.SacredPalette.utils.breathe(oscColor, this.time + index, 0.1) : oscColor;
+          const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+          if (breathRgb) {
+            harmonicFillColor = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
+          }
+        }
+      }
+      
+      if (harmonicStrokeColor && harmonicFillColor) {
         // Draw spring connection
-        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`;
+        this.ctx.strokeStyle = harmonicStrokeColor;
         this.ctx.lineWidth = 2;
         this.ctx.setLineDash([3, 3]);
         this.ctx.beginPath();
@@ -343,49 +422,64 @@ class BalanceRenderer {
         this.ctx.stroke();
         this.ctx.setLineDash([]);
         
-        // Draw oscillator with breathing
-        const breathing = window.SacredPalette?.utils?.breathe ?
-          window.SacredPalette.utils.breathe(oscColor, this.time + index, 0.1) : oscColor;
-        const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
-        if (breathRgb) {
-          this.ctx.fillStyle = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
-          this.ctx.beginPath();
-          this.ctx.arc(element.x, element.y, 8, 0, Math.PI * 2);
-          this.ctx.fill();
-        }
+        // Draw oscillator
+        this.ctx.fillStyle = harmonicFillColor;
+        this.ctx.beginPath();
+        this.ctx.arc(element.x, element.y, 8, 0, Math.PI * 2);
+        this.ctx.fill();
       }
     });
   }
 
   renderOrbital(centerX, centerY) {
-    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     this.balanceElements.forEach((element, index) => {
       const x = centerX + Math.cos(element.angle) * element.perturbedRadius;
       const y = centerY + Math.sin(element.angle) * element.perturbedRadius;
       
-      // Use Sacred Palette balance colors for orbital elements
-      const colors = [palette.primary, palette.secondary, palette.accent];
-      const orbitalColor = colors[index % colors.length];
-      const rgb = window.SacredPalette?.utils?.hexToRgb(orbitalColor);
+      // SEMANTIC COLOR INTEGRATION for orbital elements
+      let orbitalStrokeColor, orbitalFillColor, orbitalTrailColor;
       
-      if (rgb) {
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use different alpha variations for different orbital elements
+        const orbitalAlpha = 0.2 + (index * 0.05);
+        orbitalStrokeColor = this.visualParams.getHarmonizedRgba(orbitalAlpha);
+        orbitalFillColor = this.visualParams.getHarmonizedRgba(orbitalAlpha + 0.6);
+        orbitalTrailColor = this.visualParams.getHarmonizedRgba(orbitalAlpha + 0.1);
+      } else {
+        // Fallback to Sacred Palette balance colors
+        const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+        const colors = [palette.primary, palette.secondary, palette.accent];
+        const orbitalColor = colors[index % colors.length];
+        const rgb = window.SacredPalette?.utils?.hexToRgb(orbitalColor);
+        
+        if (rgb) {
+          orbitalStrokeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+          
+          // Draw orbital body with breathing
+          const breathing = window.SacredPalette?.utils?.breathe ?
+            window.SacredPalette.utils.breathe(orbitalColor, this.time + index, 0.1) : orbitalColor;
+          const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+          if (breathRgb) {
+            orbitalFillColor = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
+          }
+          
+          orbitalTrailColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, [ALPHA])`;
+        }
+      }
+      
+      if (orbitalStrokeColor && orbitalFillColor) {
         // Draw orbital path
-        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+        this.ctx.strokeStyle = orbitalStrokeColor;
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, element.baseRadius, 0, Math.PI * 2);
         this.ctx.stroke();
         
-        // Draw orbital body with breathing
-        const breathing = window.SacredPalette?.utils?.breathe ?
-          window.SacredPalette.utils.breathe(orbitalColor, this.time + index, 0.1) : orbitalColor;
-        const breathRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
-        if (breathRgb) {
-          this.ctx.fillStyle = `rgba(${breathRgb.r}, ${breathRgb.g}, ${breathRgb.b}, 0.8)`;
-          this.ctx.beginPath();
-          this.ctx.arc(x, y, 5 + element.mass * 2, 0, Math.PI * 2);
-          this.ctx.fill();
-        }
+        // Draw orbital body
+        this.ctx.fillStyle = orbitalFillColor;
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 5 + element.mass * 2, 0, Math.PI * 2);
+        this.ctx.fill();
         
         // Draw trail
         const trailLength = 20;
@@ -395,7 +489,14 @@ class BalanceRenderer {
           const trailY = centerY + Math.sin(trailAngle) * element.perturbedRadius;
           const alpha = (trailLength - i) / trailLength * 0.3;
           
-          this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+          let trailFillColor;
+          if (this.visualParams && this.visualParams.semanticColor) {
+            trailFillColor = this.visualParams.getHarmonizedRgba(alpha);
+          } else {
+            trailFillColor = orbitalTrailColor.replace('[ALPHA]', alpha.toString());
+          }
+          
+          this.ctx.fillStyle = trailFillColor;
           this.ctx.beginPath();
           this.ctx.arc(trailX, trailY, 2, 0, Math.PI * 2);
           this.ctx.fill();
@@ -408,31 +509,52 @@ class BalanceRenderer {
     // Draw equilibrium state indicator
     const isBalanced = this.checkEquilibrium();
     const { width, height } = this.canvas;
-    const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
     
-    // Use Sacred Palette for equilibrium indicators
-    const indicatorColor = isBalanced ? palette.primary : palette.accent;
-    const indRgb = window.SacredPalette?.utils?.hexToRgb(indicatorColor);
-    if (indRgb) {
-      this.ctx.fillStyle = `rgba(${indRgb.r}, ${indRgb.g}, ${indRgb.b}, 0.3)`;
-      this.ctx.fillRect(width - 20, 10, 10, 10);
-    }
+    // SEMANTIC COLOR INTEGRATION for equilibrium indicators
+    let indicatorFillColor, meterStrokeColor, levelFillColor;
     
-    // Draw balance meter
-    const meterColor = palette.secondary;
-    const meterRgb = window.SacredPalette?.utils?.hexToRgb(meterColor);
-    if (meterRgb) {
-      this.ctx.strokeStyle = `rgba(${meterRgb.r}, ${meterRgb.g}, ${meterRgb.b}, 0.5)`;
-      this.ctx.lineWidth = 1;
-      this.ctx.strokeRect(width - 40, 30, 30, 100);
+    if (this.visualParams && this.visualParams.semanticColor) {
+      indicatorFillColor = this.visualParams.getHarmonizedRgba(0.3);
+      meterStrokeColor = this.visualParams.getHarmonizedRgba(0.5);
+      levelFillColor = this.visualParams.getHarmonizedRgba(0.6);
+    } else {
+      // Fallback to Sacred Palette for equilibrium indicators
+      const palette = window.SacredPalette?.families?.balance || { primary: '#8FA68E', secondary: '#B8A890', accent: '#D6D6CE' };
+      
+      const indicatorColor = isBalanced ? palette.primary : palette.accent;
+      const indRgb = window.SacredPalette?.utils?.hexToRgb(indicatorColor);
+      if (indRgb) {
+        indicatorFillColor = `rgba(${indRgb.r}, ${indRgb.g}, ${indRgb.b}, 0.3)`;
+      }
+      
+      // Draw balance meter
+      const meterColor = palette.secondary;
+      const meterRgb = window.SacredPalette?.utils?.hexToRgb(meterColor);
+      if (meterRgb) {
+        meterStrokeColor = `rgba(${meterRgb.r}, ${meterRgb.g}, ${meterRgb.b}, 0.5)`;
+      }
       
       const balanceLevel = this.getBalanceLevel();
       const levelColor = balanceLevel < 0.1 ? palette.primary : palette.accent;
       const levelRgb = window.SacredPalette?.utils?.hexToRgb(levelColor);
       if (levelRgb) {
-        this.ctx.fillStyle = `rgba(${levelRgb.r}, ${levelRgb.g}, ${levelRgb.b}, 0.6)`;
-        this.ctx.fillRect(width - 39, 30 + (1 - balanceLevel) * 50, 28, Math.abs(balanceLevel) * 50);
+        levelFillColor = `rgba(${levelRgb.r}, ${levelRgb.g}, ${levelRgb.b}, 0.6)`;
       }
+    }
+    
+    if (indicatorFillColor) {
+      this.ctx.fillStyle = indicatorFillColor;
+      this.ctx.fillRect(width - 20, 10, 10, 10);
+    }
+    
+    if (meterStrokeColor && levelFillColor) {
+      this.ctx.strokeStyle = meterStrokeColor;
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeRect(width - 40, 30, 30, 100);
+      
+      const balanceLevel = this.getBalanceLevel();
+      this.ctx.fillStyle = levelFillColor;
+      this.ctx.fillRect(width - 39, 30 + (1 - balanceLevel) * 50, 28, Math.abs(balanceLevel) * 50);
     }
   }
 

@@ -4,6 +4,7 @@ class FlowRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
     this.params = {
       particleCount: params.particleCount || 300,
       flowSpeed: params.flowSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 1000,
@@ -18,6 +19,9 @@ class FlowRenderer {
     this.particles = [];
     this.flowField = [];
     this.animationId = null;
+    
+    // Semantic integration initialized
+    
     this.initParticles();
     this.generateFlowField();
   }
@@ -122,13 +126,21 @@ class FlowRenderer {
   render() {
     const { width, height } = this.canvas;
     
-    // Sacred Palette flow background - oxidized metal tones
-    const palette = window.SacredPalette || { families: { flow: {} } };
-    const flowColors = palette.families.flow;
-    const groundRgb = palette.utils?.hexToRgb(palette.ground?.vellum || '#FAF8F3') || {r: 250, g: 248, b: 243};
+    // SEMANTIC COLOR INTEGRATION - Background trail effect
+    let backgroundTrail;
+    
+    if (this.visualParams && this.visualParams.semanticColor) {
+      // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+      backgroundTrail = this.visualParams.getHarmonizedRgba(1 - this.params.trailLength);
+    } else {
+      // Fallback to Sacred Palette flow background - oxidized metal tones
+      const palette = window.SacredPalette || { families: { flow: {} } };
+      const groundRgb = palette.utils?.hexToRgb(palette.ground?.vellum || '#FAF8F3') || {r: 250, g: 248, b: 243};
+      backgroundTrail = `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, ${1 - this.params.trailLength})`;
+    }
     
     // Apply trail effect with warm background
-    this.ctx.fillStyle = `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, ${1 - this.params.trailLength})`;
+    this.ctx.fillStyle = backgroundTrail;
     this.ctx.fillRect(0, 0, width, height);
     
     // Update and draw particles
@@ -167,21 +179,41 @@ class FlowRenderer {
       const speed = Math.sqrt(particle.vx ** 2 + particle.vy ** 2);
       const alpha = Math.min(speed * 5, 1) * (1 - particle.life / particle.maxLife);
       
-      // Sacred Palette flow colors - oxidized copper, rust, tarnished bronze
-      const primaryRgb = palette.utils?.hexToRgb(flowColors.primary || '#A67B5B') || {r: 166, g: 123, b: 91};
-      const secondaryRgb = palette.utils?.hexToRgb(flowColors.secondary || '#8B6F47') || {r: 139, g: 111, b: 71};
-      const accentRgb = palette.utils?.hexToRgb(flowColors.accent || '#6B8E6B') || {r: 107, g: 142, b: 107};
+      let particleColor;
       
-      if (this.params.colorFlow) {
-        // Blend between oxidized metal tones based on speed
-        const speedRatio = Math.min(speed * 2, 1);
-        const r = primaryRgb.r + (secondaryRgb.r - primaryRgb.r) * speedRatio;
-        const g = primaryRgb.g + (secondaryRgb.g - primaryRgb.g) * speedRatio;
-        const b = primaryRgb.b + (secondaryRgb.b - primaryRgb.b) * speedRatio;
-        this.ctx.fillStyle = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
+      // SEMANTIC COLOR INTEGRATION - Particle colors
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+        if (this.params.colorFlow) {
+          // Vary semantic color intensity based on speed
+          const speedRatio = Math.min(speed * 2, 1);
+          const intensityAlpha = alpha * (0.6 + speedRatio * 0.4); // More intensity with speed
+          particleColor = this.visualParams.getHarmonizedRgba(intensityAlpha);
+        } else {
+          // Static semantic color
+          particleColor = this.visualParams.getHarmonizedRgba(alpha * 0.8);
+        }
       } else {
-        this.ctx.fillStyle = `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${alpha})`;
+        // Fallback to Sacred Palette flow colors - oxidized copper, rust, tarnished bronze
+        const palette = window.SacredPalette || { families: { flow: {} } };
+        const flowColors = palette.families.flow;
+        const primaryRgb = palette.utils?.hexToRgb(flowColors.primary || '#A67B5B') || {r: 166, g: 123, b: 91};
+        const secondaryRgb = palette.utils?.hexToRgb(flowColors.secondary || '#8B6F47') || {r: 139, g: 111, b: 71};
+        const accentRgb = palette.utils?.hexToRgb(flowColors.accent || '#6B8E6B') || {r: 107, g: 142, b: 107};
+        
+        if (this.params.colorFlow) {
+          // Blend between oxidized metal tones based on speed
+          const speedRatio = Math.min(speed * 2, 1);
+          const r = primaryRgb.r + (secondaryRgb.r - primaryRgb.r) * speedRatio;
+          const g = primaryRgb.g + (secondaryRgb.g - primaryRgb.g) * speedRatio;
+          const b = primaryRgb.b + (secondaryRgb.b - primaryRgb.b) * speedRatio;
+          particleColor = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
+        } else {
+          particleColor = `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${alpha})`;
+        }
       }
+      
+      this.ctx.fillStyle = particleColor;
       
       this.ctx.beginPath();
       this.ctx.arc(particle.x, particle.y, 1 + speed * 2, 0, Math.PI * 2);

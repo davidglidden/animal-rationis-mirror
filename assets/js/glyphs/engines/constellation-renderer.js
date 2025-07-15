@@ -4,6 +4,8 @@ class ConstellationRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       starCount: params.starCount || 50,
       connectionDistance: params.connectionDistance || 80,
@@ -81,14 +83,25 @@ class ConstellationRenderer {
     this.ctx.clearRect(0, 0, width, height);
     
     // Add subtle background using Sacred Palette ground colors
-    const palette = window.SacredPalette?.families?.constellation || {
-      primary: '#2F4F4F', secondary: '#708090', accent: '#B0C4DE'
-    };
-    const groundColor = window.SacredPalette?.ground?.manuscript || '#F7F3E9';
-    
     const gradient = this.ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
-    gradient.addColorStop(0, palette.primary.replace('rgb', 'rgba').replace(')', ', 0.15)'));
-    gradient.addColorStop(1, groundColor.replace('rgb', 'rgba').replace(')', ', 0.95)'));
+    
+    // SEMANTIC COLOR INTEGRATION for background
+    if (this.visualParams && this.visualParams.semanticColor) {
+      const backgroundPrimary = this.visualParams.getHarmonizedRgba(0.15);
+      const backgroundSecondary = this.visualParams.getHarmonizedRgba(0.95);
+      gradient.addColorStop(0, backgroundPrimary);
+      gradient.addColorStop(1, backgroundSecondary);
+    } else {
+      // Fallback to Sacred Palette constellation colors
+      const palette = window.SacredPalette?.families?.constellation || {
+        primary: '#2F4F4F', secondary: '#708090', accent: '#B0C4DE'
+      };
+      const groundColor = window.SacredPalette?.ground?.manuscript || '#F7F3E9';
+      
+      gradient.addColorStop(0, palette.primary.replace('rgb', 'rgba').replace(')', ', 0.15)'));
+      gradient.addColorStop(1, groundColor.replace('rgb', 'rgba').replace(')', ', 0.95)'));
+    }
+    
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, width, height);
     
@@ -98,8 +111,7 @@ class ConstellationRenderer {
       star.y = star.originalY + Math.cos(this.time * this.params.driftSpeed + star.driftPhase) * 10;
     });
     
-    // Draw connections between nearby stars using Sacred Palette
-    const connectionColor = palette.accent;
+    // Draw connections between nearby stars
     this.ctx.lineWidth = 1;
     for (let i = 0; i < this.stars.length; i++) {
       for (let j = i + 1; j < this.stars.length; j++) {
@@ -109,7 +121,20 @@ class ConstellationRenderer {
         
         if (distance < this.params.connectionDistance) {
           const alpha = (1 - distance / this.params.connectionDistance) * 0.3;
-          this.ctx.strokeStyle = connectionColor.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+          
+          // SEMANTIC COLOR INTEGRATION for connections
+          let connectionColor;
+          if (this.visualParams && this.visualParams.semanticColor) {
+            connectionColor = this.visualParams.getHarmonizedRgba(alpha);
+          } else {
+            // Fallback to Sacred Palette constellation colors
+            const palette = window.SacredPalette?.families?.constellation || {
+              primary: '#2F4F4F', secondary: '#708090', accent: '#B0C4DE'
+            };
+            connectionColor = palette.accent.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+          }
+          
+          this.ctx.strokeStyle = connectionColor;
           this.ctx.beginPath();
           this.ctx.moveTo(star1.x, star1.y);
           this.ctx.lineTo(star2.x, star2.y);
@@ -118,25 +143,40 @@ class ConstellationRenderer {
       }
     }
     
-    // Draw stars with pulsing effect using Sacred Palette
+    // Draw stars with pulsing effect
     this.stars.forEach(star => {
       const pulse = Math.sin(this.time + star.pulsePhase) * 0.3 + 0.7;
       const brightness = star.brightness * pulse * this.params.brightness;
       const size = star.size * (0.8 + pulse * 0.4);
       
-      // Get star color from Sacred Palette constellation family
-      const colors = [palette.primary, palette.secondary, palette.accent];
-      const starColor = colors[star.colorIndex % colors.length];
-      
-      // Apply breathing effect if available
-      const breathedColor = window.SacredPalette?.utilities?.breatheColor ?
-        window.SacredPalette.utilities.breatheColor(starColor, pulse) : starColor;
+      // SEMANTIC COLOR INTEGRATION for stars
+      let starColor, starGlowColor, starCoreColor;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        starColor = this.visualParams.getHarmonizedRgba(brightness);
+        starGlowColor = this.visualParams.getHarmonizedRgba(brightness * 0.5);
+        starCoreColor = this.visualParams.getHarmonizedRgba(brightness);
+      } else {
+        // Fallback to Sacred Palette constellation colors
+        const palette = window.SacredPalette?.families?.constellation || {
+          primary: '#2F4F4F', secondary: '#708090', accent: '#B0C4DE'
+        };
+        const colors = [palette.primary, palette.secondary, palette.accent];
+        const baseColor = colors[star.colorIndex % colors.length];
+        
+        // Apply breathing effect if available
+        const breathedColor = window.SacredPalette?.utilities?.breatheColor ?
+          window.SacredPalette.utilities.breatheColor(baseColor, pulse) : baseColor;
+        
+        starColor = breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`);
+        starGlowColor = breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness * 0.5})`);
+        starCoreColor = breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`);
+      }
       
       // Draw star glow
       const gradient = this.ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, size * 3);
-      gradient.addColorStop(0, breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`));
-      gradient.addColorStop(0.5, breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness * 0.5})`));
-      gradient.addColorStop(1, breathedColor.replace('rgb', 'rgba').replace(')', ', 0)'));
+      gradient.addColorStop(0, starColor);
+      gradient.addColorStop(0.5, starGlowColor);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
       
       this.ctx.fillStyle = gradient;
       this.ctx.beginPath();
@@ -144,7 +184,7 @@ class ConstellationRenderer {
       this.ctx.fill();
       
       // Draw star core
-      this.ctx.fillStyle = breathedColor.replace('rgb', 'rgba').replace(')', `, ${brightness})`);
+      this.ctx.fillStyle = starCoreColor;
       this.ctx.beginPath();
       this.ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
       this.ctx.fill();

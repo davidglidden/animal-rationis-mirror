@@ -4,6 +4,8 @@ class StrataRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       layerCount: params.layerCount || 12,
       erosionRate: params.erosionRate || 0.3,
@@ -25,11 +27,19 @@ class StrataRenderer {
   initLayers() {
     this.layers = [];
     const { height } = this.canvas;
-    // Use Sacred Palette strata family - "geological memory"
-    const palette = window.SacredPalette?.families?.strata || {
-      primary: '#D4C5A0', secondary: '#8B8680', accent: '#B8956A'
-    };
-    const baseColors = [palette.primary, palette.secondary, palette.accent];
+    
+    // Initialize base colors for layers
+    let baseColors;
+    if (this.visualParams && this.visualParams.semanticColor) {
+      // Use semantic color as base for layer variations
+      baseColors = [0, 1, 2]; // Indices for different alpha/intensity variations
+    } else {
+      // Use Sacred Palette strata family - "geological memory"
+      const palette = window.SacredPalette?.families?.strata || {
+        primary: '#D4C5A0', secondary: '#8B8680', accent: '#B8956A'
+      };
+      baseColors = [palette.primary, palette.secondary, palette.accent];
+    }
     
     for (let i = 0; i < this.params.layerCount; i++) {
       const age = i / this.params.layerCount;
@@ -134,13 +144,24 @@ class StrataRenderer {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
     
-    // Draw background gradient using Sacred Palette ground colors
-    const groundColor = window.SacredPalette?.ground?.fresco || '#F5F0E6';
-    const deepColor = window.SacredPalette?.families?.strata?.secondary || '#8B8680';
-    
+    // Draw background gradient
     const bgGradient = this.ctx.createLinearGradient(0, 0, 0, height);
-    bgGradient.addColorStop(0, groundColor);
-    bgGradient.addColorStop(1, deepColor);
+    
+    // SEMANTIC COLOR INTEGRATION for background
+    if (this.visualParams && this.visualParams.semanticColor) {
+      const backgroundTop = this.visualParams.getHarmonizedRgba(0.3);
+      const backgroundBottom = this.visualParams.getHarmonizedRgba(0.6);
+      bgGradient.addColorStop(0, backgroundTop);
+      bgGradient.addColorStop(1, backgroundBottom);
+    } else {
+      // Fallback to Sacred Palette ground colors
+      const groundColor = window.SacredPalette?.ground?.fresco || '#F5F0E6';
+      const deepColor = window.SacredPalette?.families?.strata?.secondary || '#8B8680';
+      
+      bgGradient.addColorStop(0, groundColor);
+      bgGradient.addColorStop(1, deepColor);
+    }
+    
     this.ctx.fillStyle = bgGradient;
     this.ctx.fillRect(0, 0, width, height);
     
@@ -174,37 +195,64 @@ class StrataRenderer {
       
       this.ctx.closePath();
       
-      // Fill layer with Sacred Palette geological colors
+      // Fill layer with geological colors
       const erosion = Math.sin(this.time * this.params.erosionRate + layerIndex) * 0.1 + 0.9;
       
-      // Apply weathering and erosion to base color
-      let layerColor = layer.color;
-      if (window.SacredPalette?.utils?.weather) {
-        layerColor = window.SacredPalette.utils.weather(layerColor, layer.weathering);
-      }
-      if (window.SacredPalette?.utils?.breathe) {
-        layerColor = window.SacredPalette.utils.breathe(layerColor, this.time + layerIndex, erosion * 0.1);
+      // SEMANTIC COLOR INTEGRATION for layers
+      let layerFillColor, layerStrokeColor;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use semantically extracted colors with varying alpha for different layers
+        const layerAlpha = erosion * (0.6 + (layer.colorIndex * 0.1));
+        layerFillColor = this.visualParams.getHarmonizedRgba(layerAlpha);
+        layerStrokeColor = this.visualParams.getHarmonizedRgba(layerAlpha * 0.7);
+      } else {
+        // Fallback to Sacred Palette geological colors
+        let layerColor = layer.color;
+        if (window.SacredPalette?.utils?.weather) {
+          layerColor = window.SacredPalette.utils.weather(layerColor, layer.weathering);
+        }
+        if (window.SacredPalette?.utils?.breathe) {
+          layerColor = window.SacredPalette.utils.breathe(layerColor, this.time + layerIndex, erosion * 0.1);
+        }
+        
+        // Convert to rgba for filling
+        const rgb = window.SacredPalette?.utils?.hexToRgb(layerColor);
+        if (rgb) {
+          layerFillColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${erosion})`;
+          layerStrokeColor = `rgba(${rgb.r * 0.7}, ${rgb.g * 0.7}, ${rgb.b * 0.7}, ${erosion * 0.8})`;
+        }
       }
       
-      // Convert to rgba for filling
-      const rgb = window.SacredPalette?.utils?.hexToRgb(layerColor);
-      if (rgb) {
-        this.ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${erosion})`;
+      if (layerFillColor && layerStrokeColor) {
+        this.ctx.fillStyle = layerFillColor;
         this.ctx.fill();
         
         // Add layer texture with darker version
-        this.ctx.strokeStyle = `rgba(${rgb.r * 0.7}, ${rgb.g * 0.7}, ${rgb.b * 0.7}, ${erosion * 0.8})`;
+        this.ctx.strokeStyle = layerStrokeColor;
         this.ctx.lineWidth = 0.5;
         this.ctx.stroke();
       }
     }
     
-    // Draw fault lines using Sacred Palette
-    const faultColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
+    // Draw fault lines
     this.faults.forEach(fault => {
-      const rgb = window.SacredPalette?.utils?.hexToRgb(faultColor);
-      if (rgb) {
-        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${fault.activity * 0.8})`;
+      const alpha = fault.activity * 0.8;
+      
+      // SEMANTIC COLOR INTEGRATION for fault lines
+      let faultStrokeColor;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        faultStrokeColor = this.visualParams.getHarmonizedRgba(alpha);
+      } else {
+        // Fallback to Sacred Palette
+        const faultColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
+        const rgb = window.SacredPalette?.utils?.hexToRgb(faultColor);
+        if (rgb) {
+          faultStrokeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+      }
+      
+      if (faultStrokeColor) {
+        this.ctx.strokeStyle = faultStrokeColor;
         this.ctx.lineWidth = fault.width;
         this.ctx.setLineDash([5, 5]);
         
@@ -222,13 +270,24 @@ class StrataRenderer {
       }
     });
     
-    // Add surface erosion effects with Sacred Palette
+    // Add surface erosion effects
     const surfaceLayer = this.layers[0];
     if (surfaceLayer) {
-      const erosionColor = window.SacredPalette?.base?.umber || '#826B4F';
-      const rgb = window.SacredPalette?.utils?.hexToRgb(erosionColor);
-      if (rgb) {
-        this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`;
+      // SEMANTIC COLOR INTEGRATION for surface erosion
+      let erosionStrokeColor;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        erosionStrokeColor = this.visualParams.getHarmonizedRgba(0.3);
+      } else {
+        // Fallback to Sacred Palette
+        const erosionColor = window.SacredPalette?.base?.umber || '#826B4F';
+        const rgb = window.SacredPalette?.utils?.hexToRgb(erosionColor);
+        if (rgb) {
+          erosionStrokeColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`;
+        }
+      }
+      
+      if (erosionStrokeColor) {
+        this.ctx.strokeStyle = erosionStrokeColor;
         this.ctx.lineWidth = 1;
         
         for (let x = 0; x < width; x += 5) {

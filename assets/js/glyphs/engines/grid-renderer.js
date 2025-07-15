@@ -4,6 +4,7 @@ class GridRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
     this.params = {
       gridType: params.gridType || 'cartesian', // cartesian, polar, hexagonal, triangular
       density: params.density || 8,
@@ -19,6 +20,9 @@ class GridRenderer {
     this.gridPoints = [];
     this.connections = [];
     this.animationId = null;
+    
+    // Semantic integration initialized
+    
     this.initGrid();
   }
 
@@ -285,14 +289,25 @@ class GridRenderer {
   }
 
   renderGridStructure() {
-    // Use sacred palette if available
-    const palette = window.SacredPalette || { 
-      families: { grid: { primary: '#778899' } },
-      utils: { mix: (a,b,r) => a }
-    };
+    // SEMANTIC COLOR INTEGRATION
+    // Use semantic colors if available, otherwise fallback to Sacred Palette
+    let strokeColor;
     
-    const gridColors = palette.families.grid;
-    this.ctx.strokeStyle = palette.utils.mix(gridColors.primary, palette.ground?.vellum || '#FAF8F3', 0.85);
+    if (this.visualParams && this.visualParams.semanticColor) {
+      // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+      strokeColor = this.visualParams.getHarmonizedRgba(0.15);
+    } else {
+      // Fallback to Sacred Palette grid colors
+      const palette = window.SacredPalette || { 
+        families: { grid: { primary: '#778899' } },
+        utils: { mix: (a,b,r) => a }
+      };
+      
+      const gridColors = palette.families.grid;
+      strokeColor = palette.utils.mix(gridColors.primary, palette.ground?.vellum || '#FAF8F3', 0.85);
+    }
+    
+    this.ctx.strokeStyle = strokeColor;
     this.ctx.lineWidth = 1;
     
     if (this.params.gridType === 'cartesian') {
@@ -315,9 +330,6 @@ class GridRenderer {
   }
 
   renderConnections() {
-    const palette = window.SacredPalette || { families: { grid: {} } };
-    const gridColors = palette.families.grid;
-    
     this.connections.forEach(connection => {
       const p1 = this.gridPoints[connection.from];
       const p2 = this.gridPoints[connection.to];
@@ -325,24 +337,48 @@ class GridRenderer {
       const alpha = connection.strength * 0.4; // More subtle than before
       let baseColor;
       
-      // Use sacred palette colors, muted and contemplative
-      switch (connection.logicalType) {
-        case 'equivalence':
-          baseColor = gridColors.accent || '#8FA68E'; // Moss hint
-          break;
-        case 'implication':
-          baseColor = gridColors.primary || '#778899'; // Slate blue
-          break;
-        case 'contrast':
-          baseColor = gridColors.secondary || '#A8A8A8'; // Warm grey
-          break;
-        default:
-          baseColor = palette.base?.ash || '#9B9B9B'; // Gentle grey
+      // SEMANTIC COLOR INTEGRATION
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+        switch (connection.logicalType) {
+          case 'equivalence':
+            baseColor = this.visualParams.getHarmonizedRgba(alpha * 0.8);
+            break;
+          case 'implication':
+            baseColor = this.visualParams.getHarmonizedRgba(alpha * 1.0);
+            break;
+          case 'contrast':
+            baseColor = this.visualParams.getHarmonizedRgba(alpha * 0.6);
+            break;
+          default:
+            baseColor = this.visualParams.getHarmonizedRgba(alpha * 0.4);
+        }
+      } else {
+        // Fallback to Sacred Palette grid colors
+        const palette = window.SacredPalette || { families: { grid: {} } };
+        const gridColors = palette.families.grid;
+        
+        // Use sacred palette colors, muted and contemplative
+        switch (connection.logicalType) {
+          case 'equivalence':
+            baseColor = gridColors.accent || '#8FA68E'; // Moss hint
+            break;
+          case 'implication':
+            baseColor = gridColors.primary || '#778899'; // Slate blue
+            break;
+          case 'contrast':
+            baseColor = gridColors.secondary || '#A8A8A8'; // Warm grey
+            break;
+          default:
+            baseColor = palette.base?.ash || '#9B9B9B'; // Gentle grey
+        }
+        
+        // Convert hex to rgba with contemplative alpha
+        const rgb = palette.utils?.hexToRgb(baseColor) || {r: 120, g: 136, b: 153};
+        baseColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
       }
       
-      // Convert hex to rgba with contemplative alpha
-      const rgb = palette.utils?.hexToRgb(baseColor) || {r: 120, g: 136, b: 153};
-      this.ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      this.ctx.strokeStyle = baseColor;
       this.ctx.lineWidth = 0.5 + connection.strength * 0.5; // Thinner, more subtle
       this.ctx.beginPath();
       this.ctx.moveTo(p1.x, p1.y);
@@ -352,39 +388,52 @@ class GridRenderer {
   }
 
   renderGridPoints() {
-    const palette = window.SacredPalette || { families: { grid: {} } };
-    const gridColors = palette.families.grid;
-    
     this.gridPoints.forEach(point => {
       const logicalIntensity = point.logicalValue;
       const stabilityIndicator = point.stability;
       
-      // Use sacred palette grid colors for contemplative gradation
-      const primaryRgb = palette.utils?.hexToRgb(gridColors.primary || '#778899') || {r: 119, g: 136, b: 153};
-      const secondaryRgb = palette.utils?.hexToRgb(gridColors.secondary || '#A8A8A8') || {r: 168, g: 168, b: 168};
-      const accentRgb = palette.utils?.hexToRgb(gridColors.accent || '#8FA68E') || {r: 143, g: 166, b: 142};
-      
-      // Blend between primary -> accent -> secondary based on logical intensity
-      let r, g, b;
-      if (logicalIntensity < 0.5) {
-        // Blend primary to accent (contemplative progression)
-        const t = logicalIntensity * 2;
-        r = primaryRgb.r + (accentRgb.r - primaryRgb.r) * t;
-        g = primaryRgb.g + (accentRgb.g - primaryRgb.g) * t;
-        b = primaryRgb.b + (accentRgb.b - primaryRgb.b) * t;
-      } else {
-        // Blend accent to secondary (deepening thought)
-        const t = (logicalIntensity - 0.5) * 2;
-        r = accentRgb.r + (secondaryRgb.r - accentRgb.r) * t;
-        g = accentRgb.g + (secondaryRgb.g - accentRgb.g) * t;
-        b = accentRgb.b + (secondaryRgb.b - accentRgb.b) * t;
-      }
-      
       // Breathing animation using sacred timing
+      const palette = window.SacredPalette || { timing: { breathRate: 0.001 } };
       const breathPhase = this.time * (palette.timing?.breathRate || 0.001) + point.phase;
       const breathAlpha = 0.3 + Math.sin(breathPhase) * 0.15; // Gentle contemplative pulse
       
-      this.ctx.fillStyle = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${breathAlpha})`;
+      let fillColor;
+      
+      // SEMANTIC COLOR INTEGRATION
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+        // Vary alpha based on logical intensity for depth
+        const intensityAlpha = breathAlpha * (0.5 + logicalIntensity * 0.5);
+        fillColor = this.visualParams.getHarmonizedRgba(intensityAlpha);
+      } else {
+        // Fallback to Sacred Palette grid colors with complex blending
+        const gridColors = palette.families?.grid || {};
+        
+        // Use sacred palette grid colors for contemplative gradation
+        const primaryRgb = palette.utils?.hexToRgb(gridColors.primary || '#778899') || {r: 119, g: 136, b: 153};
+        const secondaryRgb = palette.utils?.hexToRgb(gridColors.secondary || '#A8A8A8') || {r: 168, g: 168, b: 168};
+        const accentRgb = palette.utils?.hexToRgb(gridColors.accent || '#8FA68E') || {r: 143, g: 166, b: 142};
+        
+        // Blend between primary -> accent -> secondary based on logical intensity
+        let r, g, b;
+        if (logicalIntensity < 0.5) {
+          // Blend primary to accent (contemplative progression)
+          const t = logicalIntensity * 2;
+          r = primaryRgb.r + (accentRgb.r - primaryRgb.r) * t;
+          g = primaryRgb.g + (accentRgb.g - primaryRgb.g) * t;
+          b = primaryRgb.b + (accentRgb.b - primaryRgb.b) * t;
+        } else {
+          // Blend accent to secondary (deepening thought)
+          const t = (logicalIntensity - 0.5) * 2;
+          r = accentRgb.r + (secondaryRgb.r - accentRgb.r) * t;
+          g = accentRgb.g + (secondaryRgb.g - accentRgb.g) * t;
+          b = accentRgb.b + (secondaryRgb.b - accentRgb.b) * t;
+        }
+        
+        fillColor = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${breathAlpha})`;
+      }
+      
+      this.ctx.fillStyle = fillColor;
       
       // Point size based on logical certainty - modest sizing
       const size = 2 + logicalIntensity * 3 + stabilityIndicator * 1.5;
@@ -395,9 +444,20 @@ class GridRenderer {
       
       // Subtle logical state indicator
       if (this.params.geometricComplexity > 0.5) {
-        const indicatorColor = palette.utils?.weather(gridColors.primary || '#778899', 0.5) || '#5A6A79';
-        const indicatorRgb = palette.utils?.hexToRgb(indicatorColor) || {r: 90, g: 106, b: 121};
-        this.ctx.strokeStyle = `rgba(${indicatorRgb.r}, ${indicatorRgb.g}, ${indicatorRgb.b}, 0.4)`;
+        let indicatorColor;
+        
+        if (this.visualParams && this.visualParams.semanticColor) {
+          // Use semantic color with reduced alpha for indicator
+          indicatorColor = this.visualParams.getHarmonizedRgba(0.4);
+        } else {
+          // Fallback to Sacred Palette indicator
+          const gridColors = palette.families?.grid || {};
+          const indicatorColorHex = palette.utils?.weather(gridColors.primary || '#778899', 0.5) || '#5A6A79';
+          const indicatorRgb = palette.utils?.hexToRgb(indicatorColorHex) || {r: 90, g: 106, b: 121};
+          indicatorColor = `rgba(${indicatorRgb.r}, ${indicatorRgb.g}, ${indicatorRgb.b}, 0.4)`;
+        }
+        
+        this.ctx.strokeStyle = indicatorColor;
         this.ctx.lineWidth = 0.5;
         this.ctx.beginPath();
         this.ctx.arc(point.x, point.y, size + 1, 0, Math.PI * 2);
@@ -412,22 +472,50 @@ class GridRenderer {
     // Draw logical regions
     const { width, height } = this.canvas;
     
+    // SEMANTIC COLOR INTEGRATION
     // Truth value gradient overlay
     const gradient = this.ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, 'rgba(100, 100, 255, 0.1)');
-    gradient.addColorStop(0.5, 'rgba(150, 150, 150, 0.05)');
-    gradient.addColorStop(1, 'rgba(255, 100, 100, 0.1)');
+    
+    if (this.visualParams && this.visualParams.semanticColor) {
+      // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+      const overlayColor1 = this.visualParams.getHarmonizedRgba(0.1);
+      const overlayColor2 = this.visualParams.getHarmonizedRgba(0.05);
+      const overlayColor3 = this.visualParams.getHarmonizedRgba(0.08);
+      
+      gradient.addColorStop(0, overlayColor1);
+      gradient.addColorStop(0.5, overlayColor2);
+      gradient.addColorStop(1, overlayColor3);
+    } else {
+      // Fallback to hardcoded gradient colors
+      gradient.addColorStop(0, 'rgba(100, 100, 255, 0.1)');
+      gradient.addColorStop(0.5, 'rgba(150, 150, 150, 0.05)');
+      gradient.addColorStop(1, 'rgba(255, 100, 100, 0.1)');
+    }
     
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, width, height);
     
     // System coherence indicator
     const coherence = this.calculateSystemCoherence();
-    this.ctx.fillStyle = `rgba(255, 255, 255, ${coherence * 0.1})`;
-    this.ctx.fillRect(width - 20, 10, 10, 100);
     
-    this.ctx.fillStyle = `rgba(100, 255, 100, ${coherence * 0.8})`;
-    this.ctx.fillRect(width - 19, 10 + (1 - coherence) * 100, 8, coherence * 100);
+    if (this.visualParams && this.visualParams.semanticColor) {
+      // Use semantic colors for coherence indicator
+      const baseColor = this.visualParams.getHarmonizedRgba(coherence * 0.1);
+      const activeColor = this.visualParams.getHarmonizedRgba(coherence * 0.8);
+      
+      this.ctx.fillStyle = baseColor;
+      this.ctx.fillRect(width - 20, 10, 10, 100);
+      
+      this.ctx.fillStyle = activeColor;
+      this.ctx.fillRect(width - 19, 10 + (1 - coherence) * 100, 8, coherence * 100);
+    } else {
+      // Fallback to hardcoded coherence colors
+      this.ctx.fillStyle = `rgba(255, 255, 255, ${coherence * 0.1})`;
+      this.ctx.fillRect(width - 20, 10, 10, 100);
+      
+      this.ctx.fillStyle = `rgba(100, 255, 100, ${coherence * 0.8})`;
+      this.ctx.fillRect(width - 19, 10 + (1 - coherence) * 100, 8, coherence * 100);
+    }
   }
 
   calculateSystemCoherence() {

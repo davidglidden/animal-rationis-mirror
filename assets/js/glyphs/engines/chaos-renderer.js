@@ -4,6 +4,8 @@ class ChaosRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       chaosType: params.chaosType || 'lorenz', // lorenz, henon, rossler, turbulent
       attractorScale: params.attractorScale || 5,
@@ -210,15 +212,23 @@ class ChaosRenderer {
   render() {
     const { width, height } = this.canvas;
     
-    // Apply trail effect using Sacred Palette ground
-    const palette = window.SacredPalette?.families?.chaos || {
-      primary: '#A67373', secondary: '#4A5A4A', accent: '#B8956A'
-    };
-    const groundColor = window.SacredPalette?.ground?.vellum || '#FAF8F3';
-    const groundRgb = window.SacredPalette?.utils?.hexToRgb(groundColor);
+    // Apply trail effect
+    // SEMANTIC COLOR INTEGRATION for background
+    let backgroundFillColor;
+    if (this.visualParams && this.visualParams.semanticColor) {
+      backgroundFillColor = this.visualParams.getHarmonizedRgba(1 - this.params.trailLength);
+    } else {
+      // Fallback to Sacred Palette ground
+      const groundColor = window.SacredPalette?.ground?.vellum || '#FAF8F3';
+      const groundRgb = window.SacredPalette?.utils?.hexToRgb(groundColor);
+      
+      if (groundRgb) {
+        backgroundFillColor = `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, ${1 - this.params.trailLength})`;
+      }
+    }
     
-    if (groundRgb) {
-      this.ctx.fillStyle = `rgba(${groundRgb.r}, ${groundRgb.g}, ${groundRgb.b}, ${1 - this.params.trailLength})`;
+    if (backgroundFillColor) {
+      this.ctx.fillStyle = backgroundFillColor;
       this.ctx.fillRect(0, 0, width, height);
     }
     
@@ -229,21 +239,32 @@ class ChaosRenderer {
         const alpha = (index / system.trail.length) * 0.6;
         const intensity = Math.min(point.intensity * 0.1, 1);
         
-        // Use Sacred Palette chaos colors for trail
-        const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
-        const colors = [palette.primary, palette.secondary, palette.accent];
-        const trailColor = colors[system.colorIndex % colors.length];
-        const breathing = window.SacredPalette?.utils?.breathe ?
-          window.SacredPalette.utils.breathe(trailColor, this.time + index, intensity * 0.1) : trailColor;
-        const trailRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
-        
-        if (trailRgb) {
-          this.ctx.fillStyle = `rgba(${trailRgb.r}, ${trailRgb.g}, ${trailRgb.b}, ${alpha * intensity})`;
+        // SEMANTIC COLOR INTEGRATION for trail
+        let trailFillColor;
+        if (this.visualParams && this.visualParams.semanticColor) {
+          // Use different alpha variations for different trail systems
+          const trailAlpha = alpha * intensity * (0.6 + (system.colorIndex * 0.1));
+          trailFillColor = this.visualParams.getHarmonizedRgba(trailAlpha);
+        } else {
+          // Fallback to Sacred Palette chaos colors
+          const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
+          const colors = [palette.primary, palette.secondary, palette.accent];
+          const trailColor = colors[system.colorIndex % colors.length];
+          const breathing = window.SacredPalette?.utils?.breathe ?
+            window.SacredPalette.utils.breathe(trailColor, this.time + index, intensity * 0.1) : trailColor;
+          const trailRgb = window.SacredPalette?.utils?.hexToRgb(breathing);
+          
+          if (trailRgb) {
+            trailFillColor = `rgba(${trailRgb.r}, ${trailRgb.g}, ${trailRgb.b}, ${alpha * intensity})`;
+          }
         }
         
-        this.ctx.beginPath();
-        this.ctx.arc(point.x, point.y, 1 + intensity, 0, Math.PI * 2);
-        this.ctx.fill();
+        if (trailFillColor) {
+          this.ctx.fillStyle = trailFillColor;
+          this.ctx.beginPath();
+          this.ctx.arc(point.x, point.y, 1 + intensity, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
       });
       
       // Draw current position
@@ -251,21 +272,32 @@ class ChaosRenderer {
         const currentIntensity = system.trail.length > 0 ? 
           Math.min(system.trail[system.trail.length - 1].intensity * 0.1, 1) : 0.5;
         
-        // Use Sacred Palette chaos colors for current position
-        const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
-        const colors = [palette.primary, palette.secondary, palette.accent];
-        const currentColor = colors[system.colorIndex % colors.length];
-        const weathered = window.SacredPalette?.utils?.weather ?
-          window.SacredPalette.utils.weather(currentColor, 0.2) : currentColor;
-        const currentRgb = window.SacredPalette?.utils?.hexToRgb(weathered);
-        
-        if (currentRgb) {
-          this.ctx.fillStyle = `rgba(${currentRgb.r}, ${currentRgb.g}, ${currentRgb.b}, 0.9)`;
+        // SEMANTIC COLOR INTEGRATION for current position
+        let currentFillColor;
+        if (this.visualParams && this.visualParams.semanticColor) {
+          // Use different alpha variations for different chaos systems
+          const currentAlpha = 0.9 * (0.6 + (system.colorIndex * 0.1));
+          currentFillColor = this.visualParams.getHarmonizedRgba(currentAlpha);
+        } else {
+          // Fallback to Sacred Palette chaos colors
+          const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
+          const colors = [palette.primary, palette.secondary, palette.accent];
+          const currentColor = colors[system.colorIndex % colors.length];
+          const weathered = window.SacredPalette?.utils?.weather ?
+            window.SacredPalette.utils.weather(currentColor, 0.2) : currentColor;
+          const currentRgb = window.SacredPalette?.utils?.hexToRgb(weathered);
+          
+          if (currentRgb) {
+            currentFillColor = `rgba(${currentRgb.r}, ${currentRgb.g}, ${currentRgb.b}, 0.9)`;
+          }
         }
         
-        this.ctx.beginPath();
-        this.ctx.arc(system.canvasX, system.canvasY, 2 + currentIntensity * 2, 0, Math.PI * 2);
-        this.ctx.fill();
+        if (currentFillColor) {
+          this.ctx.fillStyle = currentFillColor;
+          this.ctx.beginPath();
+          this.ctx.arc(system.canvasX, system.canvasY, 2 + currentIntensity * 2, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
         
         // Draw glow for high-intensity points
         if (currentIntensity > 0.7) {
@@ -274,13 +306,21 @@ class ChaosRenderer {
             system.canvasX, system.canvasY, 10
           );
           
-          // Use Sacred Palette for glow
-          const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
-          const glowColor = palette.accent; // Old gold for glow
-          const glowRgb = window.SacredPalette?.utils?.hexToRgb(glowColor);
-          if (glowRgb) {
-            glowGradient.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.6)`);
-            glowGradient.addColorStop(1, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0)`);
+          // SEMANTIC COLOR INTEGRATION for glow
+          if (this.visualParams && this.visualParams.semanticColor) {
+            const glowCenter = this.visualParams.getHarmonizedRgba(0.6);
+            const glowEdge = this.visualParams.getHarmonizedRgba(0);
+            glowGradient.addColorStop(0, glowCenter);
+            glowGradient.addColorStop(1, glowEdge);
+          } else {
+            // Fallback to Sacred Palette for glow
+            const palette = window.SacredPalette?.families?.chaos || { primary: '#8B4513', secondary: '#CD853F', accent: '#D2B48C' };
+            const glowColor = palette.accent; // Old gold for glow
+            const glowRgb = window.SacredPalette?.utils?.hexToRgb(glowColor);
+            if (glowRgb) {
+              glowGradient.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0.6)`);
+              glowGradient.addColorStop(1, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 0)`);
+            }
           }
           
           this.ctx.fillStyle = glowGradient;
@@ -291,20 +331,36 @@ class ChaosRenderer {
       }
     });
     
-    // Draw phase space indicator using Sacred Palette
-    const indicatorColor = palette.secondary;
-    const textColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
-    const indRgb = window.SacredPalette?.utils?.hexToRgb(indicatorColor);
-    const textRgb = window.SacredPalette?.utils?.hexToRgb(textColor);
+    // Draw phase space indicator
+    // SEMANTIC COLOR INTEGRATION for phase space indicator
+    let indicatorFillColor, textFillColor;
+    if (this.visualParams && this.visualParams.semanticColor) {
+      indicatorFillColor = this.visualParams.getHarmonizedRgba(0.1);
+      textFillColor = this.visualParams.getHarmonizedRgba(0.7);
+    } else {
+      // Fallback to Sacred Palette
+      const palette = window.SacredPalette?.families?.chaos || {
+        primary: '#A67373', secondary: '#4A5A4A', accent: '#B8956A'
+      };
+      const indicatorColor = palette.secondary;
+      const textColor = window.SacredPalette?.base?.graphite || '#4A4A4A';
+      const indRgb = window.SacredPalette?.utils?.hexToRgb(indicatorColor);
+      const textRgb = window.SacredPalette?.utils?.hexToRgb(textColor);
+      
+      if (indRgb && textRgb) {
+        indicatorFillColor = `rgba(${indRgb.r}, ${indRgb.g}, ${indRgb.b}, 0.1)`;
+        textFillColor = `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.7)`;
+      }
+    }
     
-    if (indRgb && textRgb) {
-      this.ctx.fillStyle = `rgba(${indRgb.r}, ${indRgb.g}, ${indRgb.b}, 0.1)`;
+    if (indicatorFillColor && textFillColor) {
+      this.ctx.fillStyle = indicatorFillColor;
       this.ctx.fillRect(width - 60, 10, 50, 30);
-      this.ctx.fillStyle = `rgba(${textRgb.r}, ${textRgb.g}, ${textRgb.b}, 0.7)`;
+      this.ctx.fillStyle = textFillColor;
       this.ctx.font = '10px monospace';
       this.ctx.fillText(this.params.chaosType.toUpperCase(), width - 58, 25);
+      this.ctx.fillText(`t: ${this.time.toFixed(1)}`, width - 58, 35);
     }
-    this.ctx.fillText(`t: ${this.time.toFixed(1)}`, width - 58, 35);
   }
 
   destroy() {

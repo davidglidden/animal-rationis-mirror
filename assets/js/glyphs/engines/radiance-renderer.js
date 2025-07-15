@@ -30,15 +30,7 @@ class RadianceRenderer {
     this.animationId = null;
     this.center = { x: 0, y: 0 };
     
-    // Debug semantic integration
-    if (this.visualParams) {
-      console.log('🎨 Radiance renderer initialized with semantic data:', {
-        archetype: this.visualParams.archetype,
-        symbolicColor: this.visualParams.symbolicColor,
-        entropyScore: this.visualParams.entropyScore,
-        conceptualDNA: this.visualParams.conceptualDNA
-      });
-    }
+    // Semantic integration initialized
     
     this.initRadiance();
   }

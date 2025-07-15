@@ -4,6 +4,8 @@ class SpiralRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
+    // Semantic integration initialized
     this.params = {
       spiralType: params.spiralType || 'fibonacci', // fibonacci, archimedean, logarithmic
       arms: params.arms || 3,
@@ -91,28 +93,43 @@ class SpiralRenderer {
       particle.life += particle.speed * 0.01;
       if (particle.life > 1) particle.life = 0;
       
-      // Color using Sacred Palette spiral family - golden growth spiraling
-      const palette = window.SacredPalette?.families?.spiral || {
-        primary: '#8B4513', secondary: '#CD853F', accent: '#D2691E'
-      };
+      // SEMANTIC COLOR INTEGRATION
+      let primaryColor, secondaryColor, accentColor;
+      const alpha = Math.sin(particle.life * Math.PI) * 0.8;
       
-      // Cycle through spiral colors based on position and time
-      const colorPhase = (index * 137.5 + this.time * 50) % 360; // Golden angle
-      let color;
-      if (colorPhase < 120) {
-        color = palette.primary;
-      } else if (colorPhase < 240) {
-        color = palette.secondary;
+      if (this.visualParams && this.visualParams.semanticColor) {
+        // Use semantically extracted colors filtered through AldineXXI aesthetic harmonizer
+        primaryColor = this.visualParams.getHarmonizedRgba(alpha);
+        secondaryColor = this.visualParams.getHarmonizedRgba(alpha * 0.6);
+        accentColor = this.visualParams.getHarmonizedRgba(alpha * 0.8);
       } else {
-        color = palette.accent;
+        // Fallback to Sacred Palette spiral colors
+        const palette = window.SacredPalette?.families?.spiral || {
+          primary: '#8B4513', secondary: '#CD853F', accent: '#D2691E'
+        };
+        
+        // Cycle through spiral colors based on position and time
+        const colorPhase = (index * 137.5 + this.time * 50) % 360; // Golden angle
+        let color;
+        if (colorPhase < 120) {
+          color = palette.primary;
+        } else if (colorPhase < 240) {
+          color = palette.secondary;
+        } else {
+          color = palette.accent;
+        }
+        
+        // Apply life-based alpha and slight weathering
+        const weathering = window.SacredPalette?.utilities?.weatherColor ? 
+          window.SacredPalette.utilities.weatherColor(color, particle.life * 0.3) : color;
+        
+        primaryColor = weathering.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+        secondaryColor = weathering.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+        accentColor = weathering.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
       }
       
-      // Apply life-based alpha and slight weathering
-      const alpha = Math.sin(particle.life * Math.PI) * 0.8;
-      const weathering = window.SacredPalette?.utilities?.weatherColor ? 
-        window.SacredPalette.utilities.weatherColor(color, particle.life * 0.3) : color;
-      
-      this.ctx.fillStyle = weathering.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+      // Use primary color for particles
+      this.ctx.fillStyle = primaryColor;
       
       // Draw particle with size based on life
       const size = 2 + particle.life * 4;
@@ -123,9 +140,20 @@ class SpiralRenderer {
       // Draw connecting lines between nearby particles
       if (index > 0 && index % 3 === 0) {
         const prevPos = this.getSpiralPosition(this.particles[index - 1].angle, index - 1);
-        // Use muted accent color for connections
-        const connectionColor = palette.accent;
-        this.ctx.strokeStyle = connectionColor.replace('rgb', 'rgba').replace(')', ', 0.3)');
+        
+        // Use accent color for connections
+        let connectionColor;
+        if (this.visualParams && this.visualParams.semanticColor) {
+          connectionColor = this.visualParams.getHarmonizedRgba(0.3);
+        } else {
+          // Fallback to Sacred Palette
+          const palette = window.SacredPalette?.families?.spiral || {
+            primary: '#8B4513', secondary: '#CD853F', accent: '#D2691E'
+          };
+          connectionColor = palette.accent.replace('rgb', 'rgba').replace(')', ', 0.3)');
+        }
+        
+        this.ctx.strokeStyle = connectionColor;
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.moveTo(prevPos.x, prevPos.y);
