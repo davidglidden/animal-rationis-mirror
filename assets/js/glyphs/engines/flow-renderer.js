@@ -5,14 +5,18 @@ class FlowRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      particleCount: params.particleCount || 300,
-      flowSpeed: params.flowSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 1000,
-      turbulence: params.turbulence || 0.1,
-      viscosity: params.viscosity || 0.98,
-      flowPattern: params.flowPattern || 'vortex', // vortex, stream, turbulent
+      particleCount: this.semanticParams.particleCount,
+      flowSpeed: this.semanticParams.flowSpeed,
+      turbulence: this.semanticParams.turbulence,
+      viscosity: this.semanticParams.viscosity,
+      flowPattern: this.semanticParams.flowPattern,
       colorFlow: params.colorFlow || true,
-      trailLength: params.trailLength || 0.95,
+      trailLength: this.semanticParams.trailLength,
       ...params
     };
     this.time = 0;
@@ -20,10 +24,90 @@ class FlowRenderer {
     this.flowField = [];
     this.animationId = null;
     
-    // Semantic integration initialized
+    console.log(`🎨 Flow renderer initialized with semantic differentiation:`, {
+      pattern: this.semanticParams.flowPattern,
+      particles: this.semanticParams.particleCount,
+      turbulence: this.semanticParams.turbulence,
+      entropy: this.semanticParams.entropyScore
+    });
     
     this.initParticles();
     this.generateFlowField();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'flowing';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001) * 1000;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Particle density based on conceptual complexity
+      particleCount: Math.floor(200 + (entropyScore * 400)), // 200-600 particles
+      
+      // Flow speed based on temporal dynamics
+      flowSpeed: baseSpeed * (0.5 + (genome.temporality?.velocity || 0) * 2),
+      
+      // Turbulence based on complexity and chaos
+      turbulence: (genome.complexity?.nestedComplexity || 0.1) * 0.5,
+      
+      // Viscosity based on resonance harmony
+      viscosity: 0.9 + (genome.resonance?.harmonicComplexity || 0.1) * 0.08,
+      
+      // Trail length based on temporal flow
+      trailLength: 0.85 + (genome.temporality?.sequentialFlow || 0.1) * 0.1,
+      
+      // Flow pattern based on structural topology
+      flowPattern: this.selectFlowPattern(genome, conceptualDNA),
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select flow pattern based on semantic content
+  selectFlowPattern(genome, conceptualDNA) {
+    const topology = genome.topology || {};
+    const dynamics = genome.dynamics || {};
+    
+    // Analyze conceptual DNA for flow pattern hints
+    const hasCircular = conceptualDNA.some(concept => 
+      ['circular', 'cycle', 'spiral', 'orbit', 'rotation'].includes(concept.toLowerCase())
+    );
+    const hasLinear = conceptualDNA.some(concept => 
+      ['linear', 'stream', 'flow', 'sequence', 'progression'].includes(concept.toLowerCase())
+    );
+    const hasChaotic = conceptualDNA.some(concept => 
+      ['chaotic', 'turbulent', 'random', 'disorder', 'complex'].includes(concept.toLowerCase())
+    );
+    
+    // Pattern selection based on semantic analysis
+    if (hasCircular || topology.circularityIndex > 0.3) {
+      return 'vortex';
+    } else if (hasLinear || dynamics.dominantMovement === 'linear') {
+      return 'stream';
+    } else if (hasChaotic || topology.branchingFactor > 2.5) {
+      return 'turbulent';
+    } else {
+      // Default based on structural complexity
+      if (topology.branchingFactor > 1.8) {
+        return 'turbulent';
+      } else if (topology.circularityIndex > 0.15) {
+        return 'vortex';
+      } else {
+        return 'stream';
+      }
+    }
   }
 
   initParticles() {

@@ -763,6 +763,18 @@ class GlyphOrchestrator {
         
         // Add visualParams to params for renderer consumption
         params.visualParams = visualParams;
+        
+        // PRIME DIRECTIVE: Pass semantic genome data to renderer for structural differentiation
+        params.genome = genome;
+        params.archetype = genome?.archetype || 'flowing';
+        params.entropyScore = genome?.uniqueness ? (genome.uniqueness % 1000) / 1000 : 0.5;
+        params.conceptualDNA = genome?.uniqueIdentifiers?.concepts?.map(c => c.term) || [];
+        
+        console.log('🎨 Added semantic parameters for structural differentiation:', {
+          archetype: params.archetype,
+          entropyScore: params.entropyScore,
+          conceptualDNA: params.conceptualDNA?.slice(0, 5)
+        });
       } catch (visualParamsError) {
         console.error(`❌ VisualParams creation failed:`, visualParamsError);
         console.warn(`⚠️ VisualParams creation failed: ${visualParamsError.message}`);
