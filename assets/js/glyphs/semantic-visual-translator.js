@@ -3142,16 +3142,11 @@ class EnhancedSemanticDNA {
   }
   
   extractGenome(postContent, metadata = {}) {
-    // Try to get SemanticDNA at runtime if we haven't initialized it yet
-    if (!this.baseSemanticDNA && typeof window !== 'undefined') {
-      // Check for EnhancedSemanticDNA first (preferred)
-      if (window.GlyphSemantics?.EnhancedSemanticDNA) {
-        this.baseSemanticDNA = new window.GlyphSemantics.EnhancedSemanticDNA();
-        console.log('🧬 Late-initialized EnhancedSemanticDNA as base');
-      } else if (window.SemanticDNA) {
-        this.baseSemanticDNA = new window.SemanticDNA();
-        console.log('🧬 Late-initialized SemanticDNA as base');
-      }
+    // Try to get base SemanticDNA at runtime if we haven't initialized it yet
+    // IMPORTANT: Don't create EnhancedSemanticDNA recursively - only look for base SemanticDNA
+    if (!this.baseSemanticDNA && typeof window !== 'undefined' && window.SemanticDNA) {
+      this.baseSemanticDNA = new window.SemanticDNA();
+      console.log('🧬 Late-initialized base SemanticDNA');
     }
     
     // Get base genome from SemanticDNA if available, otherwise create minimal genome
