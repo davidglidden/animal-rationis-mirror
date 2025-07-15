@@ -3156,6 +3156,9 @@ class EnhancedSemanticDNA {
       genome = this.baseSemanticDNA.extractGenome(postContent, metadata);
       console.log('🧬 Using real SemanticDNA extraction (not fallback)');
       genome.debug = { source: 'semantic', using: 'real SemanticDNA' };
+      
+      // Ensure metadata is available for color derivation
+      genome.metadata = metadata;
     } else {
       // Fallback minimal genome structure
       genome = this.createFallbackGenome(postContent, metadata);

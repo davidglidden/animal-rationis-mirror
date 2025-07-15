@@ -1553,16 +1553,23 @@ class GlyphOrchestrator {
     };
 
     // Try to extract semantic color and archetype from genome
+    if (genome.uniqueIdentifiers?.semanticColor) {
+      try {
+        const semanticColor = genome.uniqueIdentifiers.semanticColor;
+        debugInfo.semanticColor = `h:${semanticColor.primary.h.toFixed(0)}, s:${semanticColor.primary.s.toFixed(0)}, l:${semanticColor.primary.l.toFixed(0)}`;
+      } catch (e) {
+        console.warn('Could not extract semantic color from genome:', e);
+      }
+    }
+    
+    // Try to extract archetype from visual translation
     if (window.GlyphSemantics?.SemanticVisualTranslator) {
       try {
         const translator = new window.GlyphSemantics.SemanticVisualTranslator();
-        const derivedColor = translator.deriveSemanticColor(genome);
-        const selectedArchetype = translator.selectArchetype(genome);
-        
-        debugInfo.semanticColor = `h:${derivedColor.primary.h.toFixed(0)}, s:${derivedColor.primary.s.toFixed(0)}, l:${derivedColor.primary.l.toFixed(0)}`;
-        debugInfo.archetype = selectedArchetype;
+        const visualTranslation = translator.translateSemanticToVisual(genome.uniqueIdentifiers?.concepts || []);
+        debugInfo.archetype = visualTranslation.archetype?.primary || 'unknown';
       } catch (e) {
-        console.warn('Could not extract semantic color/archetype:', e);
+        console.warn('Could not extract archetype:', e);
       }
     }
 
@@ -2474,6 +2481,12 @@ class EvolutionaryFitness {
     // Placeholder for aesthetic emergence detection
     return Math.random() * 0.5;
   }
+}
+
+// Export base SemanticDNA class to global namespace for EnhancedSemanticDNA
+if (typeof window !== 'undefined') {
+  window.SemanticDNA = SemanticDNA;
+  console.log('🧬 Base SemanticDNA class exported to global namespace');
 }
 
 // Auto-initialize when script loads
