@@ -1445,7 +1445,10 @@ class SemanticDNA {
         title: metadata.title || '',
         themes: metadata.themes || [],
         date: metadata.date || new Date()
-      }
+      },
+      
+      // CRITICAL: Store the actual text content for concept extraction
+      textContent: postContent
     };
     
     // Generate unique philosophical fingerprint

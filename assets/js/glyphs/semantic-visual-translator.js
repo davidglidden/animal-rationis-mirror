@@ -540,74 +540,14 @@ class EnhancedSemanticInterpreter {
     return dna;
   }
   
-  // Extract key concepts from genome data for visual differentiation
+  // Enhanced Genome→Concepts Bridge with sophisticated pattern recognition
   extractKeyConceptsFromGenome(genome) {
-    const concepts = [];
-    
-    // Extract concepts based on genome properties with semantic weighting
-    // High complexity suggests abstract/philosophical concepts
-    if (genome.complexity && genome.complexity.recursiveDepth > 2) {
-      concepts.push({ 
-        word: 'depth', 
-        source: 'complexity', 
-        weight: genome.complexity.recursiveDepth,
-        archetype: 'Strata' 
-      });
-    }
-    
-    // High resonance suggests emotional/harmonic content
-    if (genome.resonance && genome.resonance.harmonicComplexity > 0.5) {
-      concepts.push({ 
-        word: 'harmony', 
-        source: 'resonance', 
-        weight: genome.resonance.harmonicComplexity,
-        archetype: 'Radiance'
-      });
-    }
-    
-    // Temporal patterns suggest flow/rhythm concepts
-    if (genome.temporality && genome.temporality.rhythmicComplexity > 0.5) {
-      concepts.push({ 
-        word: 'rhythm', 
-        source: 'temporality', 
-        weight: genome.temporality.rhythmicComplexity,
-        archetype: 'Flow'
-      });
-    }
-    
-    // Network patterns suggest connection/threshold concepts
-    if (genome.topology && genome.topology.rhizomaticTendency > 0.5) {
-      concepts.push({ 
-        word: 'network', 
-        source: 'topology', 
-        weight: genome.topology.rhizomaticTendency,
-        archetype: 'Threshold'
-      });
-    }
-    
-    // High branching suggests constellation patterns
-    if (genome.topology && genome.topology.branchingFactor > 2) {
-      concepts.push({ 
-        word: 'branching', 
-        source: 'topology', 
-        weight: genome.topology.branchingFactor / 4,
-        archetype: 'Constellation'
-      });
-    }
-    
-    // High circularity suggests spiral patterns
-    if (genome.topology && genome.topology.circularityIndex > 0.6) {
-      concepts.push({ 
-        word: 'circular', 
-        source: 'topology', 
-        weight: genome.topology.circularityIndex,
-        archetype: 'Spiral'
-      });
-    }
+    const extractor = new GenomeConceptExtractor();
+    const concepts = extractor.extractConceptsFromGenome(genome);
     
     // Analytics logging for visual confirmation
     if (concepts.length > 0) {
-      console.log('🧠 Extracted genome concepts:', concepts);
+      console.log('🧠 Enhanced genome concepts:', concepts);
     }
     
     return concepts;
@@ -1215,18 +1155,18 @@ class SemanticVisualTranslator {
     }
   }
   
-  // FIXED: Identify dominant semantic archetype from profile using extracted concepts
+  // ENHANCED: Identify dominant semantic archetype using sophisticated concept analysis
   identifyDominantArchetype(semanticProfile) {
-    console.log('🎯 Archetype selection starting for profile:', semanticProfile.conceptualDNA?.concepts);
+    console.log('🎯 Enhanced archetype selection starting for profile:', semanticProfile.conceptualDNA?.concepts);
     
     const scores = {};
     
-    // PRIORITY 1: Use extracted concepts from genome if available
+    // PRIORITY 1: Use enhanced concepts from GenomeConceptExtractor
     if (semanticProfile.conceptualDNA?.concepts && semanticProfile.conceptualDNA.concepts.length > 0) {
-      console.log('🎯 Using extracted concepts for archetype selection');
-      console.log('🧬 Available concepts:', semanticProfile.conceptualDNA.concepts);
+      console.log('🎯 Using enhanced concepts for archetype selection');
+      console.log('🧬 Available enhanced concepts:', semanticProfile.conceptualDNA.concepts);
       
-      // Direct concept-word to archetype mapping
+      // Enhanced concept scoring with sophisticated pattern recognition
       const conceptScores = {
         'layered': 0,        // Strata family
         'luminous': 0,       // Radiance family  
@@ -1242,51 +1182,44 @@ class SemanticVisualTranslator {
       };
       
       semanticProfile.conceptualDNA.concepts.forEach(concept => {
-        console.log(`🔍 Processing concept: ${concept.word} (weight: ${concept.weight}, archetype: ${concept.archetype})`);
+        console.log(`🔍 Processing enhanced concept: ${concept.word} (weight: ${concept.weight}, archetype: ${concept.archetype}, source: ${concept.source})`);
         
-        // Map concept words directly to semantic archetypes
-        switch (concept.word) {
-          case 'depth':
-            conceptScores.layered += concept.weight;
-            break;
-          case 'harmony':
-            conceptScores.luminous += concept.weight;
-            break;
-          case 'rhythm':
-            conceptScores.flowing += concept.weight;
-            break;
-          case 'network':
-            conceptScores.liminal += concept.weight;
-            break;
-          case 'branching':
-            conceptScores.networked += concept.weight;
-            break;
-          case 'circular':
-            conceptScores.cyclical += concept.weight;
-            break;
-          default:
-            // Use the archetype if provided
-            if (concept.archetype) {
-              const semanticArchetype = this.mapVisualToSemanticArchetype(concept.archetype);
-              console.log(`🎯 Mapping ${concept.archetype} → ${semanticArchetype} (weight: ${concept.weight})`);
-              if (conceptScores.hasOwnProperty(semanticArchetype)) {
-                conceptScores[semanticArchetype] += concept.weight;
-                console.log(`✅ Added to conceptScores[${semanticArchetype}] = ${conceptScores[semanticArchetype]}`);
-              } else {
-                console.warn(`⚠️ Unknown semantic archetype: ${semanticArchetype}`);
-              }
-            }
+        // Enhanced concept-to-archetype mapping
+        const archetypeMapping = this.getEnhancedArchetypeMapping(concept);
+        
+        if (archetypeMapping) {
+          const semanticArchetype = archetypeMapping.semantic;
+          const weight = concept.weight * archetypeMapping.multiplier;
+          
+          console.log(`🎯 Enhanced mapping: ${concept.word} → ${semanticArchetype} (weight: ${weight})`);
+          
+          if (conceptScores.hasOwnProperty(semanticArchetype)) {
+            conceptScores[semanticArchetype] += weight;
+            console.log(`✅ Added to conceptScores[${semanticArchetype}] = ${conceptScores[semanticArchetype]}`);
+          }
+        }
+        
+        // Also use direct archetype mapping from concept
+        if (concept.archetype) {
+          const semanticArchetype = this.mapVisualToSemanticArchetype(concept.archetype);
+          console.log(`🎯 Direct mapping ${concept.archetype} → ${semanticArchetype} (weight: ${concept.weight})`);
+          if (conceptScores.hasOwnProperty(semanticArchetype)) {
+            conceptScores[semanticArchetype] += concept.weight;
+            console.log(`✅ Added to conceptScores[${semanticArchetype}] = ${conceptScores[semanticArchetype]}`);
+          }
         }
       });
       
-      // Convert concept scores to final scores
+      // Apply confidence weighting and source diversity bonuses
       Object.entries(conceptScores).forEach(([archetype, score]) => {
         if (score > 0) {
-          scores[archetype] = score;
+          // Apply confidence and source diversity bonuses
+          const enhancedScore = this.applyArchetypeEnhancements(archetype, score, semanticProfile.conceptualDNA.concepts);
+          scores[archetype] = enhancedScore;
         }
       });
       
-      console.log('📊 Archetype scores from concepts:', scores);
+      console.log('📊 Enhanced archetype scores from concepts:', scores);
     }
     
     // PRIORITY 2: If no concept-based archetypes, use semantic analysis
@@ -1376,6 +1309,88 @@ class SemanticVisualTranslator {
       secondary: this.findSecondaryArchetype(scores, dominant),
       scores
     };
+  }
+  
+  // Enhanced archetype mapping with sophisticated concept analysis
+  getEnhancedArchetypeMapping(concept) {
+    const mappings = {
+      // Sophisticated conceptual mappings
+      'contemplative': { semantic: 'layered', multiplier: 1.2 },
+      'dynamic': { semantic: 'flowing', multiplier: 1.1 },
+      'interconnected': { semantic: 'networked', multiplier: 1.0 },
+      'radiant': { semantic: 'luminous', multiplier: 1.3 },
+      'spiral': { semantic: 'cyclical', multiplier: 1.1 },
+      'branching': { semantic: 'networked', multiplier: 1.0 },
+      
+      // Emergent pattern mappings
+      'philosophical_stance': { semantic: 'layered', multiplier: 1.4 },
+      'temporal_awareness': { semantic: 'flowing', multiplier: 1.2 },
+      'perceptual_focus': { semantic: 'luminous', multiplier: 1.1 },
+      'spatial_orientation': { semantic: 'analytical', multiplier: 1.0 },
+      'emotional_resonance': { semantic: 'dialectical', multiplier: 0.9 },
+      
+      // Semantic field mappings
+      'nature_field': { semantic: 'luminous', multiplier: 1.1 },
+      'consciousness_field': { semantic: 'layered', multiplier: 1.3 },
+      'time_field': { semantic: 'flowing', multiplier: 1.2 },
+      'space_field': { semantic: 'analytical', multiplier: 1.0 },
+      'relation_field': { semantic: 'networked', multiplier: 1.1 },
+      'movement_field': { semantic: 'cyclical', multiplier: 1.2 },
+      'being_field': { semantic: 'equilibrium', multiplier: 1.0 },
+      
+      // Philosophical stance mappings
+      'phenomenological': { semantic: 'layered', multiplier: 1.4 },
+      'experiential': { semantic: 'layered', multiplier: 1.2 },
+      'perceptual': { semantic: 'luminous', multiplier: 1.1 },
+      'lived': { semantic: 'flowing', multiplier: 1.0 },
+      'reflective': { semantic: 'layered', multiplier: 1.3 },
+      'meditative': { semantic: 'equilibrium', multiplier: 1.1 },
+      'introspective': { semantic: 'layered', multiplier: 1.2 },
+      'dialectical': { semantic: 'dialectical', multiplier: 1.5 },
+      'tensional': { semantic: 'dialectical', multiplier: 1.3 },
+      'oppositional': { semantic: 'dialectical', multiplier: 1.2 },
+      'synthetic': { semantic: 'dialectical', multiplier: 1.1 },
+      'poetic': { semantic: 'luminous', multiplier: 1.2 },
+      'aesthetic': { semantic: 'luminous', multiplier: 1.1 },
+      'lyrical': { semantic: 'flowing', multiplier: 1.1 },
+      'metaphorical': { semantic: 'networked', multiplier: 1.0 },
+      
+      // Resonance amplification mappings
+      'resonance': { semantic: 'dialectical', multiplier: 1.3 }
+    };
+    
+    return mappings[concept.word] || null;
+  }
+  
+  // Apply confidence and source diversity bonuses
+  applyArchetypeEnhancements(archetype, score, concepts) {
+    let enhancedScore = score;
+    
+    // Confidence bonus - concepts with higher confidence get more weight
+    const relevantConcepts = concepts.filter(c => 
+      this.getEnhancedArchetypeMapping(c)?.semantic === archetype ||
+      this.mapVisualToSemanticArchetype(c.archetype) === archetype
+    );
+    
+    if (relevantConcepts.length > 0) {
+      const avgConfidence = relevantConcepts.reduce((sum, c) => sum + (c.confidence || 0.5), 0) / relevantConcepts.length;
+      enhancedScore *= (1 + avgConfidence * 0.2);
+    }
+    
+    // Source diversity bonus - concepts from multiple sources get bonus
+    const sources = new Set(relevantConcepts.map(c => c.source));
+    if (sources.size > 1) {
+      const diversityBonus = Math.min(sources.size * 0.1, 0.3);
+      enhancedScore *= (1 + diversityBonus);
+    }
+    
+    // Philosophical stance bonus - philosophical concepts get special weight
+    const philosophicalConcepts = relevantConcepts.filter(c => c.source === 'philosophical_stance');
+    if (philosophicalConcepts.length > 0) {
+      enhancedScore *= 1.2;
+    }
+    
+    return enhancedScore;
   }
   
   // Map visual archetype families to semantic archetypes
@@ -2685,6 +2700,435 @@ class ContextualEnhancers {
   }
 }
 
+// === ENHANCED GENOME→CONCEPTS BRIDGE ===
+// Sophisticated pattern recognition for concept extraction from genome data
+
+class GenomeConceptExtractor {
+  constructor() {
+    // Define conceptual archetypes with their characteristic patterns
+    this.conceptualArchetypes = {
+      'contemplative': {
+        markers: ['depth', 'reflection', 'silence', 'interior', 'quiet'],
+        genomeSignature: {
+          complexity: { recursiveDepth: [2, 5] },
+          resonance: { harmonicComplexity: [0.3, 0.7] },
+          temporality: { rhythmicComplexity: [0.2, 0.5] }
+        },
+        visualArchetype: 'Strata'
+      },
+      
+      'dynamic': {
+        markers: ['movement', 'flow', 'rhythm', 'pulse', 'energy'],
+        genomeSignature: {
+          dynamics: { velocity: [0.3, 0.8] },
+          temporality: { rhythmicComplexity: [0.5, 0.9] }
+        },
+        visualArchetype: 'Flow'
+      },
+      
+      'interconnected': {
+        markers: ['network', 'connection', 'thread', 'weaving', 'bridge'],
+        genomeSignature: {
+          topology: { rhizomaticTendency: [0.4, 0.9] },
+          complexity: { networkDensity: [0.5, 0.8] }
+        },
+        visualArchetype: 'Threshold'
+      },
+      
+      'radiant': {
+        markers: ['light', 'brightness', 'illumination', 'glow', 'clarity'],
+        genomeSignature: {
+          resonance: { harmonicComplexity: [0.6, 0.9] },
+          dynamics: { patterns: { radiating: [0.3, 0.8] } }
+        },
+        visualArchetype: 'Radiance'
+      },
+      
+      'spiral': {
+        markers: ['spiral', 'circular', 'cycle', 'turning', 'revolution'],
+        genomeSignature: {
+          topology: { circularityIndex: [0.5, 0.9] },
+          dynamics: { patterns: { spiraling: [0.4, 0.8] } }
+        },
+        visualArchetype: 'Spiral'
+      },
+      
+      'branching': {
+        markers: ['branch', 'tree', 'fractal', 'division', 'growth'],
+        genomeSignature: {
+          topology: { branchingFactor: [2, 5] },
+          complexity: { recursiveDepth: [2, 4] }
+        },
+        visualArchetype: 'Constellation'
+      }
+    };
+    
+    // Sophisticated concept patterns for emergent detection
+    this.emergentPatterns = {
+      'philosophical_stance': {
+        pattern: /\b(being|existence|consciousness|reality|truth|meaning)\b/gi,
+        weight: 0.8,
+        category: 'ontological'
+      },
+      
+      'temporal_awareness': {
+        pattern: /\b(time|moment|duration|passage|eternal|fleeting)\b/gi,
+        weight: 0.7,
+        category: 'temporal'
+      },
+      
+      'perceptual_focus': {
+        pattern: /\b(see|seeing|sight|vision|perspective|gaze|look)\b/gi,
+        weight: 0.6,
+        category: 'perceptual'
+      },
+      
+      'emotional_resonance': {
+        pattern: /\b(feel|feeling|emotion|heart|soul|spirit)\b/gi,
+        weight: 0.5,
+        category: 'emotional'
+      },
+      
+      'spatial_orientation': {
+        pattern: /\b(space|place|location|position|distance|proximity)\b/gi,
+        weight: 0.4,
+        category: 'spatial'
+      }
+    };
+    
+    // Semantic field organization for coherent concept clusters
+    this.semanticFields = {
+      'nature': ['light', 'shadow', 'tree', 'earth', 'sky', 'water', 'wind', 'season'],
+      'consciousness': ['mind', 'thought', 'awareness', 'perception', 'understanding'],
+      'time': ['moment', 'duration', 'memory', 'future', 'past', 'present'],
+      'space': ['place', 'location', 'distance', 'proximity', 'boundary'],
+      'relation': ['connection', 'bridge', 'thread', 'network', 'bond'],
+      'movement': ['flow', 'rhythm', 'dance', 'spiral', 'pulse', 'vibration'],
+      'being': ['existence', 'presence', 'absence', 'void', 'fullness']
+    };
+  }
+  
+  // Main extraction method with sophisticated pattern recognition
+  extractConceptsFromGenome(genome) {
+    const concepts = [];
+    
+    // 1. Extract concepts from direct genome analysis
+    const genomeConcepts = this.extractFromGenomeStructure(genome);
+    concepts.push(...genomeConcepts);
+    
+    // 2. Detect emergent conceptual patterns
+    const emergentConcepts = this.detectEmergentConcepts(genome);
+    concepts.push(...emergentConcepts);
+    
+    // 3. Identify semantic field organization
+    const fieldConcepts = this.organizeSemanticFields(concepts);
+    concepts.push(...fieldConcepts);
+    
+    // 4. Apply resonance amplification
+    const amplifiedConcepts = this.amplifyResonance(concepts, genome);
+    
+    // 5. Detect philosophical stance
+    const stanceConcepts = this.detectPhilosophicalStance(genome);
+    amplifiedConcepts.push(...stanceConcepts);
+    
+    // 6. Ensure conceptual diversity
+    const diverseConcepts = this.enforceConceptualDiversity(amplifiedConcepts);
+    
+    return diverseConcepts;
+  }
+  
+  // Extract concepts from direct genome structure analysis
+  extractFromGenomeStructure(genome) {
+    const concepts = [];
+    
+    // Analyze each conceptual archetype against genome signature
+    for (const [archetype, config] of Object.entries(this.conceptualArchetypes)) {
+      const match = this.matchGenomeSignature(genome, config.genomeSignature);
+      
+      if (match.score > 0.3) {
+        // Add primary archetype concept
+        concepts.push({
+          word: archetype,
+          source: 'genome_structure',
+          weight: match.score,
+          archetype: config.visualArchetype,
+          confidence: match.confidence
+        });
+        
+        // Add related marker concepts
+        config.markers.forEach(marker => {
+          concepts.push({
+            word: marker,
+            source: 'archetype_marker',
+            weight: match.score * 0.7,
+            archetype: config.visualArchetype,
+            confidence: match.confidence * 0.8
+          });
+        });
+      }
+    }
+    
+    return concepts;
+  }
+  
+  // Detect emergent conceptual patterns
+  detectEmergentConcepts(genome) {
+    const concepts = [];
+    
+    // Extract text content from genome if available
+    const textContent = this.extractTextFromGenome(genome);
+    
+    if (textContent) {
+      for (const [patternName, config] of Object.entries(this.emergentPatterns)) {
+        const matches = textContent.match(config.pattern);
+        
+        if (matches && matches.length > 0) {
+          const density = matches.length / textContent.length * 1000; // Per 1000 chars
+          
+          concepts.push({
+            word: patternName,
+            source: 'emergent_pattern',
+            weight: config.weight * Math.min(density, 1),
+            archetype: this.patternToArchetype(config.category),
+            confidence: 0.7,
+            matches: matches.length
+          });
+        }
+      }
+    }
+    
+    return concepts;
+  }
+  
+  // Organize concepts into semantic fields
+  organizeSemanticFields(concepts) {
+    const fieldConcepts = [];
+    
+    // Group concepts by semantic field
+    const fieldGroups = {};
+    
+    concepts.forEach(concept => {
+      for (const [field, keywords] of Object.entries(this.semanticFields)) {
+        if (keywords.includes(concept.word.toLowerCase())) {
+          if (!fieldGroups[field]) fieldGroups[field] = [];
+          fieldGroups[field].push(concept);
+        }
+      }
+    });
+    
+    // Create field-level concepts for coherent clusters
+    for (const [field, groupConcepts] of Object.entries(fieldGroups)) {
+      if (groupConcepts.length >= 2) {
+        const avgWeight = groupConcepts.reduce((sum, c) => sum + c.weight, 0) / groupConcepts.length;
+        
+        fieldConcepts.push({
+          word: `${field}_field`,
+          source: 'semantic_field',
+          weight: avgWeight * 1.2,
+          archetype: this.fieldToArchetype(field),
+          confidence: 0.8,
+          memberCount: groupConcepts.length
+        });
+      }
+    }
+    
+    return fieldConcepts;
+  }
+  
+  // Amplify resonance between related concepts
+  amplifyResonance(concepts, genome) {
+    const amplified = [...concepts];
+    
+    // Find resonant concept pairs
+    for (let i = 0; i < concepts.length; i++) {
+      for (let j = i + 1; j < concepts.length; j++) {
+        const resonance = this.calculateConceptResonance(concepts[i], concepts[j]);
+        
+        if (resonance > 0.6) {
+          // Amplify both concepts
+          amplified[i].weight *= (1 + resonance * 0.3);
+          amplified[j].weight *= (1 + resonance * 0.3);
+          
+          // Create resonance concept
+          amplified.push({
+            word: `${concepts[i].word}_${concepts[j].word}_resonance`,
+            source: 'resonance_amplification',
+            weight: resonance * 0.5,
+            archetype: 'Interference',
+            confidence: 0.6
+          });
+        }
+      }
+    }
+    
+    return amplified;
+  }
+  
+  // Detect philosophical stance from genome patterns
+  detectPhilosophicalStance(genome) {
+    const concepts = [];
+    
+    // Analyze philosophical characteristics
+    const stances = {
+      'phenomenological': {
+        indicators: ['experiential', 'perceptual', 'lived'],
+        genomePattern: g => g.resonance?.experientialDepth > 0.5
+      },
+      'contemplative': {
+        indicators: ['reflective', 'meditative', 'introspective'],
+        genomePattern: g => g.complexity?.recursiveDepth > 2
+      },
+      'dialectical': {
+        indicators: ['tensional', 'oppositional', 'synthetic'],
+        genomePattern: g => g.dynamics?.patterns?.oscillating > 0.4
+      },
+      'poetic': {
+        indicators: ['aesthetic', 'lyrical', 'metaphorical'],
+        genomePattern: g => g.resonance?.harmonicComplexity > 0.6
+      }
+    };
+    
+    for (const [stance, config] of Object.entries(stances)) {
+      if (config.genomePattern(genome)) {
+        concepts.push({
+          word: stance,
+          source: 'philosophical_stance',
+          weight: 0.8,
+          archetype: 'Threshold',
+          confidence: 0.7
+        });
+        
+        // Add related indicators
+        config.indicators.forEach(indicator => {
+          concepts.push({
+            word: indicator,
+            source: 'stance_indicator',
+            weight: 0.6,
+            archetype: 'Threshold',
+            confidence: 0.6
+          });
+        });
+      }
+    }
+    
+    return concepts;
+  }
+  
+  // Enforce conceptual diversity to prevent over-clustering
+  enforceConceptualDiversity(concepts) {
+    // Sort by weight descending
+    const sorted = [...concepts].sort((a, b) => b.weight - a.weight);
+    
+    // Select diverse concepts, avoiding over-representation
+    const diverse = [];
+    const archetypeCounts = {};
+    const sourceCounts = {};
+    
+    for (const concept of sorted) {
+      const archetypeCount = archetypeCounts[concept.archetype] || 0;
+      const sourceCount = sourceCounts[concept.source] || 0;
+      
+      // Limit concepts per archetype and source
+      if (archetypeCount < 3 && sourceCount < 4) {
+        diverse.push(concept);
+        archetypeCounts[concept.archetype] = archetypeCount + 1;
+        sourceCounts[concept.source] = sourceCount + 1;
+      }
+      
+      // Stop at reasonable concept count
+      if (diverse.length >= 12) break;
+    }
+    
+    return diverse;
+  }
+  
+  // Helper methods
+  matchGenomeSignature(genome, signature) {
+    let totalScore = 0;
+    let matchCount = 0;
+    
+    for (const [property, ranges] of Object.entries(signature)) {
+      const value = this.getNestedProperty(genome, property);
+      
+      if (value !== undefined) {
+        for (const [subProp, range] of Object.entries(ranges)) {
+          const subValue = typeof value === 'object' ? value[subProp] : value;
+          
+          if (subValue !== undefined && this.isInRange(subValue, range)) {
+            totalScore += 1;
+            matchCount++;
+          }
+        }
+      }
+    }
+    
+    return {
+      score: matchCount > 0 ? totalScore / matchCount : 0,
+      confidence: matchCount / Object.keys(signature).length
+    };
+  }
+  
+  getNestedProperty(obj, path) {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
+  }
+  
+  isInRange(value, range) {
+    return Array.isArray(range) ? value >= range[0] && value <= range[1] : value === range;
+  }
+  
+  extractTextFromGenome(genome) {
+    // Try to extract text content from various genome properties
+    const text = genome.textContent || genome.content || genome.raw || '';
+    console.log(`🔍 GenomeConceptExtractor: Extracted text length: ${text.length}, preview: "${text.substring(0, 100)}..."`);
+    return text;
+  }
+  
+  patternToArchetype(category) {
+    const mapping = {
+      'ontological': 'Strata',
+      'temporal': 'Flow',
+      'perceptual': 'Radiance',
+      'emotional': 'Resonance',
+      'spatial': 'Grid'
+    };
+    return mapping[category] || 'Threshold';
+  }
+  
+  fieldToArchetype(field) {
+    const mapping = {
+      'nature': 'Radiance',
+      'consciousness': 'Strata',
+      'time': 'Flow',
+      'space': 'Grid',
+      'relation': 'Threshold',
+      'movement': 'Spiral',
+      'being': 'Balance'
+    };
+    return mapping[field] || 'Constellation';
+  }
+  
+  calculateConceptResonance(concept1, concept2) {
+    // Calculate semantic resonance between concepts
+    let resonance = 0;
+    
+    // Same archetype increases resonance
+    if (concept1.archetype === concept2.archetype) {
+      resonance += 0.3;
+    }
+    
+    // Same source increases resonance
+    if (concept1.source === concept2.source) {
+      resonance += 0.2;
+    }
+    
+    // Similar weights increase resonance
+    const weightDiff = Math.abs(concept1.weight - concept2.weight);
+    resonance += Math.max(0, 0.5 - weightDiff);
+    
+    return Math.min(resonance, 1.0);
+  }
+}
+
 // === ENHANCED SEMANTIC DNA CLASS ===
 // Modify the existing SemanticDNA class to use the amplifier
 
@@ -2786,7 +3230,9 @@ class EnhancedSemanticDNA {
         emergentCharacter: 0.3,
         energeticFlow: 0.5,
         patterns: {}
-      }
+      },
+      // CRITICAL: Store the actual text content for concept extraction
+      textContent: postContent
     };
   }
 }
