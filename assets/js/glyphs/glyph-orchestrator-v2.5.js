@@ -1642,6 +1642,84 @@ class GlyphOrchestrator {
 
     return debugInfo;
   }
+  
+  // PRIME DIRECTIVE: Select renderer family based on Multi-Modal archetype
+  selectRendererFromArchetype(genome) {
+    if (!genome?.archetypeProfile?.primary) {
+      return null;
+    }
+    
+    const archetype = genome.archetypeProfile.primary;
+    const contentType = genome.contentAnalysis?.contentType;
+    
+    console.log(`🎭 PRIME DIRECTIVE: Selecting renderer for archetype: ${archetype} (content type: ${contentType})`);
+    
+    // Map archetypes to renderer families based on their essential nature
+    const archetypeToRenderer = {
+      // Temporal/narrative archetypes → Flow (movement through time)
+      'temporal': 'Flow',
+      'flowing': 'Flow',
+      'unfolding': 'Flow',
+      'sequential': 'Flow',
+      
+      // Analytical/systematic archetypes → Grid (structured analysis)
+      'logical': 'Grid',
+      'analytical': 'Grid',
+      'systematic': 'Grid',
+      'methodical': 'Grid',
+      'mechanical': 'Grid',
+      'functional': 'Grid',
+      
+      // Philosophical/layered archetypes → Strata (depth of thought)
+      'contemplative': 'Strata',
+      'layered': 'Strata',
+      'abstract': 'Strata',
+      'archival': 'Strata',
+      'sedimentary': 'Strata',
+      
+      // Emotional/experiential archetypes → Radiance (emanating feeling)
+      'intimate': 'Radiance',
+      'emotional': 'Radiance',
+      'experiential': 'Radiance',
+      'radiant': 'Radiance',
+      'luminous': 'Radiance',
+      
+      // Boundary/transformation archetypes → Threshold (crossing over)
+      'liminal': 'Threshold',
+      'boundary-crossing': 'Threshold',
+      'transformative': 'Threshold',
+      'ethereal': 'Threshold',
+      'transcendent': 'Threshold',
+      
+      // Conflicting/dialogical archetypes → Interference (wave patterns)
+      'dialectical': 'Interference',
+      'hybrid': 'Interference',
+      
+      // Cyclical/recursive archetypes → Spiral (returning patterns)
+      'cyclical': 'Spiral',
+      'reflective': 'Spiral',
+      
+      // Networked/connected archetypes → Constellation (nodes and links)
+      'networked': 'Constellation',
+      'modular': 'Constellation',
+      
+      // Chaotic archetypes → Chaos (unpredictable systems)
+      'chaotic': 'Chaos',
+      
+      // Entropic archetypes → Collapse (systems breaking down)
+      'entropic': 'Collapse'
+    };
+    
+    const renderer = archetypeToRenderer[archetype];
+    
+    if (renderer) {
+      console.log(`🎯 Selected renderer: ${renderer} for archetype: ${archetype}`);
+      return renderer;
+    }
+    
+    console.log(`⚠️ No renderer mapping for archetype: ${archetype}, will use keyword fallback`);
+    return null;
+  }
 }
 
 // Semantic DNA Extraction - captures philosophical genome of posts
@@ -1882,84 +1960,6 @@ class SemanticDNA {
       variance: variance,
       rhythmic: variance < avgLength * 0.5 // Low variance indicates rhythm
     };
-  }
-  
-  // PRIME DIRECTIVE: Select renderer family based on Multi-Modal archetype
-  selectRendererFromArchetype(genome) {
-    if (!genome?.archetypeProfile?.primary) {
-      return null;
-    }
-    
-    const archetype = genome.archetypeProfile.primary;
-    const contentType = genome.contentAnalysis?.contentType;
-    
-    console.log(`🎭 PRIME DIRECTIVE: Selecting renderer for archetype: ${archetype} (content type: ${contentType})`);
-    
-    // Map archetypes to renderer families based on their essential nature
-    const archetypeToRenderer = {
-      // Temporal/narrative archetypes → Flow (movement through time)
-      'temporal': 'Flow',
-      'flowing': 'Flow',
-      'unfolding': 'Flow',
-      'sequential': 'Flow',
-      
-      // Analytical/systematic archetypes → Grid (structured analysis)
-      'logical': 'Grid',
-      'analytical': 'Grid',
-      'systematic': 'Grid',
-      'methodical': 'Grid',
-      'mechanical': 'Grid',
-      'functional': 'Grid',
-      
-      // Philosophical/layered archetypes → Strata (depth of thought)
-      'contemplative': 'Strata',
-      'layered': 'Strata',
-      'abstract': 'Strata',
-      'archival': 'Strata',
-      'sedimentary': 'Strata',
-      
-      // Emotional/experiential archetypes → Radiance (emanating feeling)
-      'intimate': 'Radiance',
-      'emotional': 'Radiance',
-      'experiential': 'Radiance',
-      'radiant': 'Radiance',
-      'luminous': 'Radiance',
-      
-      // Boundary/transformation archetypes → Threshold (crossing over)
-      'liminal': 'Threshold',
-      'boundary-crossing': 'Threshold',
-      'transformative': 'Threshold',
-      'ethereal': 'Threshold',
-      'transcendent': 'Threshold',
-      
-      // Conflicting/dialogical archetypes → Interference (wave patterns)
-      'dialectical': 'Interference',
-      'hybrid': 'Interference',
-      
-      // Cyclical/recursive archetypes → Spiral (returning patterns)
-      'cyclical': 'Spiral',
-      'reflective': 'Spiral',
-      
-      // Networked/connected archetypes → Constellation (nodes and links)
-      'networked': 'Constellation',
-      'modular': 'Constellation',
-      
-      // Chaotic archetypes → Chaos (unpredictable systems)
-      'chaotic': 'Chaos',
-      
-      // Entropic archetypes → Collapse (systems breaking down)
-      'entropic': 'Collapse'
-    };
-    
-    const renderer = archetypeToRenderer[archetype];
-    
-    if (renderer) {
-      console.log(`🎯 Selected renderer: ${renderer} for archetype: ${archetype}`);
-      return renderer;
-    }
-    
-    console.log(`⚠️ No renderer mapping for archetype: ${archetype}, will use keyword fallback`);
-    return null;
   }
   
   calculateHarmonicComplexity(resonances) {
