@@ -389,17 +389,50 @@ class GlyphOrchestrator {
       titleLength: metadata.title ? metadata.title.length : 0
     });
     
-    // Extract post content for semantic analysis - look in the whole document
-    const contentElement = document.querySelector('.post-content[itemprop="articleBody"], .post-content, article .content, main .content, article');
+    // Extract post content for semantic analysis - look for actual post paragraphs
+    const contentElement = document.querySelector('.post-content[itemprop="articleBody"], .post-content');
+    let extractedParagraphText = '';
+    
     if (contentElement) {
-      metadata.content = contentElement.textContent || contentElement.innerText || '';
+      // Extract only paragraph text to avoid navigation/metadata
+      const paragraphs = contentElement.querySelectorAll('p');
+      if (paragraphs.length > 0) {
+        extractedParagraphText = Array.from(paragraphs)
+          .map(p => (p.textContent || p.innerText || '').trim())
+          .filter(text => text.length > 0)
+          .join(' ');
+      } else {
+        // Fallback to full text if no paragraphs found
+        extractedParagraphText = contentElement.textContent || contentElement.innerText || '';
+      }
     } else {
-      // If no content element found, try to get all text from article or main
-      const fallbackContent = document.querySelector('article, main');
+      // If no content element found, try to get text from article
+      const fallbackContent = document.querySelector('article');
       if (fallbackContent) {
-        metadata.content = fallbackContent.textContent || fallbackContent.innerText || '';
+        const paragraphs = fallbackContent.querySelectorAll('p');
+        if (paragraphs.length > 0) {
+          extractedParagraphText = Array.from(paragraphs)
+            .map(p => (p.textContent || p.innerText || '').trim())
+            .filter(text => text.length > 0)
+            .join(' ');
+        } else {
+          extractedParagraphText = fallbackContent.textContent || fallbackContent.innerText || '';
+        }
       }
     }
+    
+    // Conditional title inclusion based on content type
+    const includeTitleTypes = ['essay', 'meditation', 'gloss', 'ritual', 'chamber']; // symbolic-dense types
+    const skipTitleTypes = ['fragment', 'observation', 'glimpse', 'photo-essay'];    // minimalist types
+    
+    const titleText = metadata.title && includeTitleTypes.includes(metadata.class)
+      ? metadata.title.trim() + '. '
+      : '';
+    
+    metadata.content = titleText + extractedParagraphText;
+    
+    console.log('📝 Extracted content for', metadata.class || 'unknown type', '- preview:', 
+                metadata.content ? metadata.content.substring(0, 100) + '...' : 'No content found');
     
     // Extract post class/type
     const articleElement = document.querySelector('article');
