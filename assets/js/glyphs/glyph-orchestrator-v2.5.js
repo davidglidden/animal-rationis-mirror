@@ -630,8 +630,18 @@ class GlyphOrchestrator {
     
     // Parse glyph ID for fallback information
     const parsed = this.parseGlyphId(glyphId);
-    const hybridCandidate = this.detectHybridFamily(glyphId, metadata);
-    const emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
+    
+    // PRIME DIRECTIVE: Only use hybrid/emergent detection if no archetype-based family
+    let hybridCandidate = null;
+    let emergentCandidate = null;
+    
+    if (!chosenFamily) {
+      // Only check for hybrid/emergent families if archetype selection failed
+      hybridCandidate = this.detectHybridFamily(glyphId, metadata);
+      emergentCandidate = this.checkEmergentFamilies(glyphId, metadata);
+    } else {
+      console.log(`🎭 PRIME DIRECTIVE: Multi-Modal archetype (${chosenFamily}) overrides hybrid/emergent detection`);
+    }
     
     // If no archetype-based family, use keyword analysis
     console.log(`🔍 Before keyword check - chosenFamily: ${chosenFamily} (type: ${typeof chosenFamily})`);
