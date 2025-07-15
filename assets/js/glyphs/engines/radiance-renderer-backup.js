@@ -1,16 +1,10 @@
-// Radiance Family Glyph Renderer - Semantic-Aware Architecture
+// Radiance Family Glyph Renderer
 // Creates emanation patterns - source, spiritual center, infinite reach
 class RadianceRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    
-    // SEMANTIC-AWARE RENDERER ARCHITECTURE
-    // Extract visualParams for semantic behavior
-    this.visualParams = params.visualParams || null;
-    
-    // Apply semantic modifications to base parameters
-    this.params = this.applySemanticModifications({
+    this.params = {
       rayCount: params.rayCount || 12,
       coreRadius: params.coreRadius || 20,
       maxRadius: params.maxRadius || 200,
@@ -22,104 +16,13 @@ class RadianceRenderer {
       emanationSpeed: params.emanationSpeed || 0.5,
       spiritualResonance: params.spiritualResonance || 0.7,
       ...params
-    });
-    
+    };
     this.time = 0;
     this.rays = [];
     this.particles = [];
     this.animationId = null;
     this.center = { x: 0, y: 0 };
-    
-    // Debug semantic integration
-    if (this.visualParams) {
-      console.log('🎨 Radiance renderer initialized with semantic data:', {
-        archetype: this.visualParams.archetype,
-        symbolicColor: this.visualParams.symbolicColor,
-        entropyScore: this.visualParams.entropyScore,
-        conceptualDNA: this.visualParams.conceptualDNA
-      });
-    }
-    
     this.initRadiance();
-  }
-  
-  // Apply semantic modifications to renderer parameters
-  applySemanticModifications(baseParams) {
-    if (!this.visualParams) return baseParams;
-    
-    const { archetype, entropyScore, conceptualDNA } = this.visualParams;
-    
-    // Archetype-specific parameter modifications
-    const archetypeModifications = {
-      'flowing': {
-        rayType: 'spiral',
-        rayCount: baseParams.rayCount * 1.2,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.5,
-        emanationSpeed: baseParams.emanationSpeed * 1.3,
-        spiritualResonance: baseParams.spiritualResonance * 1.1
-      },
-      'liminal': {
-        rayType: 'classic',
-        rayCount: Math.max(6, baseParams.rayCount * 0.7),
-        intensity: baseParams.intensity * 0.6,
-        centerStrength: baseParams.centerStrength * 0.8,
-        breathingAmplitude: baseParams.breathingAmplitude * 0.7,
-        spiritualResonance: baseParams.spiritualResonance * 1.2
-      },
-      'layered': {
-        rayType: 'fibonacci',
-        rayCount: baseParams.rayCount * 1.1,
-        intensity: baseParams.intensity * 0.9,
-        centerStrength: baseParams.centerStrength * 1.2,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.1
-      },
-      'luminous': {
-        rayType: 'burst',
-        rayCount: baseParams.rayCount * 1.3,
-        intensity: baseParams.intensity * 1.4,
-        centerStrength: baseParams.centerStrength * 1.5,
-        spiritualResonance: baseParams.spiritualResonance * 1.3
-      },
-      'dialectical': {
-        rayType: 'classic',
-        rayCount: Math.floor(baseParams.rayCount / 2) * 2, // Ensure even number
-        intensity: baseParams.intensity * 0.8,
-        breathingAmplitude: baseParams.breathingAmplitude * 1.2
-      }
-    };
-    
-    // Apply archetype modifications
-    const mods = archetypeModifications[archetype] || {};
-    const semanticParams = { ...baseParams, ...mods };
-    
-    // Apply entropy-based chaos/order modulation
-    if (entropyScore > 0.7) {
-      // High entropy - more chaos
-      semanticParams.rayCount = Math.floor(semanticParams.rayCount * (1 + entropyScore * 0.3));
-      semanticParams.breathingAmplitude *= (1 + entropyScore * 0.4);
-      semanticParams.emanationSpeed *= (1 + entropyScore * 0.3);
-    } else if (entropyScore < 0.3) {
-      // Low entropy - more order
-      semanticParams.rayCount = Math.max(6, Math.floor(semanticParams.rayCount * (1 - entropyScore * 0.2)));
-      semanticParams.breathingAmplitude *= (1 - entropyScore * 0.3);
-      semanticParams.spiritualResonance *= (1 + entropyScore * 0.2);
-    }
-    
-    // Conceptual DNA influences
-    if (conceptualDNA.includes('contemplative')) {
-      semanticParams.pulseFrequency *= 0.7; // Slower, more meditative
-      semanticParams.intensity *= 0.8;
-    }
-    if (conceptualDNA.includes('radiant') || conceptualDNA.includes('bright')) {
-      semanticParams.intensity *= 1.2;
-      semanticParams.centerStrength *= 1.3;
-    }
-    if (conceptualDNA.includes('flow') || conceptualDNA.includes('temporal')) {
-      semanticParams.emanationSpeed *= 1.4;
-      semanticParams.rayType = 'spiral';
-    }
-    
-    return semanticParams;
   }
 
   initRadiance() {
@@ -364,31 +267,15 @@ class RadianceRenderer {
     );
     
     const coreAlpha = this.params.centerStrength * 0.1;
+    // Use Sacred Palette radiance colors (candlelight on vellum)
+    const palette = window.SacredPalette || { families: { radiance: {} } };
+    const colors = palette.families.radiance;
+    const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
+    const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
     
-    // SEMANTIC COLOR INTEGRATION
-    // Use semantic colors if available, otherwise fallback to Sacred Palette
-    let primaryColor, accentColor;
-    
-    if (this.visualParams && this.visualParams.semanticColor) {
-      // Use semantic colors from content analysis
-      primaryColor = this.visualParams.getSemanticRgba(coreAlpha);
-      accentColor = this.visualParams.getSemanticRgba(coreAlpha * 0.5);
-      console.log('🎨 Using semantic colors:', { primaryColor, accentColor });
-    } else {
-      // Fallback to Sacred Palette radiance colors
-      const palette = window.SacredPalette || { families: { radiance: {} } };
-      const colors = palette.families.radiance;
-      const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
-      const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
-      
-      primaryColor = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${coreAlpha})`;
-      accentColor = `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${coreAlpha * 0.5})`;
-    }
-    
-    gradient.addColorStop(0, primaryColor);
-    gradient.addColorStop(0.3, accentColor);
-    gradient.addColorStop(0.7, this.visualParams?.getSemanticRgba(coreAlpha * 0.2) || 
-                                `rgba(212, 165, 116, ${coreAlpha * 0.2})`);
+    gradient.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${coreAlpha})`);
+    gradient.addColorStop(0.3, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${coreAlpha * 0.5})`);
+    gradient.addColorStop(0.7, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${coreAlpha * 0.2})`);
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     
     this.ctx.fillStyle = gradient;
@@ -405,32 +292,17 @@ class RadianceRenderer {
         this.center.x, this.center.y, endX, endY
       );
       
-      // SEMANTIC RAY COLORS
-      // Use semantic colors if available, otherwise fallback to Sacred Palette
+      // Sacred Palette radiance ray colors
+      const palette = window.SacredPalette || { families: { radiance: {} } };
+      const colors = palette.families.radiance;
       const alpha = (ray.currentIntensity || ray.intensity) * 0.6; // More contemplative
       
-      let rayPrimaryColor, rayAccentColor, rayEndColor;
+      const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
+      const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
       
-      if (this.visualParams && this.visualParams.semanticColor) {
-        // Use semantic colors from content analysis
-        rayPrimaryColor = this.visualParams.getSemanticRgba(alpha);
-        rayAccentColor = this.visualParams.getSemanticRgba(alpha * 0.6);
-        rayEndColor = this.visualParams.getSemanticRgba(0);
-      } else {
-        // Fallback to Sacred Palette radiance colors
-        const palette = window.SacredPalette || { families: { radiance: {} } };
-        const colors = palette.families.radiance;
-        const primaryRgb = palette.utils?.hexToRgb(colors.primary || '#B89968') || {r: 184, g: 153, b: 104};
-        const accentRgb = palette.utils?.hexToRgb(colors.accent || '#D4A574') || {r: 212, g: 165, b: 116};
-        
-        rayPrimaryColor = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${alpha})`;
-        rayAccentColor = `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${alpha * 0.6})`;
-        rayEndColor = `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0)`;
-      }
-      
-      rayGradient.addColorStop(0, rayPrimaryColor);
-      rayGradient.addColorStop(0.7, rayAccentColor);
-      rayGradient.addColorStop(1, rayEndColor);
+      rayGradient.addColorStop(0, `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, ${alpha})`);
+      rayGradient.addColorStop(0.7, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, ${alpha * 0.6})`);
+      rayGradient.addColorStop(1, `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0)`);
       
       this.ctx.strokeStyle = rayGradient;
       this.ctx.lineWidth = ray.thickness;

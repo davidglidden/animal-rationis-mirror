@@ -90,6 +90,75 @@ class GlyphOrchestrator {
     }
   }
 
+  // Create visualParams object for semantic-aware renderers
+  createVisualParams(genome, metadata, params) {
+    // Extract semantic data from genome
+    const semanticColor = genome?.uniqueIdentifiers?.semanticColor?.primary || null;
+    const concepts = genome?.uniqueIdentifiers?.concepts || [];
+    const archetype = params?.archetype || 'default';
+    const entropyScore = params?.entropy || 0.5;
+    
+    // Use Sacred Palette to determine symbolic color
+    let symbolicColor = 'ash';
+    if (semanticColor && semanticColor.h !== undefined) {
+      symbolicColor = window.SacredPalette?.semantic?.mapHueToSymbol(semanticColor.h) || 'ash';
+    }
+    
+    // Extract conceptual DNA (key concept words)
+    const conceptualDNA = concepts.map(c => c.word || c.concept || '').filter(w => w.length > 0);
+    
+    // Get archetype-specific color modifications
+    const archetypeColorMod = window.SacredPalette?.semantic?.getArchetypeColorMod(archetype) || 
+                             { saturation: 1.0, lightness: 1.0, alpha: 1.0 };
+    
+    // Create the visualParams object
+    const visualParams = {
+      // Core semantic data
+      semanticColor: semanticColor ? {
+        h: semanticColor.h,
+        s: semanticColor.s * archetypeColorMod.saturation,
+        l: semanticColor.l * archetypeColorMod.lightness,
+        a: archetypeColorMod.alpha
+      } : null,
+      
+      // Archetype and behavioral modifiers
+      archetype: archetype,
+      entropyScore: Math.max(0, Math.min(1, entropyScore)),
+      
+      // Symbolic and conceptual elements
+      symbolicColor: symbolicColor,
+      conceptualDNA: conceptualDNA.slice(0, 5), // Limit to 5 key concepts
+      
+      // Content metadata
+      contentClass: metadata?.class || 'unknown',
+      contentLength: metadata?.contentLength || 0,
+      
+      // Visual enhancement data
+      archetypeColorMod: archetypeColorMod,
+      
+      // Helper methods for renderers
+      getSemanticRgba: function(alpha = 1) {
+        if (!this.semanticColor) return 'rgba(120, 120, 120, 0.5)';
+        return window.SacredPalette?.semantic?.hslToRgba(
+          this.semanticColor.h, 
+          this.semanticColor.s, 
+          this.semanticColor.l, 
+          alpha * this.semanticColor.a
+        ) || 'rgba(120, 120, 120, 0.5)';
+      },
+      
+      getSymbolicRgba: function(alpha = 1) {
+        const color = window.SacredPalette?.semantic?.getSymbolicColor(this.symbolicColor);
+        if (!color) return 'rgba(120, 120, 120, 0.5)';
+        return window.SacredPalette?.semantic?.hslToRgba(
+          color.h, color.s, color.l, alpha
+        ) || 'rgba(120, 120, 120, 0.5)';
+      }
+    };
+    
+    return visualParams;
+  }
+
   // Apply semantic visual translation enhancements to parameters
   applySemanticVisualEnhancements(params, genome, metadata) {
     // Ensure semantic translators are initialized
@@ -591,6 +660,19 @@ class GlyphOrchestrator {
       } catch (semanticError) {
         console.error(`❌ Semantic visual enhancement failed:`, semanticError);
         console.warn(`⚠️ Semantic visual enhancement failed: ${semanticError.message}`);
+      }
+      
+      // SEMANTIC-AWARE RENDERER ARCHITECTURE
+      // Create visualParams object for semantic-aware renderers
+      try {
+        const visualParams = this.createVisualParams(genome, metadata, params);
+        console.log('🎨 Created visualParams for semantic rendering:', visualParams);
+        
+        // Add visualParams to params for renderer consumption
+        params.visualParams = visualParams;
+      } catch (visualParamsError) {
+        console.error(`❌ VisualParams creation failed:`, visualParamsError);
+        console.warn(`⚠️ VisualParams creation failed: ${visualParamsError.message}`);
       }
       
     } catch (error) {

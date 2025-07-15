@@ -164,6 +164,91 @@ const SacredPalette = {
     breathRate: 0.001,      // Very slow pulse
     shiftRate: 0.0005,      // Gradual color shifts
     candleFlicker: 0.003    // Gentle variation
+  },
+  
+  // Semantic lookup helpers for renderer architecture
+  semantic: {
+    // Map HSL hue to symbolic color name
+    mapHueToSymbol(h) {
+      const hueRanges = {
+        'crimson': [0, 30],      // Red-orange
+        'amber': [30, 60],       // Orange-yellow
+        'ochre': [60, 90],       // Yellow-green
+        'sage': [90, 150],       // Green
+        'teal': [150, 210],      // Blue-green
+        'indigo': [210, 270],    // Blue-purple
+        'violet': [270, 330],    // Purple-magenta
+        'ash': [330, 360]        // Magenta-red
+      };
+      
+      for (const [symbol, [min, max]] of Object.entries(hueRanges)) {
+        if (h >= min && h < max) return symbol;
+      }
+      return 'ash'; // Default fallback
+    },
+    
+    // Get symbolic color with semantic adjustments
+    getSymbolicColor(symbol, semanticColor = null) {
+      const baseColors = {
+        'crimson': { h: 15, s: 0.4, l: 0.5 },
+        'amber': { h: 45, s: 0.6, l: 0.6 },
+        'ochre': { h: 75, s: 0.5, l: 0.5 },
+        'sage': { h: 120, s: 0.3, l: 0.5 },
+        'teal': { h: 180, s: 0.5, l: 0.5 },
+        'indigo': { h: 240, s: 0.6, l: 0.4 },
+        'violet': { h: 300, s: 0.4, l: 0.5 },
+        'ash': { h: 0, s: 0.1, l: 0.6 }
+      };
+      
+      const base = baseColors[symbol] || baseColors.ash;
+      
+      // If semantic color provided, blend with base
+      if (semanticColor) {
+        return {
+          h: semanticColor.h || base.h,
+          s: Math.min(1, (semanticColor.s || base.s) * 0.8), // Muted
+          l: Math.min(0.8, (semanticColor.l || base.l) * 0.9) // Contemplative
+        };
+      }
+      
+      return base;
+    },
+    
+    // Convert HSL to contemplative rgba string
+    hslToRgba(h, s, l, alpha = 1) {
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+      
+      let r, g, b;
+      if (h < 60) { [r, g, b] = [c, x, 0]; }
+      else if (h < 120) { [r, g, b] = [x, c, 0]; }
+      else if (h < 180) { [r, g, b] = [0, c, x]; }
+      else if (h < 240) { [r, g, b] = [0, x, c]; }
+      else if (h < 300) { [r, g, b] = [x, 0, c]; }
+      else { [r, g, b] = [c, 0, x]; }
+      
+      r = Math.round((r + m) * 255);
+      g = Math.round((g + m) * 255);
+      b = Math.round((b + m) * 255);
+      
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    },
+    
+    // Get archetype-specific color modifications
+    getArchetypeColorMod(archetype) {
+      const mods = {
+        'flowing': { saturation: 0.9, lightness: 1.1, alpha: 0.8 },
+        'liminal': { saturation: 0.7, lightness: 0.9, alpha: 0.6 },
+        'layered': { saturation: 1.0, lightness: 0.8, alpha: 0.9 },
+        'luminous': { saturation: 1.2, lightness: 1.3, alpha: 1.0 },
+        'dialectical': { saturation: 0.8, lightness: 0.7, alpha: 0.7 },
+        'networked': { saturation: 0.9, lightness: 1.0, alpha: 0.8 },
+        'cyclical': { saturation: 1.1, lightness: 1.0, alpha: 0.9 }
+      };
+      
+      return mods[archetype] || { saturation: 1.0, lightness: 1.0, alpha: 1.0 };
+    }
   }
 };
 
