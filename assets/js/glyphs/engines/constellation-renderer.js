@@ -5,20 +5,110 @@ class ConstellationRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      starCount: params.starCount || 50,
-      connectionDistance: params.connectionDistance || 80,
-      pulseSpeed: params.pulseSpeed || 0.02,
-      driftSpeed: params.driftSpeed || 0.3,
-      brightness: params.brightness || 0.8,
-      constellationPattern: params.constellationPattern || 'random', // random, circular, grid
+      starCount: this.semanticParams.starCount,
+      connectionDistance: this.semanticParams.connectionDistance,
+      pulseSpeed: this.semanticParams.pulseSpeed,
+      driftSpeed: this.semanticParams.driftSpeed,
+      brightness: this.semanticParams.brightness,
+      constellationPattern: this.semanticParams.constellationPattern,
       ...params
     };
     this.time = 0;
     this.stars = [];
     this.animationId = null;
+    
+    console.log(`🎨 Constellation renderer initialized with semantic differentiation:`, {
+      pattern: this.semanticParams.constellationPattern,
+      stars: this.semanticParams.starCount,
+      connections: this.semanticParams.connectionDistance,
+      brightness: this.semanticParams.brightness,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initStars();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'networked';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Constellation pattern based on structural organization
+      constellationPattern: this.selectConstellationPattern(genome, conceptualDNA),
+      
+      // Star count based on conceptual complexity and branching
+      starCount: Math.floor(20 + (entropyScore * 60) + 
+                           (genome.topology?.branchingFactor || 1) * 30), // 20-140 stars
+      
+      // Connection distance based on rhizomatic tendency
+      connectionDistance: 40 + (genome.topology?.rhizomaticTendency || 0.2) * 120, // 40-160 distance
+      
+      // Pulse speed based on temporal velocity and resonance
+      pulseSpeed: 0.01 + (genome.temporality?.velocity || 0) * 0.05 + 
+                  (genome.resonance?.resonantFrequency || 0.5) * 0.03, // 0.01-0.09
+      
+      // Drift speed based on dynamics and circularity
+      driftSpeed: 0.1 + (genome.dynamics?.velocity || 0) * 0.8 + 
+                  (genome.topology?.circularityIndex || 0.1) * 0.4, // 0.1-1.3
+      
+      // Brightness based on harmonic complexity
+      brightness: 0.5 + (genome.resonance?.harmonicComplexity || 0.3) * 0.5, // 0.5-1.0
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select constellation pattern based on semantic content
+  selectConstellationPattern(genome, conceptualDNA) {
+    const topology = genome.topology || {};
+    const complexity = genome.complexity || {};
+    
+    // Analyze conceptual DNA for pattern hints
+    const hasCircular = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['circular', 'radial', 'orbital', 'cyclic', 'ring'].includes(concept.toLowerCase())
+    );
+    const hasGrid = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['grid', 'matrix', 'systematic', 'ordered', 'regular'].includes(concept.toLowerCase())
+    );
+    const hasRandom = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['random', 'scattered', 'chaotic', 'dispersed', 'irregular'].includes(concept.toLowerCase())
+    );
+    
+    // Pattern selection based on semantic analysis
+    if (hasCircular || topology.circularityIndex > 0.4) {
+      return 'circular';
+    } else if (hasGrid || (complexity.selfSimilarity > 0.6 && topology.branchingFactor < 1.5)) {
+      return 'grid';
+    } else if (hasRandom || topology.rhizomaticTendency > 0.4) {
+      return 'random';
+    } else {
+      // Default based on structural characteristics
+      if (topology.circularityIndex > 0.2) {
+        return 'circular';
+      } else if (complexity.selfSimilarity > 0.4) {
+        return 'grid';
+      } else {
+        return 'random';
+      }
+    }
   }
 
   initStars() {

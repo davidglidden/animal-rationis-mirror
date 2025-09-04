@@ -5,21 +5,220 @@ class BalanceRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      balanceType: params.balanceType || 'scales', // scales, pendulum, harmonic, orbital
-      elements: params.elements || 3,
-      symmetry: params.symmetry || true,
-      perturbation: params.perturbation || 0.1,
-      restoreForce: params.restoreForce || 0.02,
-      damping: params.damping || 0.98,
-      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 10,
+      balanceType: this.semanticParams.balanceType,
+      elements: this.semanticParams.elements,
+      symmetry: this.semanticParams.symmetry,
+      perturbation: this.semanticParams.perturbation,
+      restoreForce: this.semanticParams.restoreForce,
+      damping: this.semanticParams.damping,
+      animationSpeed: this.semanticParams.animationSpeed,
       ...params
     };
     this.time = 0;
     this.balanceElements = [];
     this.animationId = null;
+    
+    console.log(`🎨 Balance renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.balanceType,
+      elements: this.semanticParams.elements,
+      symmetry: this.semanticParams.symmetry,
+      perturbation: this.semanticParams.perturbation,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initBalanceSystem();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'balanced';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001) * 10;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Balance type based on movement patterns and conceptual DNA
+      balanceType: this.selectBalanceType(genome, conceptualDNA),
+      
+      // Elements based on branching factor and complexity
+      elements: Math.floor(2 + (genome.topology?.branchingFactor || 1) * 2 + 
+                          (genome.complexity?.nestingLevel || 3) * 0.5), // 2-8 elements
+      
+      // Symmetry based on self-similarity and regularity
+      symmetry: (genome.complexity?.selfSimilarity || 0.5) > 0.4,
+      
+      // Perturbation based on entropy and chaos
+      perturbation: 0.05 + (entropyScore * 0.3) + 
+                   (genome.dynamics?.acceleration || 0.1) * 0.2, // 0.05-0.55
+      
+      // Restore force based on harmonic complexity
+      restoreForce: 0.01 + (genome.resonance?.harmonicComplexity || 0.3) * 0.03, // 0.01-0.04
+      
+      // Damping based on temporal flow and stability
+      damping: 0.95 + (genome.temporality?.sequentialFlow || 0.2) * 0.04, // 0.95-0.99
+      
+      // Animation speed based on temporal velocity
+      animationSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 3), // Variable speed
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select balance type based on semantic content
+  selectBalanceType(genome, conceptualDNA) {
+    const dynamics = genome.dynamics || {};
+    const topology = genome.topology || {};
+    
+    // PRIME DIRECTIVE: Use enhanced semantic richness instead of keyword matching
+    // Check if we have rich concept data or legacy string array
+    const hasRichConceptData = conceptualDNA && conceptualDNA.concepts && conceptualDNA.semanticSimilarity;
+    
+    let hasScales, hasPendulum, hasHarmonic, hasOrbital;
+    
+    if (hasRichConceptData) {
+      // Use semantic similarity for intelligent concept matching
+      hasScales = this.findSemanticRelatedness(conceptualDNA, 'balance', 
+        ['scales', 'weight', 'measure', 'justice', 'equilibrium', 'balance', 'symmetry'], 0.6);
+      hasPendulum = this.findSemanticRelatedness(conceptualDNA, 'temporal', 
+        ['pendulum', 'swing', 'oscillation', 'rhythm', 'periodic', 'temporal', 'flow'], 0.6);
+      hasHarmonic = this.findSemanticRelatedness(conceptualDNA, 'structural', 
+        ['harmonic', 'resonance', 'frequency', 'vibration', 'wave', 'pattern', 'structure'], 0.6);
+      hasOrbital = this.findSemanticRelatedness(conceptualDNA, 'spatial', 
+        ['orbital', 'circular', 'rotation', 'cycle', 'revolution', 'spatial', 'dimensional'], 0.6);
+    } else {
+      // Fallback to legacy string matching for backward compatibility
+      const legacyDNA = conceptualDNA.legacy || conceptualDNA || [];
+      hasScales = legacyDNA.some(concept => 
+        concept && typeof concept === 'string' && 
+        ['scales', 'weight', 'measure', 'justice', 'equilibrium'].includes(concept.toLowerCase())
+      );
+      hasPendulum = legacyDNA.some(concept => 
+        concept && typeof concept === 'string' && 
+        ['pendulum', 'swing', 'oscillation', 'rhythm', 'periodic'].includes(concept.toLowerCase())
+      );
+      hasHarmonic = legacyDNA.some(concept => 
+        concept && typeof concept === 'string' && 
+        ['harmonic', 'resonance', 'frequency', 'vibration', 'wave'].includes(concept.toLowerCase())
+      );
+      hasOrbital = legacyDNA.some(concept => 
+        concept && typeof concept === 'string' && 
+        ['orbital', 'circular', 'rotation', 'cycle', 'revolution'].includes(concept.toLowerCase())
+      );
+    }
+    
+    // Balance type selection based on semantic analysis
+    if (hasScales || dynamics.dominantMovement === 'balanced') {
+      return 'scales';
+    } else if (hasPendulum || dynamics.dominantMovement === 'oscillating') {
+      return 'pendulum';
+    } else if (hasHarmonic || (genome.resonance?.harmonicComplexity || 0) > 0.4) {
+      return 'harmonic';
+    } else if (hasOrbital || topology.circularityIndex > 0.3) {
+      return 'orbital';
+    } else {
+      // Default based on structural characteristics
+      if (topology.circularityIndex > 0.2) {
+        return 'orbital';
+      } else if (dynamics.acceleration > 0.2) {
+        return 'pendulum';
+      } else {
+        return 'scales';
+      }
+    }
+  }
+  
+  // PRIME DIRECTIVE: Semantic similarity matching for intelligent concept detection
+  findSemanticRelatedness(conceptualDNA, semanticFamily, keywords, threshold = 0.6) {
+    // Direct semantic family matching
+    if (conceptualDNA.semanticSimilarity && conceptualDNA.semanticSimilarity.has(semanticFamily)) {
+      const familyConcepts = conceptualDNA.semanticSimilarity.get(semanticFamily);
+      if (familyConcepts.length > 0) {
+        console.log(`🎯 Found semantic family match: ${semanticFamily}`, familyConcepts.map(c => c.word));
+        return true;
+      }
+    }
+    
+    // Weighted concept matching with confidence scoring
+    let totalWeight = 0;
+    let matchWeight = 0;
+    
+    conceptualDNA.concepts.forEach(concept => {
+      const weight = (concept.weight || 0.5) * (concept.confidence || 0.5);
+      totalWeight += weight;
+      
+      // Check for keyword matches with fuzzy matching
+      const word = (concept.word || '').toLowerCase();
+      const hasKeywordMatch = keywords.some(keyword => 
+        word.includes(keyword) || keyword.includes(word) || 
+        this.calculateWordSimilarity(word, keyword) > 0.7
+      );
+      
+      if (hasKeywordMatch) {
+        matchWeight += weight;
+        console.log(`🎯 Keyword match: ${word} → ${semanticFamily} (weight: ${weight})`);
+      }
+    });
+    
+    // Calculate confidence-weighted match ratio
+    const matchRatio = totalWeight > 0 ? matchWeight / totalWeight : 0;
+    const hasMatch = matchRatio >= threshold;
+    
+    if (hasMatch) {
+      console.log(`✅ Semantic match: ${semanticFamily} (ratio: ${matchRatio.toFixed(2)}, threshold: ${threshold})`);
+    }
+    
+    return hasMatch;
+  }
+  
+  // Calculate word similarity using simple string distance
+  calculateWordSimilarity(word1, word2) {
+    const longer = word1.length > word2.length ? word1 : word2;
+    const shorter = word1.length > word2.length ? word2 : word1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const distance = this.calculateLevenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  }
+  
+  // Calculate Levenshtein distance for word similarity
+  calculateLevenshteinDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
   }
 
   initBalanceSystem() {

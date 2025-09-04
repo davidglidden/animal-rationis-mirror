@@ -4,25 +4,40 @@ class ThresholdRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.visualParams = params;
     
-    // Apply semantic visual language enhancements first
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
+    // Apply legacy semantic enhancements for backward compatibility
     this.enhancedParams = this.applySemanticEnhancements(params);
     
     this.params = {
-      thresholdType: this.enhancedParams.thresholdType || params.thresholdType || 'portal', // portal, membrane, phase, gateway
-      permeability: this.enhancedParams.permeability || params.permeability || 0.5,
-      transitionSpeed: this.enhancedParams.transitionSpeed || params.transitionSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 20,
-      dimensionalOverlap: this.enhancedParams.dimensionalOverlap || params.dimensionalOverlap || 0.3,
-      boundaryTension: this.enhancedParams.boundaryTension || params.boundaryTension || 1.0,
-      phaseDensity: this.enhancedParams.phaseDensity || params.phaseDensity || 0.7,
-      temporalShift: this.enhancedParams.temporalShift || params.temporalShift || 0.1,
+      thresholdType: this.semanticParams.thresholdType,
+      permeability: this.semanticParams.permeability,
+      transitionSpeed: this.semanticParams.transitionSpeed,
+      dimensionalOverlap: this.semanticParams.dimensionalOverlap,
+      boundaryTension: this.semanticParams.boundaryTension,
+      phaseDensity: this.semanticParams.phaseDensity,
+      temporalShift: this.semanticParams.temporalShift,
+      particleCount: this.semanticParams.particleCount,
+      thresholdCount: this.semanticParams.thresholdCount,
+      portalRadius: this.semanticParams.portalRadius,
       ...params,
-      ...this.enhancedParams // Semantic enhancements take precedence
+      ...this.enhancedParams // Legacy enhancements take precedence
     };
     this.time = 0;
     this.thresholds = [];
     this.particles = [];
     this.animationId = null;
+    
+    console.log(`🎨 Threshold renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.thresholdType,
+      permeability: this.semanticParams.permeability,
+      particles: this.semanticParams.particleCount,
+      thresholds: this.semanticParams.thresholdCount,
+      entropy: this.semanticParams.entropyScore
+    });
     
     // Store semantic data for rendering decisions
     this.semanticData = {
@@ -36,6 +51,112 @@ class ThresholdRenderer {
     this.initThresholds();
     this.initTransitionParticles();
   }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'liminal';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001) * 20;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Threshold type based on boundary patterns and conceptual DNA
+      thresholdType: this.selectThresholdType(genome, conceptualDNA),
+      
+      // Permeability based on entropy and openness
+      permeability: 0.3 + (entropyScore * 0.5) + 
+                   (genome.topology?.rhizomaticTendency || 0.2) * 0.3, // 0.3-1.0
+      
+      // Transition speed based on temporal dynamics
+      transitionSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 3 + 
+                                    (genome.dynamics?.acceleration || 0.1) * 2), // Variable speed
+      
+      // Dimensional overlap based on complexity layering
+      dimensionalOverlap: 0.2 + (genome.complexity?.nestedComplexity || 0) * 0.4 + 
+                         (genome.complexity?.layerCount || 1) * 0.1, // 0.2-0.8
+      
+      // Boundary tension based on structural resistance
+      boundaryTension: 0.5 + (genome.resonance?.dissonanceLevel || 0.2) * 1.0 + 
+                      (1 - entropyScore) * 0.8, // 0.5-2.3
+      
+      // Phase density based on material thickness
+      phaseDensity: 0.5 + (genome.complexity?.nestedComplexity || 0) * 0.4 + 
+                   (genome.dynamics?.acceleration || 0.1) * 0.2, // 0.5-1.1
+      
+      // Temporal shift based on temporal flow
+      temporalShift: 0.05 + (genome.temporality?.sequentialFlow || 0.1) * 0.25, // 0.05-0.3
+      
+      // Particle count based on activity and complexity
+      particleCount: Math.floor(30 + (entropyScore * 70) + 
+                               (genome.dynamics?.velocity || 0) * 50), // 30-150
+      
+      // Threshold count based on complexity
+      thresholdCount: Math.floor(1 + (genome.complexity?.nestingLevel || 3) * 0.5 + 
+                                 (genome.topology?.branchingFactor || 1) * 0.7), // 1-5
+      
+      // Portal radius based on scope and reach
+      portalRadius: 40 + (genome.complexity?.nestingLevel || 3) * 8 + 
+                   (entropyScore * 30), // 40-110
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select threshold type based on semantic content
+  selectThresholdType(genome, conceptualDNA) {
+    const dynamics = genome.dynamics || {};
+    const topology = genome.topology || {};
+    
+    // Analyze conceptual DNA for threshold type hints
+    const hasPortal = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['portal', 'opening', 'gateway', 'passage', 'door'].includes(concept.toLowerCase())
+    );
+    const hasMembrane = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['membrane', 'boundary', 'surface', 'skin', 'interface'].includes(concept.toLowerCase())
+    );
+    const hasPhase = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['phase', 'transition', 'state', 'change', 'shift'].includes(concept.toLowerCase())
+    );
+    const hasGateway = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['gateway', 'arch', 'frame', 'structure', 'entrance'].includes(concept.toLowerCase())
+    );
+    
+    // Threshold type selection based on semantic analysis
+    if (hasPortal || (topology.circularityIndex > 0.4 && dynamics.acceleration > 0.3)) {
+      return 'portal';
+    } else if (hasMembrane || (topology.rhizomaticTendency > 0.4)) {
+      return 'membrane';
+    } else if (hasPhase || (dynamics.velocity > 0.3 && genome.temporality?.velocity > 0.2)) {
+      return 'phase';
+    } else if (hasGateway || (genome.complexity?.nestingLevel > 4)) {
+      return 'gateway';
+    } else {
+      // Default based on structural characteristics
+      if (topology.circularityIndex > 0.3) {
+        return 'portal';
+      } else if (dynamics.velocity > 0.4) {
+        return 'phase';
+      } else if (topology.rhizomaticTendency > 0.3) {
+        return 'membrane';
+      } else {
+        return 'gateway';
+      }
+    }
+  }
 
   initThresholds() {
     this.thresholds = [];
@@ -44,12 +165,13 @@ class ThresholdRenderer {
     switch (this.params.thresholdType) {
       case 'portal':
         // Central portal with rotating boundary
+        const portalRadius = this.params.portalRadius;
         this.thresholds.push({
           x: width / 2,
           y: height / 2,
-          innerRadius: 30,
-          outerRadius: 60,
-          rotationSpeed: 0.01,
+          innerRadius: portalRadius * 0.5,
+          outerRadius: portalRadius,
+          rotationSpeed: 0.01 * (1 + this.params.transitionSpeed * 0.1),
           permeability: this.params.permeability,
           phase: 0
         });
@@ -72,16 +194,17 @@ class ThresholdRenderer {
         break;
         
       case 'phase':
-        // Multiple phase boundaries
-        for (let i = 0; i < 3; i++) {
+        // Multiple phase boundaries based on semantic parameters
+        const phaseCount = this.params.thresholdCount;
+        for (let i = 0; i < phaseCount; i++) {
           this.thresholds.push({
-            x: width * (0.2 + i * 0.3),
+            x: width * (0.1 + i * (0.8 / (phaseCount - 1))),
             y: height / 2,
-            width: 40,
+            width: 30 + (this.params.phaseDensity * 30),
             height: height * 0.8,
-            phaseShift: i * Math.PI / 3,
+            phaseShift: i * Math.PI / phaseCount,
             density: this.params.phaseDensity,
-            transitionZone: 15
+            transitionZone: 10 + (this.params.permeability * 20)
           });
         }
         break;
@@ -105,7 +228,7 @@ class ThresholdRenderer {
 
   initTransitionParticles() {
     this.particles = [];
-    const particleCount = 50;
+    const particleCount = this.params.particleCount;
     const { width, height } = this.canvas;
     
     for (let i = 0; i < particleCount; i++) {

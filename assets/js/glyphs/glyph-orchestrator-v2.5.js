@@ -134,8 +134,9 @@ class GlyphOrchestrator {
       symbolicColor = window.SacredPalette?.semantic?.mapHueToSymbol(semanticColor.h) || 'ash';
     }
     
-    // Extract conceptual DNA (key concept words)
-    const conceptualDNA = concepts.map(c => c.word || c.concept || '').filter(w => w.length > 0);
+    // PRIME DIRECTIVE: Preserve semantic richness - don't flatten concepts to strings
+    // Extract conceptual DNA with full semantic richness preservation
+    const conceptualDNA = this.preserveSemanticRichness(concepts, metadata);
     
     // Get archetype-specific color modifications
     const archetypeColorMod = window.SacredPalette?.semantic?.getArchetypeColorMod(archetype) || 
@@ -157,7 +158,7 @@ class GlyphOrchestrator {
       
       // Symbolic and conceptual elements
       symbolicColor: symbolicColor,
-      conceptualDNA: conceptualDNA.slice(0, 5), // Limit to 5 key concepts
+      conceptualDNA: conceptualDNA, // Full semantic richness preserved
       
       // Content metadata
       contentClass: metadata?.class || 'unknown',
@@ -768,12 +769,13 @@ class GlyphOrchestrator {
         params.genome = genome;
         params.archetype = genome?.archetype || 'flowing';
         params.entropyScore = genome?.uniqueness ? (genome.uniqueness % 1000) / 1000 : 0.5;
-        params.conceptualDNA = genome?.uniqueIdentifiers?.concepts?.map(c => c?.term).filter(term => term) || [];
+        // PRIME DIRECTIVE: Preserve full concept richness for renderer semantic analysis
+        params.conceptualDNA = this.preserveFullConceptRichness(genome?.uniqueIdentifiers?.concepts || [], metadata);
         
         console.log('🎨 Added semantic parameters for structural differentiation:', {
           archetype: params.archetype,
           entropyScore: params.entropyScore,
-          conceptualDNA: params.conceptualDNA?.slice(0, 5)
+          conceptualDNA: params.conceptualDNA?.concepts?.slice(0, 8) || []
         });
       } catch (visualParamsError) {
         console.error(`❌ VisualParams creation failed:`, visualParamsError);
@@ -1752,6 +1754,208 @@ class GlyphOrchestrator {
     
     console.log(`⚠️ No renderer mapping for archetype: ${archetype}, will use keyword fallback`);
     return null;
+  }
+
+  // PRIME DIRECTIVE: Preserve semantic richness - don't flatten concepts to strings
+  preserveSemanticRichness(concepts, metadata) {
+    const complexity = this.calculateContentComplexity(metadata);
+    const dynamicLimit = this.calculateDynamicConceptLimit(complexity);
+    
+    // Build semantic similarity map for intelligent concept matching
+    const semanticSimilarity = this.buildSemanticSimilarityMap(concepts);
+    
+    // Create confidence profile for weight-based selection
+    const confidenceProfile = this.buildConfidenceProfile(concepts);
+    
+    // Analyze source distribution for diversity bonuses
+    const sourceDistribution = this.analyzeSourceDistribution(concepts);
+    
+    console.log('🧠 Semantic richness preservation:', {
+      totalConcepts: concepts.length,
+      dynamicLimit: dynamicLimit,
+      sourceDistribution: sourceDistribution,
+      avgConfidence: confidenceProfile.average
+    });
+    
+    return {
+      concepts: concepts.slice(0, dynamicLimit), // Dynamic limit based on complexity
+      semanticSimilarity: semanticSimilarity,
+      confidenceProfile: confidenceProfile,
+      sourceDistribution: sourceDistribution,
+      complexity: complexity,
+      
+      // Legacy compatibility - still provide string array for old renderers
+      legacy: concepts.map(c => c.word || c.concept || '').filter(w => w.length > 0).slice(0, 5)
+    };
+  }
+  
+  // Preserve full concept richness for renderer semantic analysis
+  preserveFullConceptRichness(concepts, metadata) {
+    if (!concepts || concepts.length === 0) {
+      return {
+        concepts: [],
+        semanticSimilarity: new Map(),
+        confidenceProfile: { average: 0.5, distribution: [] },
+        sourceDistribution: {},
+        complexity: 0.5,
+        legacy: []
+      };
+    }
+    
+    // Convert from legacy format if needed
+    const normalizedConcepts = concepts.map(c => {
+      if (typeof c === 'string') {
+        return { word: c, weight: 0.5, confidence: 0.5, source: 'legacy' };
+      }
+      return {
+        word: c.word || c.term || c.concept || '',
+        weight: c.weight || 0.5,
+        confidence: c.confidence || 0.5,
+        source: c.source || 'unknown',
+        archetype: c.archetype || null
+      };
+    }).filter(c => c.word.length > 0);
+    
+    return this.preserveSemanticRichness(normalizedConcepts, metadata);
+  }
+  
+  // Calculate content complexity for dynamic concept limits
+  calculateContentComplexity(metadata) {
+    if (!metadata) return 0.5;
+    
+    const factors = {
+      contentLength: Math.min(1, (metadata.contentLength || 0) / 2000), // Normalize to 2000 chars
+      classWeight: this.getClassComplexityWeight(metadata.class),
+      titleComplexity: this.analyzeTitleComplexity(metadata.title || ''),
+      hasAbstraction: metadata.class === 'essay' || metadata.class === 'fragment' ? 0.3 : 0
+    };
+    
+    const complexity = (factors.contentLength * 0.4) + 
+                      (factors.classWeight * 0.3) + 
+                      (factors.titleComplexity * 0.2) + 
+                      (factors.hasAbstraction * 0.1);
+    
+    return Math.max(0.2, Math.min(1, complexity));
+  }
+  
+  // Get complexity weight based on content class
+  getClassComplexityWeight(contentClass) {
+    const weights = {
+      'essay': 1.0,        // Highest complexity
+      'fragment': 0.9,     // High philosophical density
+      'observation': 0.7,  // Medium complexity
+      'glimpse': 0.5,      // Lower complexity
+      'photo-essay': 0.6,  // Visual + textual
+      'default': 0.5
+    };
+    
+    return weights[contentClass] || weights.default;
+  }
+  
+  // Analyze title complexity for concept limit adjustment
+  analyzeTitleComplexity(title) {
+    const words = title.split(/\s+/).filter(w => w.length > 0);
+    const uniqueWords = new Set(words.map(w => w.toLowerCase())).size;
+    const avgWordLength = words.reduce((sum, w) => sum + w.length, 0) / words.length || 0;
+    
+    // Complex titles suggest complex content
+    return Math.min(1, (uniqueWords / 10) + (avgWordLength / 10));
+  }
+  
+  // Calculate dynamic concept limit based on complexity
+  calculateDynamicConceptLimit(complexity) {
+    const baseLimit = 5;
+    const maxLimit = 12;
+    
+    // Higher complexity allows more concepts
+    const dynamicLimit = Math.floor(baseLimit + (complexity * (maxLimit - baseLimit)));
+    
+    return Math.max(baseLimit, Math.min(maxLimit, dynamicLimit));
+  }
+  
+  // Build semantic similarity map for intelligent concept matching
+  buildSemanticSimilarityMap(concepts) {
+    const similarityMap = new Map();
+    
+    // Group concepts by semantic families
+    const semanticFamilies = {
+      temporal: ['time', 'moment', 'duration', 'flow', 'sequence', 'temporal', 'chronological'],
+      spatial: ['space', 'location', 'place', 'position', 'spatial', 'dimensional'],
+      philosophical: ['meaning', 'existence', 'being', 'truth', 'reality', 'consciousness'],
+      emotional: ['feeling', 'emotion', 'mood', 'affect', 'sentiment', 'emotional'],
+      perceptual: ['vision', 'sight', 'perception', 'awareness', 'observation', 'sensory'],
+      relational: ['connection', 'relationship', 'bond', 'link', 'network', 'interaction'],
+      structural: ['pattern', 'structure', 'form', 'organization', 'arrangement', 'system']
+    };
+    
+    concepts.forEach(concept => {
+      const word = concept.word || concept.concept || '';
+      const family = this.findSemanticFamily(word.toLowerCase(), semanticFamilies);
+      
+      if (family) {
+        if (!similarityMap.has(family)) {
+          similarityMap.set(family, []);
+        }
+        similarityMap.get(family).push(concept);
+      }
+    });
+    
+    return similarityMap;
+  }
+  
+  // Find semantic family for a word
+  findSemanticFamily(word, semanticFamilies) {
+    for (const [family, keywords] of Object.entries(semanticFamilies)) {
+      if (keywords.some(keyword => word.includes(keyword) || keyword.includes(word))) {
+        return family;
+      }
+    }
+    return null;
+  }
+  
+  // Build confidence profile for weight-based selection
+  buildConfidenceProfile(concepts) {
+    if (concepts.length === 0) {
+      return { average: 0.5, distribution: [] };
+    }
+    
+    const confidences = concepts.map(c => c.confidence || 0.5);
+    const average = confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
+    
+    // Create distribution buckets
+    const distribution = {
+      high: confidences.filter(c => c > 0.8).length,
+      medium: confidences.filter(c => c >= 0.5 && c <= 0.8).length,
+      low: confidences.filter(c => c < 0.5).length
+    };
+    
+    return {
+      average: average,
+      distribution: distribution,
+      confidences: confidences
+    };
+  }
+  
+  // Analyze source distribution for diversity bonuses
+  analyzeSourceDistribution(concepts) {
+    const sourceCount = {};
+    const totalConcepts = concepts.length;
+    
+    concepts.forEach(concept => {
+      const source = concept.source || 'unknown';
+      sourceCount[source] = (sourceCount[source] || 0) + 1;
+    });
+    
+    // Calculate diversity score (higher = more diverse sources)
+    const uniqueSources = Object.keys(sourceCount).length;
+    const diversityScore = uniqueSources / Math.max(1, totalConcepts);
+    
+    return {
+      sourceCount: sourceCount,
+      uniqueSources: uniqueSources,
+      diversityScore: diversityScore,
+      totalConcepts: totalConcepts
+    };
   }
 }
 

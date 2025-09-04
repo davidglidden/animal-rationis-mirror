@@ -5,23 +5,82 @@ class StrataRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      layerCount: params.layerCount || 12,
-      erosionRate: params.erosionRate || 0.3,
-      faultLines: params.faultLines || 2,
-      compressionForce: params.compressionForce || 0.1,
-      timeScale: params.timeScale || 1000,
-      colorVariation: params.colorVariation || 30,
-      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001),
+      layerCount: this.semanticParams.layerCount,
+      erosionRate: this.semanticParams.erosionRate,
+      faultLines: this.semanticParams.faultLines,
+      compressionForce: this.semanticParams.compressionForce,
+      timeScale: this.semanticParams.timeScale,
+      colorVariation: this.semanticParams.colorVariation,
+      animationSpeed: this.semanticParams.animationSpeed,
       ...params
     };
     this.time = 0;
     this.layers = [];
     this.faults = [];
     this.animationId = null;
+    
+    console.log(`🎨 Strata renderer initialized with semantic differentiation:`, {
+      layers: this.semanticParams.layerCount,
+      erosion: this.semanticParams.erosionRate,
+      faults: this.semanticParams.faultLines,
+      compression: this.semanticParams.compressionForce,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initLayers();
     this.initFaults();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'layered';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001);
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Layer count based on complexity and nesting
+      layerCount: Math.floor(6 + (genome.complexity?.nestingLevel || 3) * 2 + 
+                            (genome.complexity?.layerCount || 1) * 4), // 6-24 layers
+      
+      // Erosion rate based on temporal dynamics and weathering
+      erosionRate: 0.1 + (genome.temporality?.velocity || 0) * 0.4 + 
+                  (entropyScore * 0.3), // 0.1-0.8
+      
+      // Fault lines based on dissonance and structural tension
+      faultLines: Math.floor(1 + (genome.resonance?.dissonanceLevel || 0.2) * 4 + 
+                           (genome.dynamics?.acceleration || 0.1) * 3), // 1-8 faults
+      
+      // Compression force based on structural pressure
+      compressionForce: 0.05 + (genome.complexity?.nestedComplexity || 0) * 0.25 + 
+                       (genome.topology?.branchingFactor || 1) * 0.05, // 0.05-0.35
+      
+      // Time scale based on temporal density and flow
+      timeScale: 500 + (genome.temporality?.temporalDensity || 0.5) * 2000, // 500-2500
+      
+      // Color variation based on conceptual diversity
+      colorVariation: 15 + (entropyScore * 45), // 15-60
+      
+      // Animation speed based on temporal velocity
+      animationSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 3), // Variable speed
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
   }
 
   initLayers() {

@@ -5,21 +5,117 @@ class SpiralRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      spiralType: params.spiralType || 'fibonacci', // fibonacci, archimedean, logarithmic
-      arms: params.arms || 3,
-      growth: params.growth || 0.2,
-      rotationSpeed: params.rotationSpeed || (window.SacredPalette?.timing?.breathRate || 0.001) * 5,
-      particleCount: params.particleCount || 200,
-      trailLength: params.trailLength || 0.95,
-      colorShift: params.colorShift || 0,
+      spiralType: this.semanticParams.spiralType,
+      arms: this.semanticParams.arms,
+      growth: this.semanticParams.growth,
+      rotationSpeed: this.semanticParams.rotationSpeed,
+      particleCount: this.semanticParams.particleCount,
+      trailLength: this.semanticParams.trailLength,
+      colorShift: this.semanticParams.colorShift,
       ...params
     };
     this.time = 0;
     this.particles = [];
     this.animationId = null;
+    
+    console.log(`🎨 Spiral renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.spiralType,
+      arms: this.semanticParams.arms,
+      growth: this.semanticParams.growth,
+      particles: this.semanticParams.particleCount,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initParticles();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'spiral';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001) * 5;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Spiral type based on growth patterns and conceptual DNA
+      spiralType: this.selectSpiralType(genome, conceptualDNA),
+      
+      // Arms based on branching factor and complexity
+      arms: Math.floor(1 + (genome.topology?.branchingFactor || 1) * 3), // 1-7 arms
+      
+      // Growth rate based on temporal dynamics and self-similarity
+      growth: 0.1 + (genome.complexity?.selfSimilarity || 0.2) * 0.4, // 0.1-0.5
+      
+      // Rotation speed based on temporal velocity and circularity
+      rotationSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 4) * 
+                     (1 + (genome.topology?.circularityIndex || 0.1) * 2), // Variable speed
+      
+      // Particle count based on complexity and entropy
+      particleCount: Math.floor(100 + (entropyScore * 300) + 
+                                (genome.complexity?.nestedComplexity || 0) * 200), // 100-600 particles
+      
+      // Trail length based on temporal flow and memory
+      trailLength: 0.9 + (genome.temporality?.sequentialFlow || 0.1) * 0.08, // 0.9-0.98
+      
+      // Color shift based on resonance and dynamics
+      colorShift: (genome.resonance?.resonantFrequency || 0.5) * 
+                  (genome.dynamics?.acceleration || 0.1) * 10, // 0-10 shift
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select spiral type based on semantic content
+  selectSpiralType(genome, conceptualDNA) {
+    const complexity = genome.complexity || {};
+    const dynamics = genome.dynamics || {};
+    
+    // Analyze conceptual DNA for spiral type hints
+    const hasFibonacci = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['fibonacci', 'golden', 'natural', 'organic', 'growth'].includes(concept.toLowerCase())
+    );
+    const hasArchimedean = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['linear', 'uniform', 'regular', 'constant', 'steady'].includes(concept.toLowerCase())
+    );
+    const hasLogarithmic = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['exponential', 'accelerating', 'explosive', 'expanding', 'infinite'].includes(concept.toLowerCase())
+    );
+    
+    // Spiral type selection based on semantic analysis
+    if (hasFibonacci || (complexity.selfSimilarity > 0.4 && complexity.nestingLevel > 3)) {
+      return 'fibonacci';
+    } else if (hasArchimedean || complexity.selfSimilarity > 0.6) {
+      return 'archimedean';
+    } else if (hasLogarithmic || dynamics.acceleration > 0.3) {
+      return 'logarithmic';
+    } else {
+      // Default based on structural characteristics
+      if (complexity.selfSimilarity > 0.5) {
+        return 'fibonacci';
+      } else if (dynamics.acceleration > 0.2) {
+        return 'logarithmic';
+      } else {
+        return 'archimedean';
+      }
+    }
   }
 
   initParticles() {

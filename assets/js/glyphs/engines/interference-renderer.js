@@ -5,19 +5,127 @@ class InterferenceRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      waveCount: params.waveCount || 3,
-      frequency: params.frequency || 0.02,
-      amplitude: params.amplitude || 30,
-      phase: params.phase || 0,
-      interferenceType: params.interferenceType || 'constructive', // constructive, destructive, mixed
-      colorIntensity: params.colorIntensity || 0.7,
-      animationSpeed: params.animationSpeed || (window.SacredPalette?.timing?.shiftRate || 0.0005) * 20,
+      waveCount: this.semanticParams.waveCount,
+      frequency: this.semanticParams.frequency,
+      amplitude: this.semanticParams.amplitude,
+      phase: this.semanticParams.phase,
+      interferenceType: this.semanticParams.interferenceType,
+      colorIntensity: this.semanticParams.colorIntensity,
+      animationSpeed: this.semanticParams.animationSpeed,
+      sourceSpacing: this.semanticParams.sourceSpacing,
+      resolution: this.semanticParams.resolution,
+      waveDecay: this.semanticParams.waveDecay,
       ...params
     };
     this.time = 0;
     this.animationId = null;
+    
+    console.log(`🎨 Interference renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.interferenceType,
+      waves: this.semanticParams.waveCount,
+      frequency: this.semanticParams.frequency,
+      amplitude: this.semanticParams.amplitude,
+      entropy: this.semanticParams.entropyScore
+    });
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'interfering';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.shiftRate || 0.0005) * 20;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Interference type based on resonance patterns
+      interferenceType: this.selectInterferenceType(genome, conceptualDNA),
+      
+      // Wave count based on complexity and branching
+      waveCount: Math.floor(2 + (genome.topology?.branchingFactor || 1) * 2 + 
+                           (genome.complexity?.nestingLevel || 3) * 0.5), // 2-8 waves
+      
+      // Frequency based on temporal velocity and resonance
+      frequency: 0.01 + (genome.temporality?.velocity || 0) * 0.03 + 
+                 (genome.resonance?.resonantFrequency || 0.5) * 0.04, // 0.01-0.08
+      
+      // Amplitude based on intensity and dynamics
+      amplitude: 20 + (genome.dynamics?.acceleration || 0.1) * 40 + 
+                 (genome.resonance?.harmonicComplexity || 0.3) * 30, // 20-80
+      
+      // Phase based on temporal flow and entropy
+      phase: (entropyScore * Math.PI * 2) + 
+             (genome.temporality?.sequentialFlow || 0.1) * Math.PI, // 0-3π
+      
+      // Color intensity based on resonance and visibility
+      colorIntensity: 0.5 + (genome.resonance?.harmonicComplexity || 0.3) * 0.5, // 0.5-1.0
+      
+      // Animation speed based on temporal dynamics
+      animationSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 3), // Variable speed
+      
+      // Source spacing based on topology
+      sourceSpacing: 40 + (genome.topology?.branchingFactor || 1) * 30, // 40-100
+      
+      // Resolution based on complexity (lower = higher detail)
+      resolution: Math.max(1, Math.floor(4 - (genome.complexity?.nestedComplexity || 0) * 3)), // 1-4
+      
+      // Wave decay based on temporal persistence
+      waveDecay: 0.1 + (1 - (genome.temporality?.sequentialFlow || 0.1)) * 0.4, // 0.1-0.5
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select interference type based on semantic content
+  selectInterferenceType(genome, conceptualDNA) {
+    const resonance = genome.resonance || {};
+    const dynamics = genome.dynamics || {};
+    
+    // Analyze conceptual DNA for interference type hints
+    const hasConstructive = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['constructive', 'harmony', 'amplification', 'resonance', 'coherence'].includes(concept.toLowerCase())
+    );
+    const hasDestructive = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['destructive', 'cancellation', 'opposing', 'discord', 'interference'].includes(concept.toLowerCase())
+    );
+    const hasMixed = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['mixed', 'complex', 'varied', 'chaotic', 'turbulent'].includes(concept.toLowerCase())
+    );
+    
+    // Interference type selection based on semantic analysis
+    if (hasConstructive || (resonance.harmonicComplexity || 0) > 0.6) {
+      return 'constructive';
+    } else if (hasDestructive || (resonance.dissonanceLevel || 0) > 0.4) {
+      return 'destructive';
+    } else if (hasMixed || dynamics.acceleration > 0.3) {
+      return 'mixed';
+    } else {
+      // Default based on structural characteristics
+      if ((resonance.harmonicComplexity || 0) > 0.4) {
+        return 'constructive';
+      } else if ((resonance.dissonanceLevel || 0) > 0.3) {
+        return 'destructive';
+      } else {
+        return 'mixed';
+      }
+    }
   }
 
   start() {
@@ -45,23 +153,32 @@ class InterferenceRenderer {
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // Create interference pattern
-    for (let x = 0; x < width; x += 2) {
-      for (let y = 0; y < height; y += 2) {
+    // Create interference pattern with semantic resolution
+    const resolution = this.params.resolution;
+    for (let x = 0; x < width; x += resolution) {
+      for (let y = 0; y < height; y += resolution) {
         let amplitude = 0;
         
         // Calculate interference from multiple wave sources
         for (let i = 0; i < this.params.waveCount; i++) {
-          const sourceX = centerX + Math.cos(i * Math.PI * 2 / this.params.waveCount) * 60;
-          const sourceY = centerY + Math.sin(i * Math.PI * 2 / this.params.waveCount) * 60;
+          const sourceAngle = i * Math.PI * 2 / this.params.waveCount;
+          const sourceX = centerX + Math.cos(sourceAngle) * this.params.sourceSpacing;
+          const sourceY = centerY + Math.sin(sourceAngle) * this.params.sourceSpacing;
           
           const distance = Math.sqrt((x - sourceX) ** 2 + (y - sourceY) ** 2);
-          const wave = Math.sin(distance * this.params.frequency + this.time + this.params.phase);
+          const decayFactor = Math.exp(-distance * this.params.waveDecay * 0.01);
+          const wave = Math.sin(distance * this.params.frequency + this.time + this.params.phase + i * Math.PI / 4) * decayFactor;
           
-          if (this.params.interferenceType === 'destructive') {
-            amplitude += wave * (i % 2 === 0 ? 1 : -1);
-          } else {
-            amplitude += wave;
+          // Apply semantic interference patterns
+          switch (this.params.interferenceType) {
+            case 'destructive':
+              amplitude += wave * (i % 2 === 0 ? 1 : -1);
+              break;
+            case 'mixed':
+              amplitude += wave * (Math.sin(i * Math.PI / 3) > 0 ? 1 : -0.7);
+              break;
+            default: // constructive
+              amplitude += wave;
           }
         }
         
@@ -111,7 +228,7 @@ class InterferenceRenderer {
         
         if (pixelColor) {
           this.ctx.fillStyle = pixelColor;
-          this.ctx.fillRect(x, y, 2, 2);
+          this.ctx.fillRect(x, y, resolution, resolution);
         }
       }
     }

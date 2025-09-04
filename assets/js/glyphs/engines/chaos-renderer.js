@@ -5,27 +5,161 @@ class ChaosRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      chaosType: params.chaosType || 'lorenz', // lorenz, henon, rossler, turbulent
-      attractorScale: params.attractorScale || 5,
-      sensitivityRate: params.sensitivityRate || 0.01,
-      evolutionSpeed: params.evolutionSpeed || (window.SacredPalette?.timing?.candleFlicker || 0.003) * 33,
-      trailLength: params.trailLength || 0.98,
-      colorChaos: params.colorChaos || true,
-      perturbationStrength: params.perturbationStrength || 0.001,
+      chaosType: this.semanticParams.chaosType,
+      attractorScale: this.semanticParams.attractorScale,
+      sensitivityRate: this.semanticParams.sensitivityRate,
+      evolutionSpeed: this.semanticParams.evolutionSpeed,
+      trailLength: this.semanticParams.trailLength,
+      colorChaos: this.semanticParams.colorChaos,
+      perturbationStrength: this.semanticParams.perturbationStrength,
+      systemCount: this.semanticParams.systemCount,
+      turbulenceIntensity: this.semanticParams.turbulenceIntensity,
       ...params
     };
     this.time = 0;
     this.systems = [];
     this.animationId = null;
+    
+    console.log(`🎨 Chaos renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.chaosType,
+      systems: this.semanticParams.systemCount,
+      sensitivity: this.semanticParams.sensitivityRate,
+      evolution: this.semanticParams.evolutionSpeed,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initChaosSystems();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'chaotic';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.candleFlicker || 0.003) * 33;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Chaos type based on dynamic patterns and conceptual DNA
+      chaosType: this.selectChaosType(genome, conceptualDNA),
+      
+      // Attractor scale based on scope and complexity
+      attractorScale: 3 + (genome.complexity?.nestingLevel || 3) * 2 + 
+                     (entropyScore * 5), // 3-18 scale
+      
+      // Sensitivity rate based on entropy and dissonance
+      sensitivityRate: 0.005 + (entropyScore * 0.05) + 
+                       (genome.resonance?.dissonanceLevel || 0.2) * 0.045, // 0.005-0.1
+      
+      // Evolution speed based on temporal dynamics
+      evolutionSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 4 + 
+                                   (genome.dynamics?.acceleration || 0.1) * 6), // Variable speed
+      
+      // Trail length based on temporal continuity
+      trailLength: 0.9 + (genome.temporality?.sequentialFlow || 0.1) * 0.08, // 0.9-0.98
+      
+      // Color chaos enabled for higher entropy
+      colorChaos: entropyScore > 0.3,
+      
+      // Perturbation strength based on chaos and dynamics
+      perturbationStrength: 0.0005 + (entropyScore * 0.0015) + 
+                           (genome.dynamics?.acceleration || 0.1) * 0.002, // 0.0005-0.004
+      
+      // System count based on complexity
+      systemCount: this.calculateSystemCount(genome, conceptualDNA, entropyScore),
+      
+      // Turbulence intensity based on chaos level
+      turbulenceIntensity: 10 + (entropyScore * 30) + 
+                          (genome.resonance?.dissonanceLevel || 0.2) * 20, // 10-50
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select chaos type based on semantic content
+  selectChaosType(genome, conceptualDNA) {
+    const dynamics = genome.dynamics || {};
+    const complexity = genome.complexity || {};
+    
+    // Analyze conceptual DNA for chaos type hints
+    const hasLorenz = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['lorenz', 'attractor', 'butterfly', 'weather', 'meteorology'].includes(concept.toLowerCase())
+    );
+    const hasHenon = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['discrete', 'map', 'iteration', 'henon', 'nonlinear'].includes(concept.toLowerCase())
+    );
+    const hasRossler = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['rossler', 'chemical', 'reaction', 'oscillation', 'continuous'].includes(concept.toLowerCase())
+    );
+    const hasTurbulent = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['turbulent', 'fluid', 'flow', 'vortex', 'swirl'].includes(concept.toLowerCase())
+    );
+    
+    // Chaos type selection based on semantic analysis
+    if (hasLorenz || (dynamics.acceleration > 0.4 && complexity.nestingLevel > 4)) {
+      return 'lorenz';
+    } else if (hasHenon || complexity.selfSimilarity > 0.5) {
+      return 'henon';
+    } else if (hasRossler || (dynamics.velocity > 0.3 && genome.resonance?.harmonicComplexity > 0.3)) {
+      return 'rossler';
+    } else if (hasTurbulent || (dynamics.acceleration > 0.5 && genome.topology?.rhizomaticTendency > 0.4)) {
+      return 'turbulent';
+    } else {
+      // Default based on structural characteristics
+      if (dynamics.acceleration > 0.4) {
+        return 'lorenz';
+      } else if (complexity.selfSimilarity > 0.4) {
+        return 'henon';
+      } else if (dynamics.velocity > 0.3) {
+        return 'rossler';
+      } else {
+        return 'turbulent';
+      }
+    }
+  }
+  
+  // Calculate system count based on semantic content
+  calculateSystemCount(genome, conceptualDNA, entropyScore) {
+    const complexity = genome.complexity || {};
+    const topology = genome.topology || {};
+    
+    // Base count varies by chaos type
+    let baseCount = 3;
+    
+    // Turbulent systems need more particles
+    if (this.selectChaosType(genome, conceptualDNA) === 'turbulent') {
+      baseCount = 30 + Math.floor(entropyScore * 40) + 
+                  Math.floor((complexity.nestedComplexity || 0) * 30); // 30-100
+    } else {
+      baseCount = 2 + Math.floor((topology.branchingFactor || 1) * 2) + 
+                  Math.floor(entropyScore * 5); // 2-12
+    }
+    
+    return baseCount;
   }
 
   initChaosSystems() {
     this.systems = [];
     const { width, height } = this.canvas;
-    const systemCount = this.params.chaosType === 'turbulent' ? 50 : 3;
+    const systemCount = this.params.systemCount;
     
     for (let i = 0; i < systemCount; i++) {
       const system = {
@@ -148,21 +282,21 @@ class ChaosRenderer {
           const distFromCenter = Math.sqrt((system.x - centerX) ** 2 + (system.y - centerY) ** 2);
           const angle = Math.atan2(system.y - centerY, system.x - centerX);
           
-          // Vortex field
-          const vortexStrength = 100 / (distFromCenter + 10);
+          // Vortex field with semantic intensity
+          const vortexStrength = (100 + this.params.turbulenceIntensity) / (distFromCenter + 10);
           dx = -Math.sin(angle) * vortexStrength;
           dy = Math.cos(angle) * vortexStrength;
           
-          // Turbulent perturbations
-          const turbulence = 20;
-          dx += (Math.random() - 0.5) * turbulence + perturbation * system.sensitivity * 100;
-          dy += (Math.random() - 0.5) * turbulence + perturbation * system.sensitivity * 100;
+          // Turbulent perturbations with semantic scaling
+          const turbulence = this.params.turbulenceIntensity;
+          dx += (Math.random() - 0.5) * turbulence + perturbation * system.sensitivity * (100 + this.params.turbulenceIntensity);
+          dy += (Math.random() - 0.5) * turbulence + perturbation * system.sensitivity * (100 + this.params.turbulenceIntensity);
           dz = 0;
           
-          // Add noise field
-          const noiseScale = 0.01;
-          dx += Math.sin(system.x * noiseScale + this.time) * 10;
-          dy += Math.cos(system.y * noiseScale + this.time) * 10;
+          // Add noise field with semantic scaling
+          const noiseScale = 0.01 + (this.params.turbulenceIntensity * 0.0002);
+          dx += Math.sin(system.x * noiseScale + this.time) * (10 + this.params.turbulenceIntensity * 0.2);
+          dy += Math.cos(system.y * noiseScale + this.time) * (10 + this.params.turbulenceIntensity * 0.2);
           break;
           
         default:

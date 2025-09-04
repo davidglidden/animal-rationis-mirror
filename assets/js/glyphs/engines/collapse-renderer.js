@@ -5,23 +5,130 @@ class CollapseRenderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visualParams = params;
-    // Semantic integration initialized
+    
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    this.semanticParams = this.extractSemanticParameters(params);
+    
     this.params = {
-      collapseType: params.collapseType || 'gravitational', // gravitational, structural, cascade
-      particleCount: params.particleCount || 150,
-      collapseSpeed: params.collapseSpeed || (window.SacredPalette?.timing?.shiftRate || 0.0005) * 40,
-      centerMass: params.centerMass || 5,
-      eventHorizon: params.eventHorizon || 30,
-      shearForce: params.shearForce || 0.1,
-      fragmentationRate: params.fragmentationRate || 0.01,
+      collapseType: this.semanticParams.collapseType,
+      particleCount: this.semanticParams.particleCount,
+      collapseSpeed: this.semanticParams.collapseSpeed,
+      centerMass: this.semanticParams.centerMass,
+      eventHorizon: this.semanticParams.eventHorizon,
+      shearForce: this.semanticParams.shearForce,
+      fragmentationRate: this.semanticParams.fragmentationRate,
+      structuralStress: this.semanticParams.structuralStress,
+      cascadeThreshold: this.semanticParams.cascadeThreshold,
       ...params
     };
     this.time = 0;
     this.particles = [];
     this.collapseCenter = { x: 0, y: 0 };
     this.animationId = null;
+    
+    console.log(`🎨 Collapse renderer initialized with semantic differentiation:`, {
+      type: this.semanticParams.collapseType,
+      particles: this.semanticParams.particleCount,
+      speed: this.semanticParams.collapseSpeed,
+      mass: this.semanticParams.centerMass,
+      entropy: this.semanticParams.entropyScore
+    });
+    
     this.initParticles();
     this.initCollapseCenter();
+  }
+  
+  // Extract semantic parameters for dramatic visual differentiation
+  extractSemanticParameters(params) {
+    // Get semantic genome data
+    const genome = params.genome || {};
+    const archetype = params.archetype || 'collapsing';
+    const entropyScore = params.entropyScore || 0.5;
+    const conceptualDNA = params.conceptualDNA || [];
+    
+    // Base parameters influenced by semantic content
+    const baseSpeed = (window.SacredPalette?.timing?.shiftRate || 0.0005) * 40;
+    
+    // Dramatically different patterns based on semantic content
+    const semanticInfluences = {
+      // Collapse type based on structural failure patterns
+      collapseType: this.selectCollapseType(genome, conceptualDNA),
+      
+      // Particle count based on complexity and chaos
+      particleCount: Math.floor(100 + (entropyScore * 200) + 
+                                (genome.complexity?.nestedComplexity || 0) * 150), // 100-450 particles
+      
+      // Collapse speed based on temporal acceleration
+      collapseSpeed: baseSpeed * (1 + (genome.temporality?.velocity || 0) * 3 + 
+                                   (genome.dynamics?.acceleration || 0.1) * 5), // Variable speed
+      
+      // Center mass based on gravitational pull and complexity
+      centerMass: 3 + (genome.complexity?.nestingLevel || 3) * 2 + 
+                  (genome.dynamics?.acceleration || 0.1) * 10, // 3-33 mass
+      
+      // Event horizon based on scope and reach
+      eventHorizon: 20 + (entropyScore * 40) + 
+                   (genome.topology?.branchingFactor || 1) * 15, // 20-95 radius
+      
+      // Shear force based on structural tension
+      shearForce: 0.05 + (genome.resonance?.dissonanceLevel || 0.2) * 0.3 + 
+                 (genome.dynamics?.acceleration || 0.1) * 0.2, // 0.05-0.55
+      
+      // Fragmentation rate based on entropy and chaos
+      fragmentationRate: 0.005 + (entropyScore * 0.02) + 
+                        (genome.resonance?.dissonanceLevel || 0.2) * 0.03, // 0.005-0.055
+      
+      // Structural stress based on complexity pressure
+      structuralStress: 0.1 + (genome.complexity?.nestedComplexity || 0) * 0.4, // 0.1-0.5
+      
+      // Cascade threshold based on rhizomatic tendency
+      cascadeThreshold: 0.5 + (genome.topology?.rhizomaticTendency || 0.2) * 0.3, // 0.5-0.8
+      
+      // Store for later use
+      entropyScore: entropyScore,
+      genome: genome,
+      archetype: archetype
+    };
+    
+    return semanticInfluences;
+  }
+  
+  // Select collapse type based on semantic content
+  selectCollapseType(genome, conceptualDNA) {
+    const dynamics = genome.dynamics || {};
+    const complexity = genome.complexity || {};
+    
+    // Analyze conceptual DNA for collapse type hints
+    const hasGravitational = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['gravitational', 'attraction', 'pull', 'center', 'mass'].includes(concept.toLowerCase())
+    );
+    const hasStructural = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['structural', 'failure', 'breakdown', 'framework', 'support'].includes(concept.toLowerCase())
+    );
+    const hasCascade = conceptualDNA.some(concept => 
+      concept && typeof concept === 'string' && 
+      ['cascade', 'chain', 'domino', 'ripple', 'propagation'].includes(concept.toLowerCase())
+    );
+    
+    // Collapse type selection based on semantic analysis
+    if (hasGravitational || dynamics.acceleration > 0.4) {
+      return 'gravitational';
+    } else if (hasStructural || complexity.nestedComplexity > 0.4) {
+      return 'structural';
+    } else if (hasCascade || (genome.topology?.rhizomaticTendency || 0) > 0.3) {
+      return 'cascade';
+    } else {
+      // Default based on structural characteristics
+      if (dynamics.acceleration > 0.3) {
+        return 'gravitational';
+      } else if (complexity.nestedComplexity > 0.3) {
+        return 'structural';
+      } else {
+        return 'cascade';
+      }
+    }
   }
 
   initCollapseCenter() {
@@ -188,9 +295,11 @@ class CollapseRenderer {
     // Structural failure propagates stress
     particle.structural -= this.params.fragmentationRate;
     
-    if (particle.structural < 0.3) {
+    // Apply structural stress based on semantic parameters
+    const stressMultiplier = this.params.structuralStress;
+    if (particle.structural < (0.3 + stressMultiplier * 0.3)) {
       // Apply collapse forces toward center
-      const collapseForce = (1 - particle.structural) * 0.05;
+      const collapseForce = (1 - particle.structural) * 0.05 * stressMultiplier;
       particle.vx += (dx / distance) * collapseForce;
       particle.vy += (dy / distance) * collapseForce;
       
@@ -203,23 +312,26 @@ class CollapseRenderer {
   updateCascadeCollapse(particle, dx, dy, distance) {
     // Cascade effect - particles influence nearby ones
     let neighborInfluence = 0;
+    const cascadeRadius = 50 + (this.params.cascadeThreshold * 50);
+    
     this.particles.forEach(other => {
       if (other !== particle && !other.collapsed) {
         const otherDx = other.x - particle.x;
         const otherDy = other.y - particle.y;
         const otherDistance = Math.sqrt(otherDx * otherDx + otherDy * otherDy);
         
-        if (otherDistance < 50 && other.structural < particle.structural) {
-          neighborInfluence += (1 - other.structural) * 0.1;
+        if (otherDistance < cascadeRadius && other.structural < particle.structural) {
+          neighborInfluence += (1 - other.structural) * 0.1 * this.params.cascadeThreshold;
         }
       }
     });
     
     particle.structural -= neighborInfluence;
     
-    // Apply cascade forces
-    if (particle.structural < 0.7) {
-      const cascadeForce = (0.7 - particle.structural) * 0.03;
+    // Apply cascade forces with semantic threshold
+    const cascadeThreshold = this.params.cascadeThreshold;
+    if (particle.structural < cascadeThreshold) {
+      const cascadeForce = (cascadeThreshold - particle.structural) * 0.03;
       particle.vx += (dx / distance) * cascadeForce;
       particle.vy += (dy / distance) * cascadeForce;
       particle.vy += this.params.collapseSpeed * 2; // Gravity effect
