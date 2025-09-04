@@ -98,26 +98,39 @@ class CollapseRenderer {
     const dynamics = genome.dynamics || {};
     const complexity = genome.complexity || {};
     
-    // Analyze conceptual DNA for collapse type hints
-    const hasGravitational = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['gravitational', 'attraction', 'pull', 'center', 'mass'].includes(concept.toLowerCase())
-    );
-    const hasStructural = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['structural', 'failure', 'breakdown', 'framework', 'support'].includes(concept.toLowerCase())
-    );
-    const hasCascade = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['cascade', 'chain', 'domino', 'ripple', 'propagation'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const collapseAnalysis = {
+      hasGravitational: {
+        family: 'force',
+        keywords: ['gravitational', 'attraction', 'pull', 'center', 'mass', 'gravity', 'weight'],
+        threshold: 0.6
+      },
+      hasStructural: {
+        family: 'structural',
+        keywords: ['structural', 'failure', 'breakdown', 'framework', 'support', 'collapse', 'integrity'],
+        threshold: 0.6
+      },
+      hasCascade: {
+        family: 'dynamic',
+        keywords: ['cascade', 'chain', 'domino', 'ripple', 'propagation', 'spread', 'avalanche'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, collapseAnalysis) :
+      { hasGravitational: false, hasStructural: false, hasCascade: false };
     
     // Collapse type selection based on semantic analysis
-    if (hasGravitational || dynamics.acceleration > 0.4) {
+    if (results.hasGravitational || dynamics.acceleration > 0.4) {
       return 'gravitational';
-    } else if (hasStructural || complexity.nestedComplexity > 0.4) {
+    } else if (results.hasStructural || complexity.nestedComplexity > 0.4) {
       return 'structural';
-    } else if (hasCascade || (genome.topology?.rhizomaticTendency || 0) > 0.3) {
+    } else if (results.hasCascade || (genome.topology?.rhizomaticTendency || 0) > 0.3) {
       return 'cascade';
     } else {
       // Default based on structural characteristics

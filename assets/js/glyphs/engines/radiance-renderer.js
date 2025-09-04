@@ -97,26 +97,39 @@ class RadianceRenderer {
     const topology = genome.topology || {};
     const dynamics = genome.dynamics || {};
     
-    // Analyze conceptual DNA for ray type hints
-    const hasSpiral = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['spiral', 'helical', 'twist', 'vortex', 'coil'].includes(concept.toLowerCase())
-    );
-    const hasBurst = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['burst', 'explosion', 'sudden', 'flash', 'intensity'].includes(concept.toLowerCase())
-    );
-    const hasFibonacci = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['natural', 'organic', 'growth', 'pattern', 'sequence'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const radianceAnalysis = {
+      hasSpiral: {
+        family: 'helical',
+        keywords: ['spiral', 'helical', 'twist', 'vortex', 'coil', 'helix', 'gyre'],
+        threshold: 0.6
+      },
+      hasBurst: {
+        family: 'explosive',
+        keywords: ['burst', 'explosion', 'sudden', 'flash', 'intensity', 'eruption', 'nova'],
+        threshold: 0.6
+      },
+      hasFibonacci: {
+        family: 'natural',
+        keywords: ['natural', 'organic', 'growth', 'pattern', 'sequence', 'fibonacci', 'golden'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, radianceAnalysis) :
+      { hasSpiral: false, hasBurst: false, hasFibonacci: false };
     
     // Ray type selection based on semantic analysis
-    if (hasSpiral || topology.circularityIndex > 0.4) {
+    if (results.hasSpiral || topology.circularityIndex > 0.4) {
       return 'spiral';
-    } else if (hasBurst || dynamics.acceleration > 0.3) {
+    } else if (results.hasBurst || dynamics.acceleration > 0.3) {
       return 'burst';
-    } else if (hasFibonacci || (topology.branchingFactor > 1.6 && topology.branchingFactor < 2.0)) {
+    } else if (results.hasFibonacci || (topology.branchingFactor > 1.6 && topology.branchingFactor < 2.0)) {
       return 'fibonacci';
     } else {
       // Default based on structural characteristics

@@ -85,26 +85,39 @@ class SpiralRenderer {
     const complexity = genome.complexity || {};
     const dynamics = genome.dynamics || {};
     
-    // Analyze conceptual DNA for spiral type hints
-    const hasFibonacci = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['fibonacci', 'golden', 'natural', 'organic', 'growth'].includes(concept.toLowerCase())
-    );
-    const hasArchimedean = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['linear', 'uniform', 'regular', 'constant', 'steady'].includes(concept.toLowerCase())
-    );
-    const hasLogarithmic = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['exponential', 'accelerating', 'explosive', 'expanding', 'infinite'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const spiralAnalysis = {
+      hasFibonacci: {
+        family: 'natural',
+        keywords: ['fibonacci', 'golden', 'natural', 'organic', 'growth', 'phi', 'nautilus'],
+        threshold: 0.6
+      },
+      hasArchimedean: {
+        family: 'mathematical',
+        keywords: ['linear', 'uniform', 'regular', 'constant', 'steady', 'arithmetic', 'mechanical'],
+        threshold: 0.6
+      },
+      hasLogarithmic: {
+        family: 'exponential',
+        keywords: ['exponential', 'accelerating', 'explosive', 'expanding', 'infinite', 'logarithmic', 'compound'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, spiralAnalysis) :
+      { hasFibonacci: false, hasArchimedean: false, hasLogarithmic: false };
     
     // Spiral type selection based on semantic analysis
-    if (hasFibonacci || (complexity.selfSimilarity > 0.4 && complexity.nestingLevel > 3)) {
+    if (results.hasFibonacci || (complexity.selfSimilarity > 0.4 && complexity.nestingLevel > 3)) {
       return 'fibonacci';
-    } else if (hasArchimedean || complexity.selfSimilarity > 0.6) {
+    } else if (results.hasArchimedean || complexity.selfSimilarity > 0.6) {
       return 'archimedean';
-    } else if (hasLogarithmic || dynamics.acceleration > 0.3) {
+    } else if (results.hasLogarithmic || dynamics.acceleration > 0.3) {
       return 'logarithmic';
     } else {
       // Default based on structural characteristics

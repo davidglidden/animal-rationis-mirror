@@ -117,32 +117,46 @@ class ThresholdRenderer {
     const dynamics = genome.dynamics || {};
     const topology = genome.topology || {};
     
-    // Analyze conceptual DNA for threshold type hints
-    const hasPortal = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['portal', 'opening', 'gateway', 'passage', 'door'].includes(concept.toLowerCase())
-    );
-    const hasMembrane = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['membrane', 'boundary', 'surface', 'skin', 'interface'].includes(concept.toLowerCase())
-    );
-    const hasPhase = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['phase', 'transition', 'state', 'change', 'shift'].includes(concept.toLowerCase())
-    );
-    const hasGateway = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['gateway', 'arch', 'frame', 'structure', 'entrance'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const thresholdAnalysis = {
+      hasPortal: {
+        family: 'liminal',
+        keywords: ['portal', 'opening', 'gateway', 'passage', 'door', 'threshold', 'entry'],
+        threshold: 0.6
+      },
+      hasMembrane: {
+        family: 'boundary',
+        keywords: ['membrane', 'boundary', 'surface', 'skin', 'interface', 'barrier', 'film'],
+        threshold: 0.6
+      },
+      hasPhase: {
+        family: 'transitional',
+        keywords: ['phase', 'transition', 'state', 'change', 'shift', 'transformation', 'metamorphosis'],
+        threshold: 0.6
+      },
+      hasGateway: {
+        family: 'architectural',
+        keywords: ['gateway', 'arch', 'frame', 'structure', 'entrance', 'edifice', 'construct'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, thresholdAnalysis) :
+      { hasPortal: false, hasMembrane: false, hasPhase: false, hasGateway: false };
     
     // Threshold type selection based on semantic analysis
-    if (hasPortal || (topology.circularityIndex > 0.4 && dynamics.acceleration > 0.3)) {
+    if (results.hasPortal || (topology.circularityIndex > 0.4 && dynamics.acceleration > 0.3)) {
       return 'portal';
-    } else if (hasMembrane || (topology.rhizomaticTendency > 0.4)) {
+    } else if (results.hasMembrane || (topology.rhizomaticTendency > 0.4)) {
       return 'membrane';
-    } else if (hasPhase || (dynamics.velocity > 0.3 && genome.temporality?.velocity > 0.2)) {
+    } else if (results.hasPhase || (dynamics.velocity > 0.3 && genome.temporality?.velocity > 0.2)) {
       return 'phase';
-    } else if (hasGateway || (genome.complexity?.nestingLevel > 4)) {
+    } else if (results.hasGateway || (genome.complexity?.nestingLevel > 4)) {
       return 'gateway';
     } else {
       // Default based on structural characteristics

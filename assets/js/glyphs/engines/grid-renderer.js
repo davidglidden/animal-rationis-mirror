@@ -87,26 +87,39 @@ class GridRenderer {
     const topology = genome.topology || {};
     const complexity = genome.complexity || {};
     
-    // Analyze conceptual DNA for grid type hints
-    const hasPolar = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['circular', 'radial', 'center', 'polar', 'orbit', 'spiral'].includes(concept.toLowerCase())
-    );
-    const hasHexagonal = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['hexagonal', 'organic', 'natural', 'honeycomb', 'cellular'].includes(concept.toLowerCase())
-    );
-    const hasTriangular = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['triangular', 'sharp', 'angular', 'geometric', 'faceted'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const gridAnalysis = {
+      hasPolar: {
+        family: 'spatial',
+        keywords: ['circular', 'radial', 'center', 'polar', 'orbit', 'spiral', 'centripetal', 'vortex'],
+        threshold: 0.6
+      },
+      hasHexagonal: {
+        family: 'natural',
+        keywords: ['hexagonal', 'organic', 'natural', 'honeycomb', 'cellular', 'crystalline', 'lattice'],
+        threshold: 0.6
+      },
+      hasTriangular: {
+        family: 'structural',
+        keywords: ['triangular', 'sharp', 'angular', 'geometric', 'faceted', 'pyramid', 'apex'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, gridAnalysis) :
+      { hasPolar: false, hasHexagonal: false, hasTriangular: false };
     
     // Grid type selection based on semantic analysis
-    if (hasPolar || topology.circularityIndex > 0.4) {
+    if (results.hasPolar || topology.circularityIndex > 0.4) {
       return 'polar';
-    } else if (hasHexagonal || (complexity.selfSimilarity > 0.3 && topology.branchingFactor > 1.5)) {
+    } else if (results.hasHexagonal || (complexity.selfSimilarity > 0.3 && topology.branchingFactor > 1.5)) {
       return 'hexagonal';
-    } else if (hasTriangular || topology.branchingFactor > 2.0) {
+    } else if (results.hasTriangular || topology.branchingFactor > 2.0) {
       return 'triangular';
     } else {
       // Default based on structural characteristics

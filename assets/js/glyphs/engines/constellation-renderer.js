@@ -78,26 +78,39 @@ class ConstellationRenderer {
     const topology = genome.topology || {};
     const complexity = genome.complexity || {};
     
-    // Analyze conceptual DNA for pattern hints
-    const hasCircular = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['circular', 'radial', 'orbital', 'cyclic', 'ring'].includes(concept.toLowerCase())
-    );
-    const hasGrid = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['grid', 'matrix', 'systematic', 'ordered', 'regular'].includes(concept.toLowerCase())
-    );
-    const hasRandom = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['random', 'scattered', 'chaotic', 'dispersed', 'irregular'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const constellationAnalysis = {
+      hasCircular: {
+        family: 'spatial',
+        keywords: ['circular', 'radial', 'orbital', 'cyclic', 'ring', 'wheel', 'mandala'],
+        threshold: 0.6
+      },
+      hasGrid: {
+        family: 'structural',
+        keywords: ['grid', 'matrix', 'systematic', 'ordered', 'regular', 'lattice', 'array'],
+        threshold: 0.6
+      },
+      hasRandom: {
+        family: 'chaotic',
+        keywords: ['random', 'scattered', 'chaotic', 'dispersed', 'irregular', 'stochastic', 'entropy'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, constellationAnalysis) :
+      { hasCircular: false, hasGrid: false, hasRandom: false };
     
     // Pattern selection based on semantic analysis
-    if (hasCircular || topology.circularityIndex > 0.4) {
+    if (results.hasCircular || topology.circularityIndex > 0.4) {
       return 'circular';
-    } else if (hasGrid || (complexity.selfSimilarity > 0.6 && topology.branchingFactor < 1.5)) {
+    } else if (results.hasGrid || (complexity.selfSimilarity > 0.6 && topology.branchingFactor < 1.5)) {
       return 'grid';
-    } else if (hasRandom || topology.rhizomaticTendency > 0.4) {
+    } else if (results.hasRandom || topology.rhizomaticTendency > 0.4) {
       return 'random';
     } else {
       // Default based on structural characteristics

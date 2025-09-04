@@ -95,32 +95,51 @@ class ChaosRenderer {
     const dynamics = genome.dynamics || {};
     const complexity = genome.complexity || {};
     
-    // Analyze conceptual DNA for chaos type hints
-    const hasLorenz = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['lorenz', 'attractor', 'butterfly', 'weather', 'meteorology'].includes(concept.toLowerCase())
-    );
-    const hasHenon = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['discrete', 'map', 'iteration', 'henon', 'nonlinear'].includes(concept.toLowerCase())
-    );
-    const hasRossler = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['rossler', 'chemical', 'reaction', 'oscillation', 'continuous'].includes(concept.toLowerCase())
-    );
-    const hasTurbulent = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['turbulent', 'fluid', 'flow', 'vortex', 'swirl'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const chaosAnalysis = {
+      hasLorenz: {
+        family: 'dynamic',
+        keywords: ['lorenz', 'attractor', 'butterfly', 'weather', 'meteorology', 'chaos', 'strange'],
+        threshold: 0.6
+      },
+      hasHenon: {
+        family: 'mathematical',
+        keywords: ['discrete', 'map', 'iteration', 'henon', 'nonlinear', 'fractal', 'recursive'],
+        threshold: 0.6
+      },
+      hasRossler: {
+        family: 'systemic',
+        keywords: ['rossler', 'chemical', 'reaction', 'oscillation', 'continuous', 'periodic', 'cycle'],
+        threshold: 0.6
+      },
+      hasTurbulent: {
+        family: 'flow',
+        keywords: ['turbulent', 'fluid', 'flow', 'vortex', 'swirl', 'eddy', 'stream'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, chaosAnalysis) :
+      {
+        hasLorenz: false,
+        hasHenon: false,
+        hasRossler: false,
+        hasTurbulent: false
+      };
     
     // Chaos type selection based on semantic analysis
-    if (hasLorenz || (dynamics.acceleration > 0.4 && complexity.nestingLevel > 4)) {
+    if (results.hasLorenz || (dynamics.acceleration > 0.4 && complexity.nestingLevel > 4)) {
       return 'lorenz';
-    } else if (hasHenon || complexity.selfSimilarity > 0.5) {
+    } else if (results.hasHenon || complexity.selfSimilarity > 0.5) {
       return 'henon';
-    } else if (hasRossler || (dynamics.velocity > 0.3 && genome.resonance?.harmonicComplexity > 0.3)) {
+    } else if (results.hasRossler || (dynamics.velocity > 0.3 && genome.resonance?.harmonicComplexity > 0.3)) {
       return 'rossler';
-    } else if (hasTurbulent || (dynamics.acceleration > 0.5 && genome.topology?.rhizomaticTendency > 0.4)) {
+    } else if (results.hasTurbulent || (dynamics.acceleration > 0.5 && genome.topology?.rhizomaticTendency > 0.4)) {
       return 'turbulent';
     } else {
       // Default based on structural characteristics

@@ -95,26 +95,39 @@ class InterferenceRenderer {
     const resonance = genome.resonance || {};
     const dynamics = genome.dynamics || {};
     
-    // Analyze conceptual DNA for interference type hints
-    const hasConstructive = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['constructive', 'harmony', 'amplification', 'resonance', 'coherence'].includes(concept.toLowerCase())
-    );
-    const hasDestructive = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['destructive', 'cancellation', 'opposing', 'discord', 'interference'].includes(concept.toLowerCase())
-    );
-    const hasMixed = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && 
-      ['mixed', 'complex', 'varied', 'chaotic', 'turbulent'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const interferenceAnalysis = {
+      hasConstructive: {
+        family: 'harmonic',
+        keywords: ['constructive', 'harmony', 'amplification', 'resonance', 'coherence', 'synchrony', 'alignment'],
+        threshold: 0.6
+      },
+      hasDestructive: {
+        family: 'oppositional',
+        keywords: ['destructive', 'cancellation', 'opposing', 'discord', 'interference', 'conflict', 'negation'],
+        threshold: 0.6
+      },
+      hasMixed: {
+        family: 'complex',
+        keywords: ['mixed', 'complex', 'varied', 'chaotic', 'turbulent', 'heterogeneous', 'composite'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, interferenceAnalysis) :
+      { hasConstructive: false, hasDestructive: false, hasMixed: false };
     
     // Interference type selection based on semantic analysis
-    if (hasConstructive || (resonance.harmonicComplexity || 0) > 0.6) {
+    if (results.hasConstructive || (resonance.harmonicComplexity || 0) > 0.6) {
       return 'constructive';
-    } else if (hasDestructive || (resonance.dissonanceLevel || 0) > 0.4) {
+    } else if (results.hasDestructive || (resonance.dissonanceLevel || 0) > 0.4) {
       return 'destructive';
-    } else if (hasMixed || dynamics.acceleration > 0.3) {
+    } else if (results.hasMixed || dynamics.acceleration > 0.3) {
       return 'mixed';
     } else {
       // Default based on structural characteristics

@@ -80,23 +80,39 @@ class FlowRenderer {
     const topology = genome.topology || {};
     const dynamics = genome.dynamics || {};
     
-    // Analyze conceptual DNA for flow pattern hints
-    const hasCircular = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && ['circular', 'cycle', 'spiral', 'orbit', 'rotation'].includes(concept.toLowerCase())
-    );
-    const hasLinear = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && ['linear', 'stream', 'flow', 'sequence', 'progression'].includes(concept.toLowerCase())
-    );
-    const hasChaotic = conceptualDNA.some(concept => 
-      concept && typeof concept === 'string' && ['chaotic', 'turbulent', 'random', 'disorder', 'complex'].includes(concept.toLowerCase())
-    );
+    // PRIME DIRECTIVE: Use base semantic renderer for consistent analysis
+    const baseRenderer = new (window.BaseSemanticRenderer || function(){})();
+    
+    // Define semantic analysis configuration
+    const flowAnalysis = {
+      hasCircular: {
+        family: 'cyclical',
+        keywords: ['circular', 'cycle', 'spiral', 'orbit', 'rotation', 'vortex', 'whirlpool'],
+        threshold: 0.6
+      },
+      hasLinear: {
+        family: 'directional',
+        keywords: ['linear', 'stream', 'flow', 'sequence', 'progression', 'current', 'river'],
+        threshold: 0.6
+      },
+      hasChaotic: {
+        family: 'turbulent',
+        keywords: ['chaotic', 'turbulent', 'random', 'disorder', 'complex', 'fractal', 'eddy'],
+        threshold: 0.6
+      }
+    };
+    
+    // Perform semantic analysis
+    const results = baseRenderer.analyzeConceptsWithFamilies ? 
+      baseRenderer.analyzeConceptsWithFamilies(conceptualDNA, flowAnalysis) :
+      { hasCircular: false, hasLinear: false, hasChaotic: false };
     
     // Pattern selection based on semantic analysis
-    if (hasCircular || topology.circularityIndex > 0.3) {
+    if (results.hasCircular || topology.circularityIndex > 0.3) {
       return 'vortex';
-    } else if (hasLinear || dynamics.dominantMovement === 'linear') {
+    } else if (results.hasLinear || dynamics.dominantMovement === 'linear') {
       return 'stream';
-    } else if (hasChaotic || topology.branchingFactor > 2.5) {
+    } else if (results.hasChaotic || topology.branchingFactor > 2.5) {
       return 'turbulent';
     } else {
       // Default based on structural complexity
