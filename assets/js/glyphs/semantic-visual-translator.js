@@ -2891,6 +2891,12 @@ class GenomeConceptExtractor {
   extractConceptsFromGenome(genome) {
     const concepts = [];
     
+    // 0. Apply extended semantic analysis (Pass 2 enhancement)
+    if (genome.sourceText && typeof window !== 'undefined' && window.computeExtendedFeatures) {
+      const extendedFeatures = window.computeExtendedFeatures(genome.sourceText);
+      this.integrateExtendedFeatures(concepts, extendedFeatures);
+    }
+    
     // 1. Extract concepts from direct genome analysis
     const genomeConcepts = this.extractFromGenomeStructure(genome);
     concepts.push(...genomeConcepts);
@@ -3205,6 +3211,44 @@ class GenomeConceptExtractor {
     resonance += Math.max(0, 0.5 - weightDiff);
     
     return Math.min(resonance, 1.0);
+  }
+  
+  // PASS 2: Integrate extended semantic features from document structure
+  integrateExtendedFeatures(concepts, extendedFeatures) {
+    // High structural complexity → analytical flavor
+    if (extendedFeatures.headers > 2 || extendedFeatures.lists > 3 || extendedFeatures.table) {
+      concepts.push({
+        word: 'analytical-structure',
+        weight: 0.8,
+        confidence: 0.9,
+        visualHint: 'grid-pattern',
+        extendedType: 'structural'
+      });
+    }
+    
+    // High quote/question density → contemplative/lyrical flavor  
+    if (extendedFeatures.quoteRatio > 0.02 || extendedFeatures.qMarkRatio > 0.01 || extendedFeatures.longSentences > 3) {
+      concepts.push({
+        word: 'contemplative-depth',
+        weight: 0.7,
+        confidence: 0.8,
+        visualHint: 'flowing-current',
+        extendedType: 'contemplative'
+      });
+    }
+    
+    // High proper nouns + quotes → argumentative (boost Interference)
+    if (extendedFeatures.properNouns > 10 && extendedFeatures.quoteRatio > 0.015) {
+      concepts.push({
+        word: 'argumentative-discourse',
+        weight: 0.9,
+        confidence: 0.85,
+        visualHint: 'interference-pattern',
+        extendedType: 'argumentative'
+      });
+    }
+    
+    console.log('📊 Extended semantic features integrated:', extendedFeatures);
   }
 }
 

@@ -1,22 +1,51 @@
 // Constellation Family Glyph Renderer
 // Creates star field patterns with connecting lines and pulsing nodes
 class ConstellationRenderer {
+  deriveConstellationParams(vp) {
+    const g = vp.genome||{}, topo = g.topology||{}, cx = g.complexity||{}, res = g.resonance||{};
+    const branch = topo.branchingFactor ?? 1.0;
+    const nested = cx.nestedComplexity ?? 0.5;
+    const harmonic = res.harmonicComplexity ?? 0.3;
+    const arch = topo.architecturalComplexity ?? 0.4;
+    
+    const starCount = Math.floor(40 + branch * 40 + nested * 220); // 40-300 stars
+    const clusterTightness = (window.GlyphUtils?.clamp || ((x,a,b)=>Math.max(a,Math.min(b,x))))(0.2 + arch * 0.6, 0.1, 0.9);
+    const connectionProb = 0.15 + harmonic * 0.25;
+    const pulseRate = 0.8 + nested * 1.2;
+    
+    return {
+      starCount,
+      clusterTightness,
+      connectionDistance: clusterTightness * 120,
+      connectionProbability: connectionProb,
+      pulseSpeed: pulseRate,
+      paletteIntent: 'astral'
+    };
+  }
+  
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
+    
+    const P = this.deriveConstellationParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Constellation', { seed:this._seed, ...P });
+    
     this.visualParams = params;
     
     // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
     this.semanticParams = this.extractSemanticParameters(params);
     
+    // Use derived parameters combined with semantic ones
     this.params = {
-      starCount: this.semanticParams.starCount,
-      connectionDistance: this.semanticParams.connectionDistance,
-      pulseSpeed: this.semanticParams.pulseSpeed,
+      ...this.params, // Already contains derived params
       driftSpeed: this.semanticParams.driftSpeed,
       brightness: this.semanticParams.brightness,
-      constellationPattern: this.semanticParams.constellationPattern,
-      ...params
+      constellationPattern: this.semanticParams.constellationPattern
     };
     this.time = 0;
     this.stars = [];
@@ -184,6 +213,11 @@ class ConstellationRenderer {
   render() {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
+    
+    // Optional illumination overlay
+    if (window.drawIlluminationOverlay) {
+      window.drawIlluminationOverlay(this.ctx, this.params, this._rng);
+    }
     
     // Add subtle background using Sacred Palette ground colors
     const gradient = this.ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);

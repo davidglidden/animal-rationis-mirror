@@ -189,6 +189,11 @@ class SpiralRenderer {
     this.ctx.fillStyle = `rgba(0, 0, 0, ${1 - this.params.trailLength})`;
     this.ctx.fillRect(0, 0, width, height);
     
+    // Optional illumination overlay
+    if (window.drawIlluminationOverlay) {
+      window.drawIlluminationOverlay(this.ctx, this.params, this._rng);
+    }
+    
     // Draw spiral particles
     this.particles.forEach((particle, index) => {
       const pos = this.getSpiralPosition(particle.angle, index);

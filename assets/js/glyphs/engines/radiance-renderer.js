@@ -1,26 +1,54 @@
 // Radiance Family Glyph Renderer - Semantic-Aware Architecture
 // Creates emanation patterns - source, spiritual center, infinite reach
 class RadianceRenderer {
+  deriveRadianceParams(vp) {
+    const g = vp.genome||{}, res = g.resonance||{}, t = g.temporality||{}, cx = g.complexity||{};
+    const harmonic = res.harmonicComplexity ?? 0.4;
+    const spiritual = res.spiritualResonance ?? 0.3;
+    const temporal = t.temporalDensity ?? 0.5;
+    const nested = cx.nestedComplexity ?? 0.4;
+    
+    const rayCount = Math.floor(24 + harmonic * 72); // 24-96 rays
+    const glow = (window.GlyphUtils?.clamp || ((x,a,b)=>Math.max(a,Math.min(b,x))))(0.2 + spiritual * 0.6, 0.2, 0.8);
+    const pulse = 0.5 + temporal * 1.5;
+    const intensity = 0.6 + nested * 0.4;
+    
+    return {
+      rayCount,
+      glow,
+      pulseFrequency: pulse,
+      intensity,
+      coreRadius: 8 + glow * 12,
+      maxRadius: 180 + intensity * 120,
+      paletteIntent: 'astral'
+    };
+  }
+  
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
+    
+    const P = this.deriveRadianceParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Radiance', { seed:this._seed, ...P });
+    
     this.visualParams = params.visualParams || null;
     
-    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
+    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation  
     this.semanticParams = this.extractSemanticParameters(params);
     
+    // Use derived parameters combined with semantic ones
     this.params = {
-      rayCount: this.semanticParams.rayCount,
-      coreRadius: this.semanticParams.coreRadius,
-      maxRadius: this.semanticParams.maxRadius,
-      pulseFrequency: this.semanticParams.pulseFrequency,
+      ...this.params, // Already contains derived params
       rayType: this.semanticParams.rayType,
-      intensity: this.semanticParams.intensity,
       centerStrength: this.semanticParams.centerStrength,
       breathingAmplitude: this.semanticParams.breathingAmplitude,
       emanationSpeed: this.semanticParams.emanationSpeed,
-      spiritualResonance: this.semanticParams.spiritualResonance,
-      ...params
+      spiritualResonance: this.semanticParams.spiritualResonance
     };
     
     this.time = 0;

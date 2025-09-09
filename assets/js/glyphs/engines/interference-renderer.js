@@ -1,26 +1,55 @@
 // Interference Family Glyph Renderer
 // Creates wave interference patterns - constructive and destructive
 class InterferenceRenderer {
+  deriveInterferenceParams(vp) {
+    const g = vp.genome||{}, res = g.resonance||{}, t = g.temporality||{}, cx = g.complexity||{};
+    const dissonance = Math.abs(res.dissonanceLevel ?? 0);
+    const temporal = t.temporalDensity ?? 0.5;
+    const nested = cx.nestedComplexity ?? 0.4;
+    const harmonic = res.harmonicComplexity ?? 0.3;
+    
+    const freq = 1.5 + dissonance * 3.5; // 1.5-5.0 frequency
+    const phaseDelta = temporal * Math.PI * 0.8; // phase variation
+    const waveCount = Math.floor(2 + nested * 4); // 2-6 wave sources
+    const amplitude = 0.4 + harmonic * 0.5;
+    
+    return {
+      frequency: freq,
+      phaseDelta,
+      waveCount,
+      amplitude,
+      interferenceStrength: dissonance,
+      paletteIntent: 'void'
+    };
+  }
+  
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
+    
+    const P = this.deriveInterferenceParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Interference', { seed:this._seed, ...P });
+    
     this.visualParams = params;
     
     // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
     this.semanticParams = this.extractSemanticParameters(params);
     
+    // Use derived parameters combined with semantic ones
     this.params = {
-      waveCount: this.semanticParams.waveCount,
-      frequency: this.semanticParams.frequency,
-      amplitude: this.semanticParams.amplitude,
+      ...this.params, // Already contains derived params
       phase: this.semanticParams.phase,
       interferenceType: this.semanticParams.interferenceType,
       colorIntensity: this.semanticParams.colorIntensity,
       animationSpeed: this.semanticParams.animationSpeed,
       sourceSpacing: this.semanticParams.sourceSpacing,
       resolution: this.semanticParams.resolution,
-      waveDecay: this.semanticParams.waveDecay,
-      ...params
+      waveDecay: this.semanticParams.waveDecay
     };
     this.time = 0;
     this.animationId = null;

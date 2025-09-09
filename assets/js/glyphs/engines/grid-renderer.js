@@ -398,6 +398,11 @@ class GridRenderer {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
     
+    // Optional illumination overlay
+    if (window.drawIlluminationOverlay) {
+      window.drawIlluminationOverlay(this.ctx, this.params, this._rng);
+    }
+    
     // Draw background grid lines for structure
     this.renderGridStructure();
     
