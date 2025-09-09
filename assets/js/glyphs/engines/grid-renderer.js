@@ -1,13 +1,27 @@
 // Grid Family Glyph Renderer
 // Creates systematic patterns - logic, structure, organized thought
 class GridRenderer {
+  deriveGridParams(vp){
+    const g=vp.genome||{}, topo=g.topology||{}, cx=g.complexity||{}, res=g.resonance||{};
+    const arch = topo.architecturalComplexity ?? 0.5;
+    const cell = 6 + Math.floor((1-arch) * 24);       // smaller cells for more structure
+    const jitter = (Math.abs(res.dissonanceLevel ?? 0) * 0.4);
+    const stroke = 0.5 + (cx.selfSimilarity ?? 0.5) * 1.0;
+    const orth = (window.GlyphUtils?.clamp || ((x,a,b)=>Math.max(a,Math.min(b,x))))(1 - (topo.rhizomaticTendency ?? (topo.branchingFactor ?? 1)/3), 0, 1);
+    return { cellSize:cell, gridJitter:jitter, strokeWidth:stroke, orthogonality:orth, paletteIntent:'earth' };
+  }
+  
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.visualParams = params;
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng  = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
     
-    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
-    this.semanticParams = this.extractSemanticParameters(params);
+    const P = this.deriveGridParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Grid', { seed:this._seed, ...P });
     
     this.params = {
       gridType: this.semanticParams.gridType,

@@ -1,35 +1,30 @@
 // Spiral Family Glyph Renderer
 // Creates various spiral patterns - fibonacci, archimedean, logarithmic
 class SpiralRenderer {
+  deriveSpiralParams(vp){
+    const g=vp.genome||{}, t=g.temporality||{}, topo=g.topology||{}, res=g.resonance||{};
+    const arms = 1 + Math.round((t.sequentialFlow ?? 0.3) * 5);
+    const tight = 0.25 + 0.6 * (topo.circularityIndex ?? 0.4);
+    const precess = (res.harmonicComplexity ?? 0.3) * Math.PI * 0.35;
+    const drift = (g.dynamics?.velocity ?? 0.2) * 0.4;
+    return { arms, tightness: tight, precession: precess, drift, paletteIntent:'astral' };
+  }
+  
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.visualParams = params;
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng  = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
     
-    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
-    this.semanticParams = this.extractSemanticParameters(params);
+    const P = this.deriveSpiralParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Spiral', { seed:this._seed, ...P });
     
-    this.params = {
-      spiralType: this.semanticParams.spiralType,
-      arms: this.semanticParams.arms,
-      growth: this.semanticParams.growth,
-      rotationSpeed: this.semanticParams.rotationSpeed,
-      particleCount: this.semanticParams.particleCount,
-      trailLength: this.semanticParams.trailLength,
-      colorShift: this.semanticParams.colorShift,
-      ...params
-    };
     this.time = 0;
     this.particles = [];
     this.animationId = null;
-    
-    console.log(`🎨 Spiral renderer initialized with semantic differentiation:`, {
-      type: this.semanticParams.spiralType,
-      arms: this.semanticParams.arms,
-      growth: this.semanticParams.growth,
-      particles: this.semanticParams.particleCount,
-      entropy: this.semanticParams.entropyScore
-    });
     
     this.initParticles();
   }
@@ -137,8 +132,8 @@ class SpiralRenderer {
       this.particles.push({
         angle: (i / this.params.particleCount) * Math.PI * 2 * this.params.arms,
         radius: i * 0.5,
-        life: Math.random(),
-        speed: 0.5 + Math.random() * 0.5
+        life: this._rng(),
+        speed: 0.5 + this._rng() * 0.5
       });
     }
   }

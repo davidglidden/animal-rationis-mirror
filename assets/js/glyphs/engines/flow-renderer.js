@@ -1,78 +1,46 @@
 // Flow Family Glyph Renderer
 // Creates fluid dynamics patterns - currents, eddies, streams
 class FlowRenderer {
+  deriveFlowParams(vp) {
+    const g = vp.genome||{}, t=g.temporality||{}, topo=g.topology||{}, res=g.resonance||{}, cx=g.complexity||{};
+    const dis = Math.abs(res.dissonanceLevel ?? 0);
+    const circ = topo.circularityIndex ?? 0;
+    const seq  = t.sequentialFlow ?? 0.3;
+    const branch = topo.branchingFactor ?? 1.0;
+    const chaos = (cx.nestedComplexity ?? 0) + dis;
+    const entropy = (window.GlyphUtils?.clamp || ((x,a,b)=>Math.max(a,Math.min(b,x))))(0.05 + 0.4*(t.temporalDensity ?? 0.5) + 0.4*(cx.nestedComplexity ?? 0.5) + 0.2*dis, 0.05, 1);
+
+    const pattern = circ > 0.7 ? 'vortex' : (seq > 0.55 ? 'stream' : (branch>2.0||chaos>0.8 ? 'turbulent' : (circ>0.3?'vortex':'stream')));
+
+    return {
+      pattern,
+      particleCount: Math.floor(200 + entropy * 800),
+      turbulence: (window.GlyphUtils?.clamp || ((x,a,b)=>Math.max(a,Math.min(b,x))))(0.05 + 0.5*(cx.nestedComplexity ?? 0.2) + 0.2*dis, 0.05, 0.7),
+      viscosity: 0.82 + (res.harmonicComplexity ?? 0.2) * 0.16,
+      trailLength: 0.75 + seq * 0.2,
+      paletteIntent: 'ash'  // neutral base; color comes from semanticColor
+    };
+  }
+
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.visualParams = params;
+    this.params = params;
+    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
+    this._seed = fp;
+    this._rng  = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
     
-    // PRIME DIRECTIVE: Use semantic parameters for dramatic structural differentiation
-    this.semanticParams = this.extractSemanticParameters(params);
+    const P = this.deriveFlowParams(this.params);
+    this.params = { ...this.params, ...P };
+    console.debug('♍ SIGIL Flow', { seed:this._seed, ...P });
     
-    this.params = {
-      particleCount: this.semanticParams.particleCount,
-      flowSpeed: this.semanticParams.flowSpeed,
-      turbulence: this.semanticParams.turbulence,
-      viscosity: this.semanticParams.viscosity,
-      flowPattern: this.semanticParams.flowPattern,
-      colorFlow: params.colorFlow || true,
-      trailLength: this.semanticParams.trailLength,
-      ...params
-    };
     this.time = 0;
     this.particles = [];
     this.flowField = [];
     this.animationId = null;
     
-    console.log(`🎨 Flow renderer initialized with semantic differentiation:`, {
-      pattern: this.semanticParams.flowPattern,
-      particles: this.semanticParams.particleCount,
-      turbulence: this.semanticParams.turbulence,
-      entropy: this.semanticParams.entropyScore
-    });
-    
     this.initParticles();
     this.generateFlowField();
-  }
-  
-  // Extract semantic parameters for dramatic visual differentiation
-  extractSemanticParameters(params) {
-    // Get semantic genome data
-    const genome = params.genome || {};
-    const archetype = params.archetype || 'flowing';
-    const entropyScore = params.entropyScore || 0.5;
-    const conceptualDNA = params.conceptualDNA || [];
-    
-    // Base parameters influenced by semantic content
-    const baseSpeed = (window.SacredPalette?.timing?.breathRate || 0.001) * 1000;
-    
-    // Dramatically different patterns based on semantic content
-    const semanticInfluences = {
-      // Particle density based on conceptual complexity
-      particleCount: Math.floor(200 + (entropyScore * 400)), // 200-600 particles
-      
-      // Flow speed based on temporal dynamics
-      flowSpeed: baseSpeed * (0.5 + (genome.temporality?.velocity || 0) * 2),
-      
-      // Turbulence based on complexity and chaos
-      turbulence: (genome.complexity?.nestedComplexity || 0.1) * 0.5,
-      
-      // Viscosity based on resonance harmony
-      viscosity: 0.9 + (genome.resonance?.harmonicComplexity || 0.1) * 0.08,
-      
-      // Trail length based on temporal flow
-      trailLength: 0.85 + (genome.temporality?.sequentialFlow || 0.1) * 0.1,
-      
-      // Flow pattern based on structural topology
-      flowPattern: this.selectFlowPattern(genome, conceptualDNA),
-      
-      // Store for later use
-      entropyScore: entropyScore,
-      genome: genome,
-      archetype: archetype
-    };
-    
-    return semanticInfluences;
   }
   
   // Select flow pattern based on semantic content
@@ -132,13 +100,13 @@ class FlowRenderer {
     
     for (let i = 0; i < this.params.particleCount; i++) {
       this.particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
+        x: this._rng() * width,
+        y: this._rng() * height,
         vx: 0,
         vy: 0,
-        life: Math.random(),
-        maxLife: 100 + Math.random() * 200,
-        hue: Math.random() * 60 + 180 // Blue to cyan range
+        life: this._rng(),
+        maxLife: 100 + this._rng() * 200,
+        hue: this._rng() * 60 + 180 // Blue to cyan range
       });
     }
   }
@@ -154,13 +122,13 @@ class FlowRenderer {
         const centerY = height / 2;
         let angle;
         
-        switch (this.params.flowPattern) {
+        switch (this.params.pattern) {
           case 'vortex':
             const dx = x - centerX;
             const dy = y - centerY;
             angle = Math.atan2(dy, dx) + Math.PI / 2;
             // Add some noise for turbulence
-            angle += (Math.random() - 0.5) * this.params.turbulence;
+            angle += (this._rng() - 0.5) * this.params.turbulence;
             break;
           case 'stream':
             angle = Math.sin(y * 0.01) * 0.5 + Math.cos(x * 0.008) * 0.3;
@@ -171,14 +139,14 @@ class FlowRenderer {
             angle = (noise1 + noise2) * Math.PI;
             break;
           default:
-            angle = Math.random() * Math.PI * 2;
+            angle = this._rng() * Math.PI * 2;
         }
         
         this.flowField.push({
           x: x,
           y: y,
           angle: angle,
-          strength: 0.1 + Math.random() * 0.2
+          strength: 0.1 + this._rng() * 0.2
         });
       }
     }
@@ -226,6 +194,11 @@ class FlowRenderer {
   render() {
     const { width, height } = this.canvas;
     
+    // Optional illumination overlay
+    if (window.drawIlluminationOverlay) {
+      window.drawIlluminationOverlay(this.ctx, this.params, this._rng);
+    }
+    
     // SEMANTIC COLOR INTEGRATION - Background trail effect
     let backgroundTrail;
     
@@ -265,13 +238,13 @@ class FlowRenderer {
       
       // Wrap around edges or reset if too old
       if (particle.x < 0 || particle.x > width || particle.y < 0 || particle.y > height || particle.life > particle.maxLife) {
-        particle.x = Math.random() * width;
-        particle.y = Math.random() * height;
+        particle.x = this._rng() * width;
+        particle.y = this._rng() * height;
         particle.vx = 0;
         particle.vy = 0;
         particle.life = 0;
         if (this.params.colorFlow) {
-          particle.hue = Math.random() * 60 + 180;
+          particle.hue = this._rng() * 60 + 180;
         }
       }
       

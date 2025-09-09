@@ -42,10 +42,10 @@ class SemanticAnalysisUtils {
         
         // Check for keyword matches with fuzzy matching
         const word = (concept.word || '').toLowerCase();
-        const hasKeywordMatch = keywords.some(keyword => 
-          word.includes(keyword) || keyword.includes(keyword) || 
-          this.calculateWordSimilarity(word, keyword) > 0.7
-        );
+        const hasKeywordMatch = keywords.some(k => {
+          const kl = (k ?? '').toString().toLowerCase();
+          return word.includes(kl) || kl.includes(word) || this.calculateWordSimilarity(word, kl) > 0.7;
+        });
         
         if (hasKeywordMatch) {
           matchWeight += weight;
