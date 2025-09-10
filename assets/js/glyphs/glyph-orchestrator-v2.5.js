@@ -601,8 +601,9 @@ class GlyphOrchestrator {
     return metadata;
   }
 
-  // Generate rendering parameters from glyph_id and metadata
-  generateParameters(glyphId, metadata = {}) {
+  // REMOVED: Legacy parameter generation - now using pure MM→EM pipeline
+  // Pure MM→EM pipeline handles all parameter generation in loadGlyphOrFallback
+  generateParameters_REMOVED(glyphId, metadata = {}) {
     // Ensure orchestrator is ready before acting
     if (!this.ready) {
       console.log('⏳ Orchestrator not ready, initializing...');
@@ -621,9 +622,20 @@ class GlyphOrchestrator {
       const postContent = this.extractPostContent(metadata);
       genome = this.semanticDNA.extractGenome(postContent, metadata);
       
-      // Select renderer family based on Multi-Modal archetype
-      chosenFamily = this.selectRendererFromArchetype(genome);
-      console.log(`🎭 Multi-Modal archetype selected renderer: ${chosenFamily}`);
+      // NEW: Use MM→EM pipeline for renderer selection
+      const mmResult = this.selectRendererFromMeaningModel(genome, metadata, postContent);
+      if (mmResult) {
+        chosenFamily = mmResult.family;
+        // Store MM/EM data for parameter passing
+        this._currentMM = mmResult.mm;
+        this._currentEM = mmResult.em;
+        this._currentParams = mmResult.params;
+        console.log(`🧭 MM→EM pipeline selected renderer: ${chosenFamily}`);
+      } else {
+        // Fallback to legacy archetype selection
+        chosenFamily = this.selectRendererFromArchetype(genome);
+        console.log(`🎭 Legacy archetype fallback selected renderer: ${chosenFamily}`);
+      }
       console.log(`🔍 chosenFamily is: ${chosenFamily} (type: ${typeof chosenFamily})`);
     } catch (genomeError) {
       console.warn('⚠️ Genome extraction failed, falling back to keyword analysis:', genomeError.message);
@@ -1240,13 +1252,12 @@ class GlyphOrchestrator {
         const glyphId = container.dataset.glyphId;
         console.log(`🎯 Processing glyph: ${glyphId}`);
         const metadata = this.extractPostMetadata(container);
-        const parameters = this.generateParameters(glyphId, metadata);
         
         // Set up interaction tracking for living system
         this.setupInteractionTracking(container, glyphId);
         
-        // Check if specific glyph file exists, otherwise use procedural
-        this.loadGlyphOrFallback(canvas, glyphId, parameters);
+        // Use pure MM→EM pipeline for all glyphs
+        this.loadGlyphOrFallback(canvas, glyphId, metadata);
       });
     };
 
@@ -1349,8 +1360,8 @@ class GlyphOrchestrator {
   }
 
   // Try to load specific glyph file, fall back to procedural
-  // Prime Directive: Single unified renderer loading path
-  async loadGlyphOrFallback(canvas, glyphId, parameters) {
+  // Prime Directive: Single unified MM→EM pipeline
+  async loadGlyphOrFallback(canvas, glyphId, metadata) {
     console.log(`🎨 Creating glyph: ${glyphId}`);
     
     // Set standard canvas dimensions
@@ -1366,10 +1377,16 @@ class GlyphOrchestrator {
       rendererName = this.archivedMap[glyphId];
       console.log(`🏛️ Using archived renderer: ${rendererName}`);
     } else {
-      // Use procedural family renderer
-      rendererName = parameters.family;
-      rendererParams = parameters;
-      console.log(`🔧 Using procedural renderer: ${rendererName}`);
+      // Use MM→EM pipeline for procedural generation
+      const genome = this.genomeFinder.findGenome(glyphId);
+      const postContent = this.extractPostContent();
+      
+      console.log(`🧬 Running MM→EM pipeline for: ${glyphId}`);
+      const mmResult = this.selectRendererFromMeaningModel(genome, metadata, postContent);
+      
+      rendererName = mmResult.rendererName;
+      rendererParams = mmResult.parameters;
+      console.log(`🔧 MM→EM selected renderer: ${rendererName}`);
     }
     
     // Load and create renderer using unified system
@@ -1688,7 +1705,120 @@ class GlyphOrchestrator {
     return debugInfo;
   }
   
-  // PRIME DIRECTIVE: Select renderer family based on Multi-Modal archetype
+  // NEW MM→EM PIPELINE: Select renderer using Meaning Model → Expression Model
+  selectRendererFromMeaningModel(genome, metadata, rawText) {
+    try {
+      // Check for editorial front-matter overrides first
+      const glyph_family = metadata?.glyph_family;
+      if (glyph_family) {
+        console.log(`🎯 Editorial override: forcing family ${glyph_family}`);
+        return { family: glyph_family, params: {} };
+      }
+      
+      // Check for upstream MM injection
+      const upstreamMM = metadata?.mm;
+      
+      // Build MM from existing analyzers or use upstream
+      const mm = upstreamMM || window.buildMM({
+        rawText,
+        analyzers: {
+          multiModal: genome?.archetypeProfile,
+          contentType: genome?.contentAnalysis?.contentType,
+          structure: {
+            analyticalScore: genome?.topology?.analyticalComplexity || 0,
+            complexity: genome?.complexity?.structuralComplexity || 0,
+            cyclicality: genome?.resonance?.cyclicalPatterns || 0
+          },
+          lexicon: {
+            analytical: genome?.conceptualDNA?.concepts?.filter(c => 
+              ['analytical', 'systematic', 'logical'].includes(c.archetype)).length / 12 || 0,
+            contemplative: genome?.resonance?.contemplativeDepth || 0,
+            ritual: genome?.resonance?.ritualPatterns || 0,
+            contested: genome?.resonance?.dissonanceLevel || 0
+          },
+          temporal: {
+            lyricality: genome?.temporality?.lyricality || 0,
+            velocity: genome?.dynamics?.velocity || 0,
+            historicalDepth: genome?.temporality?.historicalDepth || 0
+          },
+          resonance: {
+            dissonanceLevel: genome?.resonance?.dissonanceLevel || 0,
+            affectPolarity: genome?.resonance?.affectPolarity || 0
+          },
+          topology: {
+            topicEntropy: genome?.topology?.topicEntropy || 0
+          },
+          textStats: {
+            wordCount: rawText?.split(/\s+/).length || 0
+          },
+          extendedSemantics: window.computeExtendedFeatures ? window.computeExtendedFeatures(rawText || '') : {},
+          seed: genome?.uniqueIdentifiers?.fingerprint || Date.now(),
+          fingerprint: genome?.uniqueIdentifiers?.fingerprint || Date.now()
+        },
+        priors: metadata?.glyph_priors || {}
+      });
+      
+      // Build EM from MM
+      const em = window.buildEM(mm);
+      
+      // Select family from EM energies
+      const family = window.familyFromEM(em);
+      
+      // Get binding and generate parameters
+      const BINDINGS = {
+        flow: window.FlowBinding,
+        grid: window.GridBinding,
+        strata: window.StrataBinding,
+        constellation: window.ConstellationBinding
+      };
+      
+      const binding = BINDINGS[family];
+      if (!binding) {
+        console.warn(`⚠️ No binding found for family: ${family}`);
+        return null;
+      }
+      
+      const chosen = binding.choose(em);
+      const params = binding.params(em);
+      
+      // Log the full pipeline for diagnostics
+      console.log('🧭 MM→EM→Render', {
+        mm: {
+          intent: Object.entries(mm.intent).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(','),
+          texture: Object.entries(mm.texture).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(','),
+          dynamics: Object.entries(mm.dynamics).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(',')
+        },
+        em: {
+          families: Object.entries(em.families).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(','),
+          cadence: `pulse:${em.cadence.pulse.toFixed(2)},anisotropy:${em.cadence.anisotropy.toFixed(2)}`,
+          scale: `density:${em.scale.density.toFixed(2)},granularity:${em.scale.granularity.toFixed(2)}`
+        },
+        family,
+        chosen,
+        paramsSummary: this.summarizeParams(params)
+      });
+      
+      return { family: chosen, params, mm, em };
+      
+    } catch (error) {
+      console.error('❌ MM→EM pipeline failed:', error);
+      return null;
+    }
+  }
+  
+  // Helper to summarize parameters for logging
+  summarizeParams(params) {
+    const summary = {};
+    if (params.pattern) summary.pattern = params.pattern;
+    if (params.particleCount) summary.particleCount = params.particleCount;
+    if (params.layers) summary.layers = params.layers;
+    if (params.columns) summary.columns = params.columns;
+    if (params.starCount) summary.starCount = params.starCount;
+    if (params.cellSize) summary.cellSize = params.cellSize;
+    return summary;
+  }
+  
+  // LEGACY: Select renderer family based on Multi-Modal archetype (fallback)
   selectRendererFromArchetype(genome) {
     if (!genome?.archetypeProfile?.primary) {
       return null;
