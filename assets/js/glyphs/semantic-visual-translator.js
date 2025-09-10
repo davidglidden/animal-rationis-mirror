@@ -3213,16 +3213,27 @@ class GenomeConceptExtractor {
     return Math.min(resonance, 1.0);
   }
   
-  // PASS 2: Integrate extended semantic features from document structure
+  // PASS 2: Integrate extended semantic features from document structure  
   integrateExtendedFeatures(concepts, extendedFeatures) {
-    // High structural complexity → analytical flavor
+    // High structural complexity → analytical flavor (BOOSTED for stronger override)
     if (extendedFeatures.headers > 2 || extendedFeatures.lists > 3 || extendedFeatures.table) {
       concepts.push({
         word: 'analytical-structure',
-        weight: 0.8,
-        confidence: 0.9,
+        weight: 1.5, // Increased from 0.8 to override narrative classification
+        confidence: 0.95,
         visualHint: 'grid-pattern',
-        extendedType: 'structural'
+        extendedType: 'structural',
+        archetype: 'analytical' // Direct archetype mapping
+      });
+      
+      // Add multiple analytical concepts to strengthen classification
+      concepts.push({
+        word: 'systematic-organization',
+        weight: 1.2,
+        confidence: 0.9,
+        visualHint: 'methodical-grid',
+        extendedType: 'analytical',
+        archetype: 'logical'
       });
     }
     
@@ -3230,10 +3241,11 @@ class GenomeConceptExtractor {
     if (extendedFeatures.quoteRatio > 0.02 || extendedFeatures.qMarkRatio > 0.01 || extendedFeatures.longSentences > 3) {
       concepts.push({
         word: 'contemplative-depth',
-        weight: 0.7,
-        confidence: 0.8,
+        weight: 1.0, // Increased from 0.7
+        confidence: 0.85,
         visualHint: 'flowing-current',
-        extendedType: 'contemplative'
+        extendedType: 'contemplative',
+        archetype: 'contemplative'
       });
     }
     
@@ -3241,14 +3253,16 @@ class GenomeConceptExtractor {
     if (extendedFeatures.properNouns > 10 && extendedFeatures.quoteRatio > 0.015) {
       concepts.push({
         word: 'argumentative-discourse',
-        weight: 0.9,
-        confidence: 0.85,
+        weight: 1.3, // Increased from 0.9
+        confidence: 0.9,
         visualHint: 'interference-pattern',
-        extendedType: 'argumentative'
+        extendedType: 'argumentative',
+        archetype: 'contested'
       });
     }
     
     console.log('📊 Extended semantic features integrated:', extendedFeatures);
+    console.log('🎯 Added structural concepts for archetype override:', concepts.filter(c => c.extendedType));
   }
 }
 

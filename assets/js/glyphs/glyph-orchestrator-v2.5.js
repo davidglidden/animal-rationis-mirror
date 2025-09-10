@@ -1476,6 +1476,16 @@ class GlyphOrchestrator {
         if (renderer.start) {
           renderer.start();
         }
+        
+        // Record diagnostic manifest for acceptance testing
+        if (typeof window !== 'undefined' && window.glyphDiagnostics && parameters.glyphId) {
+          const manifestParams = {
+            ...parameters,
+            renderer: rendererName,
+            sourceText: this.extractPostContent(parameters) // Add source text for lexica detection
+          };
+          window.glyphDiagnostics.recordGlyphManifest(parameters.glyphId, manifestParams);
+        }
       } catch (error) {
         console.error(`❌ Failed to create ${rendererName} renderer:`, error);
         this.createFallbackGlyph(canvas, parameters);
