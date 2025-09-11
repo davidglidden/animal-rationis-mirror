@@ -55,21 +55,21 @@ function bindingFor(family) {
 // Main glyph rendering function
 function renderGlyph(canvas, content) {
   try {
-    // 1. MM→EM pipeline
+    // 1. MM→EM pipeline (MM now handles input normalization)
     const mm = buildMM(content);
     const em = buildEM(mm);
     
-    // 2. Family selection and binding
+    // 2. Family selection and binding  
     const familyName = familyFromEM(em);
     const family = familyName.charAt(0).toUpperCase() + familyName.slice(1);
     const fromEM = bindingFor(family);
     
     // 3. Generate contract-compliant seed and binding output
     const rendererId = family; // Use family name as renderer ID
-    const contractSeed = deterministicSeed(em.seed, rendererId);
+    const seedPackage = deterministicSeed(mm.meta.seed, rendererId);
     
-    // Update EM with contract-compliant seed
-    const contractEM = { ...em, seed: contractSeed };
+    // Update EM with contract-compliant seed string
+    const contractEM = { ...em, seed: seedPackage.str };
     const out = fromEM(contractEM);
     
     // 4. Validate contract

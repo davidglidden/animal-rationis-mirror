@@ -42,11 +42,16 @@
    * Format: hash(mm.meta.seed + ':' + organOrRendererId)
    * @param {string} mmSeed - Base seed from MM.meta.seed
    * @param {string} rendererId - Renderer/organ identifier
-   * @returns {string} - Deterministic seed for this renderer
+   * @returns {Object} - Seed package with multiple formats
    */
   function deterministicSeed(mmSeed, rendererId) {
     const combined = `${mmSeed}:${rendererId}`;
-    return hashSeed(combined);
+    const hash32 = hashSeedNumeric(combined);
+    const num01 = (hash32 / 0x100000000); // 0..1 range
+    const str = hashSeed(combined);
+    const rng = createSeededRNG(combined);
+    
+    return { hash32, num01, rng, str };
   }
 
   /**

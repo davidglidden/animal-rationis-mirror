@@ -2,7 +2,25 @@
 // Input: existing analyzers + optional editorial priors
 // Output: Canonical semantic representation for all organs
 
-export function buildMM({ rawText, analyzers, priors = {} }) {
+export function buildMM(input) {
+  let rawText, analyzers, priors;
+
+  if (typeof input === 'string') {
+    rawText   = input;
+    analyzers = minimalAnalyzersFrom(rawText); // safety net only
+    priors    = {};
+  } else if (input && typeof input === 'object') {
+    rawText   = (input.rawText ?? '').toString();
+    analyzers = input.analyzers ?? minimalAnalyzersFrom(rawText);
+    priors    = input.priors ?? {};
+  } else {
+    rawText   = '';
+    analyzers = minimalAnalyzersFrom(rawText);
+    priors    = {};
+  }
+
+  rawText = rawText.normalize('NFC');
+  
   const { 
     multiModal, 
     contentType, 
@@ -100,6 +118,17 @@ export function buildMM({ rawText, analyzers, priors = {} }) {
   }
   
   return { intent, texture, dynamics, meta };
+}
+
+// minimal fallback: counts only, used if no analyzers supplied
+function minimalAnalyzersFrom(content) {
+  const wordCount = content ? content.trim().split(/\s+/).filter(Boolean).length : 0;
+  const sentenceCount = content ? content.split(/[.!?]+/).filter(Boolean).length : 0;
+  return {
+    contentType: 'text',
+    textStats: { wordCount, sentenceCount, characterCount: content.length },
+    extendedSemantics: {}
+  };
 }
 
 // ES Module exports only - no globals
