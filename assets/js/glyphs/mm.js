@@ -3,6 +3,7 @@
 // Output: Canonical semantic representation for all organs
 
 import { parseMarkdown, runAnalyzers, mergeCouncil, guessLang, stableTextHash } from './analyzer-council.js';
+import { htmlToMarkdownLite, looksLikeHTML } from './content-resolver.js';
 
 export async function buildMM(input) {
   let rawText, analyzers, priors;
@@ -22,6 +23,12 @@ export async function buildMM(input) {
   }
 
   rawText = rawText.normalize('NFC');
+  
+  // Guard: if HTML slipped through, convert it
+  if (looksLikeHTML(rawText)) {
+    console.warn('[MM] HTML detected in input, converting to markdown');
+    rawText = htmlToMarkdownLite(rawText);
+  }
   
   // Parse once  
   const { ast, index } = parseMarkdown(rawText);

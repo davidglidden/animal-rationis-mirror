@@ -3,6 +3,7 @@
 
 import { assertBindingOutput } from './contracts.js';
 import { deterministicSeed } from './util-seed.esm.js';
+import { defaultContentSource } from './content-resolver.js';
 
 // Version consistency - single source of truth
 const ASSETS_VER = '21';
@@ -98,15 +99,25 @@ function bindingFor(family) {
   return mod.fromEM;
 }
 
-// Main glyph rendering function
-async function renderGlyph(canvas, content) {
+// Main glyph rendering function - now takes host element, not raw content
+async function renderGlyph(canvas, hostElement) {
   try {
-    // 0. Sanity probe - content extraction verification
-    const preview = (content || '').slice(0, 160).replace(/\n/g,'⏎');
-    console.log('[Orchestrator] glyph content bytes/preview:', content?.length || 0, '::', preview);
+    // 0. Resolve actual content using Content Source Contract
+    const { text, provenance, slug, confidence } = await defaultContentSource.resolve(hostElement);
     
-    // 1. MM→EM pipeline (MM now handles input normalization and council analysis)
-    const mm = await buildMM(content);
+    // Skip if no meaningful content
+    if (text.length < 30 && confidence < 0.5) {
+      console.warn('[Orchestrator] Insufficient content for meaningful analysis:', provenance);
+      renderFallback(canvas, 'Insufficient content');
+      return null;
+    }
+    
+    // 1. MM→EM pipeline with clean text (not HTML/slug)
+    const mm = await buildMM({ 
+      rawText: text, 
+      analyzers: undefined, 
+      priors: { seedTag: slug || undefined } 
+    });
     const em = buildEM(mm);
     
     // 2. Family selection and binding  
@@ -169,31 +180,28 @@ function renderFallback(canvas, errorMsg) {
 export function bootGlyphs() {
   console.log('[Glyph] ESM Boot v2.5.1 - scanning for glyphs...');
   
-  // Find all glyph targets
-  const glyphNodes = document.querySelectorAll('[data-glyph], .glyph-canvas, canvas[data-content]');
+  // Find all potential glyph hosts - expanded selectors for content resolution
+  const glyphNodes = document.querySelectorAll(
+    '[data-glyph], [data-glyph-source], [data-glyph-content], ' +
+    '.glyph-canvas, canvas[data-content], .glyph-container'
+  );
   
-  glyphNodes.forEach((node, index) => {
+  glyphNodes.forEach((hostElement, index) => {
     try {
-      // Extract content for MM analysis
-      const content = node.getAttribute('data-glyph') || 
-                     node.getAttribute('data-content') || 
-                     node.textContent || 
-                     `default-glyph-${index}`;
-      
       // Find or create canvas
       let canvas;
-      if (node.tagName === 'CANVAS') {
-        canvas = node;
+      if (hostElement.tagName === 'CANVAS') {
+        canvas = hostElement;
       } else {
-        canvas = node.querySelector('canvas');
+        canvas = hostElement.querySelector('canvas');
         if (!canvas) {
-          console.warn(`[Glyph] No canvas found for node`, node);
+          console.warn(`[Glyph] No canvas found for host`, hostElement);
           return;
         }
       }
       
-      // Render glyph asynchronously
-      renderGlyph(canvas, content).catch(error => {
+      // Render glyph asynchronously - pass host element for content resolution
+      renderGlyph(canvas, hostElement).catch(error => {
         console.error(`[Glyph] Failed to render glyph ${index}:`, error);
       });
       
