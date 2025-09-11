@@ -2,24 +2,47 @@
 // Input: existing analyzers + optional editorial priors
 // Output: Canonical semantic representation for all organs
 
-export function buildMM(input) {
+import { parseMarkdown, runAnalyzers, mergeCouncil, guessLang, stableTextHash } from './analyzer-council.js';
+
+export async function buildMM(input) {
   let rawText, analyzers, priors;
 
   if (typeof input === 'string') {
     rawText   = input;
-    analyzers = minimalAnalyzersFrom(rawText); // safety net only
+    analyzers = undefined; // will run council
     priors    = {};
   } else if (input && typeof input === 'object') {
     rawText   = (input.rawText ?? '').toString();
-    analyzers = input.analyzers ?? minimalAnalyzersFrom(rawText);
+    analyzers = input.analyzers; // if provided, use as-is
     priors    = input.priors ?? {};
   } else {
     rawText   = '';
-    analyzers = minimalAnalyzersFrom(rawText);
+    analyzers = undefined;
     priors    = {};
   }
 
   rawText = rawText.normalize('NFC');
+  
+  // Parse once  
+  const { ast, index } = parseMarkdown(rawText);
+  
+  // Run analyzers (council) if not provided
+  if (!analyzers) {
+    const councilOutputs = await runAnalyzers({ 
+      rawText, ast, index, 
+      lang: guessLang(rawText), 
+      meta: priors?.meta 
+    });
+    
+    if (priors?.analyzers?.__inject) {
+      councilOutputs.push(...priors.analyzers.__inject);
+    }
+    
+    const council = mergeCouncil(councilOutputs);
+    
+    // Convert council evidence to legacy analyzer format for compatibility
+    analyzers = councilToLegacyAnalyzers(council, rawText);
+  }
   
   const { 
     multiModal, 
@@ -107,17 +130,114 @@ export function buildMM(input) {
     timestamp: Date.now()
   };
   
+  // Enhanced MM with council data
+  const mm = {
+    intent, texture, dynamics, meta,
+    // Add council features if available
+    features: analyzers.__council ? { council: analyzers.__council } : undefined
+  };
+  
   // Log MM construction for diagnostics
   if (typeof window !== 'undefined' && window.console) {
     console.log('🧬 MM constructed:', {
       intent: Object.entries(intent).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
       texture: Object.entries(texture).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
       dynamics: Object.entries(dynamics).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
-      seed: meta.seed
+      seed: meta.seed,
+      council: mm.features?.council ? 'evidence-based' : 'legacy'
     });
   }
   
-  return { intent, texture, dynamics, meta };
+  return mm;
+}
+
+// Convert council evidence to legacy analyzer format for MM compatibility
+function councilToLegacyAnalyzers(council, rawText) {
+  const wordCount = rawText.trim().split(/\s+/).filter(Boolean).length || 0;
+  const sentenceCount = rawText.split(/[.!?]+/).filter(Boolean).length || 0;
+  
+  // Extract evidence counts and values
+  const structureEvidence = council.byType['structure:heading'] || [];
+  const musicFormEvidence = Object.keys(council.byType)
+    .filter(type => type.startsWith('music:form:'))
+    .flatMap(type => council.byType[type]);
+  const rhetoricEvidence = Object.keys(council.byType)
+    .filter(type => type.startsWith('rhetoric:'))
+    .flatMap(type => council.byType[type]);
+  const poeticsEvidence = council.byType['poetics:haiku'] || [];
+  const temporalEvidence = Object.keys(council.byType)
+    .filter(type => type.startsWith('temporal:'))
+    .flatMap(type => council.byType[type]);
+  const voiceEvidence = Object.keys(council.byType)
+    .filter(type => type.startsWith('voice:'))
+    .flatMap(type => council.byType[type]);
+  
+  // Map evidence to analyzer values (0..1 range)
+  const clamp = x => Math.max(0, Math.min(1, x));
+  
+  return {
+    // Store council for features
+    __council: council,
+    
+    contentType: 'text',
+    multiModal: null,
+    
+    // Structure analysis
+    structure: {
+      headingCount: structureEvidence.length,
+      listCount: (council.byType['structure:list'] || []).length,
+      complexity: clamp(structureEvidence.length / 10) // normalize
+    },
+    
+    // Lexicon analysis - music forms drive ritual intent
+    lexicon: {
+      musicForms: musicFormEvidence.length,
+      dominantForm: musicFormEvidence[0]?.type.split(':')[2] || null
+    },
+    
+    // Temporal analysis
+    temporal: {
+      velocity: clamp(temporalEvidence.length / 20), // more temporal words = faster
+      dateReferences: (council.byType['temporal:year'] || []).length
+    },
+    
+    // Resonance - rhetoric and poetics
+    resonance: {
+      questionDensity: clamp((council.byType['rhetoric:question'] || []).length / 10),
+      poeticElements: poeticsEvidence.length,
+      affectPolarity: clamp(rhetoricEvidence.length / 15)
+    },
+    
+    // Topology - derived from structure and content
+    topology: {
+      paragraphCount: (council.byType['structure:paragraph'] || []).length || 1,
+      topicEntropy: clamp(Object.keys(council.byType).length / 20), // diversity of evidence types
+      averageSentenceLength: wordCount / Math.max(1, sentenceCount)
+    },
+    
+    // Text stats  
+    textStats: { 
+      wordCount, 
+      sentenceCount, 
+      characterCount: rawText.length 
+    },
+    
+    // Extended semantics - evidence-enriched
+    extendedSemantics: {
+      evidenceTypes: Object.keys(council.byType).length,
+      musicAware: musicFormEvidence.length > 0,
+      ritualContent: musicFormEvidence.some(e => 
+        ['vespers', 'magnificat', 'mass', 'motet'].includes(e.payload?.form)
+      ),
+      analyticalContent: (council.byType['rhetoric:question'] || []).length > 2,
+      contemplativeContent: poeticsEvidence.length > 0 || 
+                          voiceEvidence.filter(e => e.type === 'voice:first-person').length > 2
+    },
+    
+    // Deterministic seed from content
+    seed: stableTextHash(rawText),
+    fingerprint: stableTextHash(rawText)
+  };
 }
 
 // minimal fallback: counts only, used if no analyzers supplied

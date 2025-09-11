@@ -4,6 +4,11 @@
 import { assertBindingOutput } from './contracts.js';
 import { deterministicSeed } from './util-seed.esm.js';
 
+// Load analyzers
+import './analyzer-council.js';
+import './analyzers/core.js'; 
+import './analyzers/music.js';
+
 // Bindings
 import * as Flow from './bindings/flow.binding.js';
 import * as Grid from './bindings/grid.binding.js';
@@ -53,10 +58,10 @@ function bindingFor(family) {
 }
 
 // Main glyph rendering function
-function renderGlyph(canvas, content) {
+async function renderGlyph(canvas, content) {
   try {
-    // 1. MM→EM pipeline (MM now handles input normalization)
-    const mm = buildMM(content);
+    // 1. MM→EM pipeline (MM now handles input normalization and council analysis)
+    const mm = await buildMM(content);
     const em = buildEM(mm);
     
     // 2. Family selection and binding  
@@ -142,8 +147,10 @@ export function bootGlyphs() {
         }
       }
       
-      // Render glyph
-      renderGlyph(canvas, content);
+      // Render glyph asynchronously
+      renderGlyph(canvas, content).catch(error => {
+        console.error(`[Glyph] Failed to render glyph ${index}:`, error);
+      });
       
     } catch (error) {
       console.error(`[Glyph] Failed to render glyph ${index}:`, error);
