@@ -44,10 +44,18 @@ export async function buildMM(input) {
     
     const council = mergeCouncil(councilOutputs);
     
-    // Council merge verification - check evidence survival
-    console.log('[Council] byType keys:', Object.keys(council.byType).length, Object.keys(council.byType));
+    // Council merge verification - check evidence survival  
+    const ledger = Object.fromEntries(
+      Object.entries(council.byType).map(([k, arr]) => [k, arr.length])
+    );
+    console.log('[Council] evidence counts byType:', ledger);
     const totalEvidence = Object.values(council.byType).reduce((n,arr)=>n+arr.length,0);
     console.log('[Council] total evidence pieces:', totalEvidence);
+    
+    // Flag if no evidence on meaningful content
+    if (totalEvidence === 0 && rawText.length > 20) {
+      console.warn('[Council] NO EVIDENCE detected on substantial content - analyzer regex/Unicode issue');
+    }
     
     // Convert council evidence to legacy analyzer format for compatibility
     analyzers = councilToLegacyAnalyzers(council, rawText);
@@ -156,24 +164,17 @@ export async function buildMM(input) {
     features: analyzers.__council ? { council: analyzers.__council } : undefined
   };
   
-  // Fallback heuristics - never collapse to identical visuals
-  if (analyzers.__council && !Object.keys(analyzers.__council.byType).length) {
-    console.log('[MM] Applying fallback heuristics for analyzer-quiet content');
-    const words = rawText.trim().split(/\s+/).filter(Boolean).length;
-    const lines = rawText.split(/\n/).length;
-    const chars = rawText.length;
-    
-    // Text-based diversity to prevent identical sigils
-    mm.intent.analytical = c01(words / 200); // more words → more analytical
-    mm.texture.structural_complexity = c01(lines / 12); // more lines → more complex
-    mm.dynamics.velocity = c01(chars / 1000); // longer text → more velocity
-    
-    // Add deterministic variety based on content hash
-    const hashNum = parseInt(meta.seed.slice(-6), 36) / Math.pow(36, 6); // 0..1
-    mm.intent.contemplative = c01(0.1 + 0.3 * hashNum);
-    mm.texture.personal_intimacy = c01(0.1 + 0.2 * (1 - hashNum));
-    
-    console.log('[MM] Fallback applied:', formatIntent(mm.intent), formatTexture(mm.texture));
+  // Semantic validation - only minimal tie-breaking for truly empty content
+  const semanticEnergy = Object.values(intent).concat(Object.values(texture), Object.values(dynamics)).reduce((a,b)=>a+b,0);
+  if (semanticEnergy === 0 && analyzers.__council && !Object.keys(analyzers.__council.byType).length) {
+    console.warn('[MM] No semantic analysis detected - text may be too minimal or analyzers failed');
+    // Only minimal tie-breaking for truly empty content (single emoji, etc.)
+    // Real content should produce meaningful semantic vectors through evidence pipeline
+    if (rawText.length < 10) {
+      const hashNum = parseInt(meta.seed.slice(-6), 36) / Math.pow(36, 6);
+      mm.intent.analytical = c01(0.01 + 0.02 * hashNum); // minimal tie-breaker only
+      console.log('[MM] Minimal tie-breaker applied for empty content');
+    }
   }
   
   // Log MM construction for diagnostics (using pretty formatters)
