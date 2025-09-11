@@ -166,6 +166,10 @@ The Bauhaus, ‎⁨Hochschule Anhalt⁩, ⁨Dessau-Roßlau⁩, ⁨Saxony-Anhalt�
   <link rel="modulepreload" href="./assets/js/glyphs/overlays/scriptorium-overlay.js?v=21">
   <link rel="modulepreload" href="./assets/js/glyphs/overlays/seal-insignia-overlay.js?v=21">
   
+  <!-- Deterministic seed utilities (dual loading) -->
+  <script type="module" src="./assets/js/glyphs/util-seed.esm.js?v=21"></script>
+  <script nomodule src="./assets/js/glyphs/util-seed.iife.js?v=21"></script>
+  
   <!-- Single ES module entrypoint -->
   <script type="module">
     import { bootGlyphs } from "/assets/js/glyphs/glyph-orchestrator-v2.5.1.js?v=21";
@@ -179,7 +183,6 @@ The Bauhaus, ‎⁨Hochschule Anhalt⁩, ⁨Dessau-Roßlau⁩, ⁨Saxony-Anhalt�
   <script src="./assets/js/glyphs/semantic-analysis-utils.js?v=21"></script>
   <script src="./assets/js/glyphs/base-semantic-renderer.js?v=21"></script>
   <script src="./assets/js/glyphs/semantic-visual-translator.js?v=21"></script>
-  <script src="./assets/js/glyphs/util-seed.js?v=21"></script>
   <script src="./assets/js/glyphs/glyph-diagnostics.js?v=21"></script>
   <script src="./assets/js/glyphs/diagnostic-console.js?v=21"></script>
 </body>

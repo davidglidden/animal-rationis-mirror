@@ -2,6 +2,7 @@
 // Prime Directive: Single clean path, explicit imports, no globals
 
 import { assertBindingOutput } from './contracts.js';
+import { deterministicSeed } from './util-seed.esm.js';
 
 // Bindings
 import * as Flow from './bindings/flow.binding.js';
@@ -63,8 +64,13 @@ function renderGlyph(canvas, content) {
     const family = familyName.charAt(0).toUpperCase() + familyName.slice(1);
     const fromEM = bindingFor(family);
     
-    // 3. Generate binding output
-    const out = fromEM(em);
+    // 3. Generate contract-compliant seed and binding output
+    const rendererId = family; // Use family name as renderer ID
+    const contractSeed = deterministicSeed(em.seed, rendererId);
+    
+    // Update EM with contract-compliant seed
+    const contractEM = { ...em, seed: contractSeed };
+    const out = fromEM(contractEM);
     
     // 4. Validate contract
     assertBindingOutput(out.family, out, Object.keys(out.knobs || {}));

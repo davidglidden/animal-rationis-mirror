@@ -1,14 +1,14 @@
 // Flow Family Renderer - v2.5.1
 // Reads from binding output knobs only
 import { registerRenderer } from './index.js';
+import { createSeededRNG } from '../util-seed.esm.js';
 
 export function renderFlow(ctx, bindingOutput) {
   const { knobs, seed, scale, palette } = bindingOutput;
   const { velocity, turbulence, direction } = knobs;
   
-  // Deterministic seeded RNG
-  const seedNum = typeof seed === 'string' ? hashString(seed) : seed;
-  const rng = seededRng(seedNum);
+  // Contract-compliant deterministic seeded RNG
+  const rng = createSeededRNG(seed);
   
   const canvas = ctx.canvas;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -75,26 +75,6 @@ export function renderFlow(ctx, bindingOutput) {
       }
     }
   }
-}
-
-// Simple hash function for seeds
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-// Simple seeded RNG
-function seededRng(seed) {
-  let state = seed;
-  return function() {
-    state = (1664525 * state + 1013904223) % 0x100000000;
-    return state / 0x100000000;
-  };
 }
 
 registerRenderer('Flow', renderFlow);

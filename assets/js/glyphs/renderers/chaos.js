@@ -1,13 +1,14 @@
 // Chaos Family Renderer - v2.5.1
 import { registerRenderer } from './index.js';
+import { createSeededRNG } from '../util-seed.esm.js';
 
 export function renderChaos(ctx, bindingOutput) {
   const { knobs, seed, scale, palette } = bindingOutput;
   const { noiseScale, entropy } = knobs;
   
   const canvas = ctx.canvas;
-  const seedNum = typeof seed === 'string' ? hashString(seed) : seed;
-  const rng = seededRng(seedNum);
+  // Contract-compliant deterministic seeded RNG
+  const rng = createSeededRNG(seed);
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
@@ -30,21 +31,5 @@ export function renderChaos(ctx, bindingOutput) {
   ctx.globalAlpha = 1;
 }
 
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-function seededRng(seed) {
-  let state = seed;
-  return () => {
-    state = (1664525 * state + 1013904223) % 0x100000000;
-    return state / 0x100000000;
-  };
-}
 
 registerRenderer('Chaos', renderChaos);
