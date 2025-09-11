@@ -2,7 +2,7 @@
 // Each analyzer emits span-level evidence with provenance
 
 console.log('🔄 Core analyzers module loading...');
-import { registerAnalyzer } from '../analyzer-council.js';
+import { registerAnalyzer } from '../analyzer-council.js?v=21';
 console.log('🔄 Core analyzers registerAnalyzer imported successfully');
 
 // Structure Analyzer - AST-aware structural elements
@@ -360,3 +360,6 @@ registerAnalyzer({
 });
 
 console.log('📊 Core analyzers loaded (Structure, Rhetoric, Poetics, Voice, Temporal)');
+
+// ES Module export to ensure module executes
+export const CORE_ANALYZERS_LOADED = true;

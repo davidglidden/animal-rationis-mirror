@@ -4,10 +4,37 @@
 import { assertBindingOutput } from './contracts.js';
 import { deterministicSeed } from './util-seed.esm.js';
 
-// Load analyzers
-import './analyzer-council.js';
-import './analyzers/core.js'; 
-import './analyzers/music.js';
+// Version consistency - single source of truth
+const ASSETS_VER = '21';
+
+// Load analyzers - versioned and explicit to ensure execution
+import './analyzer-council.js?v=21';
+import { CORE_ANALYZERS_LOADED } from './analyzers/core.js?v=21'; 
+import { MUSIC_ANALYZERS_LOADED } from './analyzers/music.js?v=21';
+import { listAnalyzers, countAnalyzers } from './analyzer-council.js?v=21';
+
+// Verify analyzers loaded and registered
+console.log('[Orchestrator] Analyzers loaded flags:', {
+  core: CORE_ANALYZERS_LOADED,
+  music: MUSIC_ANALYZERS_LOADED
+});
+console.log('[AnalyzerCouncil] Total analyzers:', countAnalyzers(), listAnalyzers());
+
+// Dynamic fallback for resilience (usually no-op)
+(async () => {
+  try {
+    if (!CORE_ANALYZERS_LOADED) {
+      const m = await import(/* @vite-ignore */ `./analyzers/core.js?v=${ASSETS_VER}`);
+      console.log('[Orchestrator] Fallback imported core analyzers:', !!m.CORE_ANALYZERS_LOADED);
+    }
+    if (!MUSIC_ANALYZERS_LOADED) {
+      const m = await import(/* @vite-ignore */ `./analyzers/music.js?v=${ASSETS_VER}`);
+      console.log('[Orchestrator] Fallback imported music analyzers:', !!m.MUSIC_ANALYZERS_LOADED);
+    }
+  } catch (e) {
+    console.error('[Orchestrator] Dynamic import fallback failed:', e);
+  }
+})();
 
 // Bindings
 import * as Flow from './bindings/flow.binding.js';

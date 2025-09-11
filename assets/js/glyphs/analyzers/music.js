@@ -2,7 +2,7 @@
 // Lexicon-driven with conservative confidence scoring
 
 console.log('🎵 Music analyzers module loading...');
-import { registerAnalyzer } from '../analyzer-council.js';
+import { registerAnalyzer } from '../analyzer-council.js?v=21';
 console.log('🎵 Music analyzers registerAnalyzer imported successfully');
 
 // Music lexicons - will load from JSON files
@@ -469,3 +469,6 @@ function getVenueType(venue) {
 }
 
 console.log('🎵 Music-aware analyzers loaded (Form, Forces, Practice, Source, Venue)');
+
+// ES Module export to ensure module executes
+export const MUSIC_ANALYZERS_LOADED = true;

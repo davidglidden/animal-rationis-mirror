@@ -132,6 +132,15 @@ export function registerAnalyzer({ name, version, fn }) {
   console.log(`[AnalyzerCouncil] Registered: ${name} v${version}`);
 }
 
+// Self-verification functions for dev diagnostics
+export function listAnalyzers() {
+  return Array.from(analyzers.entries()).map(([name, {version}]) => ({ name, version }));
+}
+
+export function countAnalyzers() {
+  return analyzers.size;
+}
+
 export async function runAnalyzers(ctx) {
   const outputs = [];
   for (const [name, mod] of analyzers) {
