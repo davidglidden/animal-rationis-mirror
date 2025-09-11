@@ -182,30 +182,45 @@ function councilToLegacyAnalyzers(council, rawText) {
     contentType: 'text',
     multiModal: null,
     
-    // Structure analysis
+    // Structure analysis - with all MM-expected properties
     structure: {
       headingCount: structureEvidence.length,
       listCount: (council.byType['structure:list'] || []).length,
-      complexity: clamp(structureEvidence.length / 10) // normalize
+      complexity: clamp(structureEvidence.length / 10), // normalize
+      analyticalScore: clamp((council.byType['rhetoric:question'] || []).length / 15), // questions drive analytical
+      cyclicality: clamp(musicFormEvidence.length / 10) // musical forms suggest cyclical structure
     },
     
-    // Lexicon analysis - music forms drive ritual intent
+    // Lexicon analysis - with all MM-expected properties for intent calculation
     lexicon: {
       musicForms: musicFormEvidence.length,
-      dominantForm: musicFormEvidence[0]?.type.split(':')[2] || null
+      dominantForm: musicFormEvidence[0]?.type.split(':')[2] || null,
+      analytical: clamp((council.byType['rhetoric:question'] || []).length / 10),
+      contemplative: clamp(poeticsEvidence.length / 5 + voiceEvidence.filter(e => e.type === 'voice:first-person').length / 10),
+      ritual: clamp(musicFormEvidence.filter(e => 
+        ['vespers', 'magnificat', 'mass', 'motet'].includes(e.payload?.form)
+      ).length / 3),
+      contested: clamp(rhetoricEvidence.filter(e => 
+        e.type === 'rhetoric:imperative' || e.type === 'rhetoric:hedge'
+      ).length / 8),
+      personal: clamp(voiceEvidence.filter(e => e.type === 'voice:first-person').length / 15)
     },
     
-    // Temporal analysis
+    // Temporal analysis - with all MM-expected properties
     temporal: {
       velocity: clamp(temporalEvidence.length / 20), // more temporal words = faster
-      dateReferences: (council.byType['temporal:year'] || []).length
+      dateReferences: (council.byType['temporal:year'] || []).length,
+      lyricality: clamp(poeticsEvidence.length / 5), // poetic elements suggest lyrical time
+      debate: clamp((council.byType['rhetoric:question'] || []).length / 12), // questions suggest debate
+      historicalDepth: clamp((council.byType['temporal:year'] || []).length / 5) // years suggest historical depth
     },
     
-    // Resonance - rhetoric and poetics
+    // Resonance - rhetoric and poetics with all MM-expected properties
     resonance: {
       questionDensity: clamp((council.byType['rhetoric:question'] || []).length / 10),
       poeticElements: poeticsEvidence.length,
-      affectPolarity: clamp(rhetoricEvidence.length / 15)
+      affectPolarity: clamp(rhetoricEvidence.length / 15),
+      dissonanceLevel: clamp((council.byType['rhetoric:hedge'] || []).length / 10) // hedging suggests dissonance
     },
     
     // Topology - derived from structure and content
