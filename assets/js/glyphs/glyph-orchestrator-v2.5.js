@@ -101,6 +101,60 @@ class GlyphOrchestrator {
     };
   }
 
+  // Resolve renderer parameters using bindings or UPA fallback
+  resolveRenderer(em) {
+    if (!em || !em.families) {
+      throw new Error('[Glyph] Invalid EM object for renderer resolution');
+    }
+    
+    // Determine family from EM
+    const family = em.family || window.familyFromEM(em);
+    
+    // Try dedicated binding first (Flow, Grid, Strata, Constellation)
+    const BINDINGS = {
+      flow: window.FlowBinding,
+      grid: window.GridBinding, 
+      strata: window.StrataBinding,
+      constellation: window.ConstellationBinding
+    };
+    
+    const binding = BINDINGS[family];
+    if (binding) {
+      // Use dedicated binding
+      const params = binding.params(em);
+      params.__source = 'binding';
+      return {
+        rendererName: binding.choose(em),
+        parameters: params
+      };
+    }
+    
+    // Fallback to UPA for orphaned families (Radiance, Interference, Spiral, Balance, Chaos, Collapse, Threshold)
+    if (window.UPA) {
+      const params = window.UPA.fromEM({ ...em, family });
+      return {
+        rendererName: family.charAt(0).toUpperCase() + family.slice(1),
+        parameters: params
+      };
+    }
+    
+    throw new Error(`[Glyph] No binding or UPA available for family: ${family}`);
+  }
+
+  // Normalize MM→EM pipeline output for backward compatibility
+  normalizeMMEMResult(mmResult) {
+    // Accept both shapes to keep backward compatibility
+    if (mmResult && typeof mmResult === 'object') {
+      if ('rendererName' in mmResult || 'parameters' in mmResult) {
+        return { rendererName: mmResult.rendererName, parameters: mmResult.parameters };
+      }
+      if ('family' in mmResult || 'params' in mmResult) {
+        return { rendererName: mmResult.family, parameters: mmResult.params };
+      }
+    }
+    throw new Error('[Glyph] MM→EM result has unknown shape: ' + JSON.stringify(mmResult));
+  }
+
   // Initialize semantic translators when classes become available
   initializeSemanticTranslators() {
     // Check if semantic translator classes are available
@@ -1384,9 +1438,22 @@ class GlyphOrchestrator {
       console.log(`🧬 Running MM→EM pipeline for: ${glyphId}`);
       const mmResult = this.selectRendererFromMeaningModel(genome, metadata, postContent);
       
-      rendererName = mmResult.rendererName;
-      rendererParams = mmResult.parameters;
-      console.log(`🔧 MM→EM selected renderer: ${rendererName}`);
+      if (!mmResult || !mmResult.em) {
+        throw new Error(`[Glyph] MM→EM pipeline failed for: ${glyphId}`);
+      }
+      
+      // Resolve renderer using proper UPA/binding system
+      const resolved = this.resolveRenderer(mmResult.em);
+      rendererName = resolved.rendererName;
+      rendererParams = resolved.parameters;
+      
+      // Add source tracking for metrics
+      console.info('[Glyph]', {
+        family: rendererName,
+        source: rendererParams.__source,
+        secondary: rendererParams.secondary?.family || null,
+        glyphId: glyphId
+      });
     }
     
     // Load and create renderer using unified system
@@ -1467,14 +1534,22 @@ class GlyphOrchestrator {
 
   // Create glyph with any renderer (archived or procedural) - unified system  
   createGlyphWithRenderer(canvas, rendererName, parameters = {}) {
-    console.log(`🎨 Creating glyph with renderer: ${rendererName}`);
+    // Ensure global registry exists
+    window.GlyphRenderers = window.GlyphRenderers || {};
     
-    // Ensure we have the global registry
-    if (!window.GlyphRenderers) {
-      console.warn(`❌ No GlyphRenderers registry found, creating fallback`);
-      this.createFallbackGlyph(canvas, parameters);
-      return;
+    // Strong assertion: renderer must exist and be callable
+    const renderFn = window.GlyphRenderers[rendererName];
+    if (typeof renderFn !== 'function') {
+      const availableRenderers = Object.keys(window.GlyphRenderers);
+      console.error('[Glyph] Missing renderer function', { 
+        rendererName, 
+        availableRenderers, 
+        parametersPreview: Object.keys(parameters) 
+      });
+      throw new Error(`[Glyph] Missing renderer for family: ${rendererName}. Available: [${availableRenderers.join(', ')}]`);
     }
+    
+    console.log(`[Glyph] Validated renderer function for: ${rendererName}`);
     
     // Check if this is a hybrid glyph (only for procedural renderers)
     const { isHybrid, hybridSecondary, hybridBlend } = parameters;
@@ -1484,33 +1559,27 @@ class GlyphOrchestrator {
       return;
     }
     
-    // Create single renderer
-    if (window.GlyphRenderers[rendererName]) {
-      console.log(`✅ Creating glyph with renderer: ${rendererName}`);
-      const RendererClass = window.GlyphRenderers[rendererName];
-      try {
-        const renderer = new RendererClass(canvas, parameters);
-        if (renderer.start) {
-          renderer.start();
-        }
-        
-        // Record diagnostic manifest for acceptance testing
-        if (typeof window !== 'undefined' && window.glyphDiagnostics && parameters.glyphId) {
-          const manifestParams = {
-            ...parameters,
-            renderer: rendererName,
-            sourceText: this.extractPostContent(parameters) // Add source text for lexica detection
-          };
-          window.glyphDiagnostics.recordGlyphManifest(parameters.glyphId, manifestParams);
-        }
-      } catch (error) {
-        console.error(`❌ Failed to create ${rendererName} renderer:`, error);
-        this.createFallbackGlyph(canvas, parameters);
+    // Create single renderer (we already validated it exists above)
+    console.log(`✅ Creating glyph with renderer: ${rendererName}`);
+    const RendererClass = window.GlyphRenderers[rendererName];
+    try {
+      const renderer = new RendererClass(canvas, parameters);
+      if (renderer.start) {
+        renderer.start();
       }
-    } else {
-      console.warn(`❌ Glyph renderer not available: ${rendererName}`);
-      console.log(`🔍 Available renderers:`, Object.keys(window.GlyphRenderers || {}));
-      this.createFallbackGlyph(canvas, parameters);
+      
+      // Record diagnostic manifest for acceptance testing
+      if (typeof window !== 'undefined' && window.glyphDiagnostics && parameters.glyphId) {
+        const manifestParams = {
+          ...parameters,
+          renderer: rendererName,
+          sourceText: this.extractPostContent(parameters) // Add source text for lexica detection
+        };
+        window.glyphDiagnostics.recordGlyphManifest(parameters.glyphId, manifestParams);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to create ${rendererName} renderer:`, error);
+      this.createGuardedFallbackGlyph(canvas, parameters);
     }
   }
 
@@ -1551,6 +1620,16 @@ class GlyphOrchestrator {
   }
 
   // Fallback for when no renderer is available
+  createGuardedFallbackGlyph(canvas, parameters = {}) {
+    const DEBUG_PLACEHOLDER = false; // Set to true only for development
+    if (!DEBUG_PLACEHOLDER) {
+      throw new Error(`[Glyph] Renderer creation failed for ${parameters.family || 'unknown'}. Check engine loading.`);
+    }
+    
+    // Development placeholder only - should not be reached in production
+    this.createFallbackGlyph(canvas, parameters);
+  }
+
   createFallbackGlyph(canvas, parameters = {}) {
     const ctx = canvas.getContext('2d');
     const { width, height } = canvas;
@@ -1772,14 +1851,29 @@ class GlyphOrchestrator {
         constellation: window.ConstellationBinding
       };
       
-      const binding = BINDINGS[family];
+      let binding = BINDINGS[family];
+      
       if (!binding) {
         console.warn(`⚠️ No binding found for family: ${family}`);
         return null;
       }
       
       const chosen = binding.choose(em);
-      const params = binding.params(em);
+      let params = binding.params(em);
+      
+      // Extract lexica hits from raw text for overlay processing
+      const lexicaHits = this.extractLexicaHits(rawText);
+      
+      // Apply overlay systems based on lexica hits and MM analysis
+      params = this.applyOverlays(params, lexicaHits, mm, metadata, em.seed);
+      
+      // Implement micro-blend secondary families if strong secondary affinity
+      if (em.secondary_affinity && em.secondary_affinity > 0.65) {
+        params = this.applySecondaryBlend(params, em, chosen);
+      }
+      
+      // Comprehensive per-glyph logging
+      this.logGlyphGeneration(chosen, params, em, mm, lexicaHits, metadata);
       
       // Log the full pipeline for diagnostics
       console.log('🧭 MM→EM→Render', {
@@ -3002,6 +3096,164 @@ class EvolutionaryFitness {
   measureUnexpectedBeauty(glyph) {
     // Placeholder for aesthetic emergence detection
     return Math.random() * 0.5;
+  }
+
+  // Extract lexica hits from raw text for overlay processing
+  extractLexicaHits(rawText) {
+    if (!rawText) return [];
+    
+    const text = rawText.toLowerCase();
+    const lexicaHits = [];
+    
+    // Define lexica categories for overlay triggering
+    const lexicaCategories = {
+      intimacy: ['personal', 'intimate', 'private', 'diary', 'memoir', 'confession', 'secret'],
+      trace: ['trace', 'mark', 'inscription', 'writing', 'manuscript', 'palimpsest', 'scribe'],
+      scholarly: ['scholar', 'study', 'research', 'academic', 'medieval', 'analysis', 'treatise'],
+      archive: ['archive', 'document', 'record', 'preservation', 'collection', 'catalog', 'vault'],
+      postal: ['post', 'mail', 'letter', 'correspondence', 'dispatch', 'delivery', 'envelope'],
+      authority: ['seal', 'stamp', 'official', 'certification', 'validation', 'authority', 'government'],
+      bureaucratic: ['bureaucrat', 'office', 'administration', 'procedure', 'form', 'protocol', 'regulation']
+    };
+    
+    // Extract hits with category information
+    for (const [category, markers] of Object.entries(lexicaCategories)) {
+      for (const marker of markers) {
+        if (text.includes(marker)) {
+          lexicaHits.push({ category, marker, text: marker });
+        }
+      }
+    }
+    
+    return lexicaHits;
+  }
+
+  // Apply overlay systems based on lexica hits and MM analysis
+  applyOverlays(params, lexicaHits, mm, metadata, seed) {
+    let overlayParams = { ...params };
+    
+    // Check for scriptorium overlay (intimacy/trace/scholarly triggers)
+    if (window.ScriptoriumOverlay && window.ScriptoriumOverlay.shouldApply(lexicaHits, metadata)) {
+      const scriptoriumOverlay = window.ScriptoriumOverlay.generate(params, seed);
+      overlayParams.scriptoriumOverlay = scriptoriumOverlay;
+      console.log('📜 Scriptorium overlay applied:', {
+        incipit: scriptoriumOverlay.incipit.enabled,
+        marginalia: scriptoriumOverlay.marginalia.enabled,
+        opacity: scriptoriumOverlay.opacity
+      });
+    }
+    
+    // Check for seal/insignia overlay (archive/postal/authority triggers or contested intent)
+    if (window.SealInsigniaOverlay && window.SealInsigniaOverlay.shouldApply(lexicaHits, mm, metadata)) {
+      const sealOverlay = window.SealInsigniaOverlay.generate(params, mm, seed);
+      overlayParams.sealInsigniaOverlay = sealOverlay;
+      console.log('🏛️ Seal/insignia overlay applied:', {
+        seals: sealOverlay.seals.enabled,
+        postal: sealOverlay.postal.enabled,
+        bureaucratic: sealOverlay.bureaucratic.enabled,
+        opacity: sealOverlay.opacity
+      });
+    }
+    
+    return overlayParams;
+  }
+
+  // Implement micro-blend secondary families when EM shows strong affinity
+  applySecondaryBlend(params, em, primaryFamily) {
+    // Find the strongest secondary family (excluding primary)
+    const families = { ...em.families };
+    delete families[primaryFamily.toLowerCase()];
+    
+    const secondaryFamily = Object.entries(families)
+      .sort(([,a], [,b]) => b - a)[0];
+    
+    if (!secondaryFamily || secondaryFamily[1] < 0.2) {
+      return params; // No significant secondary family
+    }
+    
+    const [secondaryName, secondaryStrength] = secondaryFamily;
+    const blendStrength = Math.min(0.2, secondaryStrength); // Cap at 0.2 per spec
+    
+    console.log(`🌈 Micro-blend: ${primaryFamily} + ${secondaryName} (${(blendStrength * 100).toFixed(1)}%)`);
+    
+    // Apply secondary family influence as subtle parameter adjustments
+    const secondaryParams = {
+      secondaryFamily: secondaryName,
+      blendStrength: blendStrength,
+      // Subtle adjustments based on secondary family characteristics
+      opacityAdjust: blendStrength * 0.1,
+      speedAdjust: secondaryName === 'flux' ? blendStrength * 0.2 : 0,
+      complexityAdjust: secondaryName === 'gridness' ? blendStrength * 0.15 : 0,
+      depthAdjust: secondaryName === 'stratification' ? blendStrength * 0.1 : 0,
+      luminosityAdjust: secondaryName === 'constellation' ? blendStrength * 0.1 : 0
+    };
+    
+    return { ...params, microBlend: secondaryParams };
+  }
+
+  // Comprehensive per-glyph logging for diagnostics and validation
+  logGlyphGeneration(family, params, em, mm, lexicaHits, metadata) {
+    // Extract key parameters based on family type
+    const keyParams = this.extractKeyParams(family, params);
+    
+    // Create comprehensive log entry
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      family: family,
+      seed: params.seed || em.seed,
+      paletteIntent: params.paletteIntent,
+      keyParams: keyParams,
+      overlays: {
+        scriptorium: !!params.scriptoriumOverlay,
+        sealInsignia: !!params.sealInsigniaOverlay
+      },
+      microBlend: params.microBlend ? {
+        secondary: params.microBlend.secondaryFamily,
+        strength: params.microBlend.blendStrength
+      } : null,
+      lexicaTriggered: lexicaHits.map(hit => `${hit.category}:${hit.marker}`),
+      emSignature: {
+        primaryAffinity: Math.max(...Object.values(em.families)),
+        secondaryAffinity: em.secondary_affinity || 0,
+        pulseLevel: em.cadence.pulse,
+        densityLevel: em.scale.density
+      },
+      contentMeta: {
+        title: metadata?.title?.substring(0, 50) || 'untitled',
+        class: metadata?.class || 'unknown',
+        wordCount: (metadata?.rawText || '').split(/\s+/).length
+      }
+    };
+    
+    console.log('🎨 Glyph generation log:', logEntry);
+    
+    // Store in session for SSIM validation testing
+    if (!window.glyphGenerationLog) window.glyphGenerationLog = [];
+    window.glyphGenerationLog.push(logEntry);
+    
+    return logEntry;
+  }
+
+  // Extract 3-5 key parameters per family for focused logging
+  extractKeyParams(family, params) {
+    const familyKeyParams = {
+      'Flow': ['velocity', 'turbulence', 'directionalCoherence', 'particleCount', 'pattern'],
+      'Grid': ['columns', 'rows', 'orthogonality', 'rhythmicModulation', 'cellPrecision'],
+      'Strata': ['layers', 'temporalDepth', 'geologicalDrift', 'sedimentationAngle', 'weathering'],
+      'Constellation': ['starCount', 'cosmicDensity', 'stellarPulsation', 'connectionComplexity', 'constellationPattern']
+    };
+    
+    const keyFields = familyKeyParams[family] || Object.keys(params).slice(0, 5);
+    const extracted = {};
+    
+    keyFields.forEach(field => {
+      if (params[field] !== undefined) {
+        extracted[field] = typeof params[field] === 'number' ? 
+          Number(params[field].toFixed(3)) : params[field];
+      }
+    });
+    
+    return extracted;
   }
 }
 

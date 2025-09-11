@@ -1,61 +1,63 @@
-// Strata renderer binding - translates EM energies to Strata parameters
+// Strata Family Binding - v2.5.1
+// Maps EM energies to strata-specific parameters
+import { validateFamilyBinding } from '../contracts.js';
 
-const StrataBinding = {
-  // Renderer selection logic
-  choose() { 
-    return 'Strata'; 
-  },
-  
-  // Parameter derivation from EM
-  params({ families, cadence, scale, seed }) {
-    // Layer count from stratification energy
-    const layers = 3 + Math.round(7 * families.stratification);
-    
-    // Drift increases with pulse (breathing layers)
-    const drift = 0.01 + 0.08 * cadence.pulse;
-    
-    // Opacity variation inversely related to granularity
-    const opacityVar = 0.05 + 0.25 * (1 - scale.granularity);
-    
-    // Fossil links when grid energy present but less than stratification
-    const fossilLinks = families.gridness > 0.3 && 
-                        families.gridness < families.stratification;
-    
-    // Erosion effect from flux energy
-    const erosion = Math.max(0, Math.min(1,
-      0.1 + 0.6 * families.flux
-    ));
-    
-    // Layer thickness variation
-    const thicknessVariation = Math.max(0.1, Math.min(0.8,
-      0.1 + 0.7 * scale.density
-    ));
-    
-    // Temporal markers from historical depth
-    const temporalMarkers = families.stratification > 0.6;
-    
-    // Sediment texture from contemplative energy
-    const sedimentGranularity = Math.max(0.2, Math.min(0.9,
-      0.2 + 0.7 * families.constellation
-    ));
-    
-    return {
-      layers,
-      drift,
-      opacityVar,
-      fossilLinks,
-      erosion,
-      thicknessVariation,
-      temporalMarkers,
-      sedimentGranularity,
-      animationSpeed: 0.1 + 0.2 * drift,
-      seed: window.hashSeedNumeric ? window.hashSeedNumeric(seed + ':Strata') : seed,
-      paletteIntent: 'sediment'
-    };
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+const quantize = (x, min, max) => Math.round(min + (max - min) * clamp(x, 0, 1));
+
+export function fromEM(em) {
+  if (!em || !em.families) {
+    throw new Error('[StrataBinding] Invalid EM object - missing families');
   }
-};
+  
+  // Core binding outputs
+  const scale = clamp(em.scale?.density || 0.5, 0.5, 2.0);
+  const seed = String(em.seed);
+  
+  // Sacred Palette integration - strata uses geological palette
+  const palette = {
+    name: 'geological',
+    intent: 'strata'
+  };
+  
+  // Map EM energies to strata-specific knobs
+  const knobs = {
+    layers: quantize(em.families?.stratification || 0.5, 4, 16),
+    depth: clamp(0.2 + 0.7 * (em.families?.stratification || 0.5), 0.2, 0.9),
+    density: clamp(em.scale?.density || 0.5, 0, 1)
+  };
+  
+  // Secondary family micro-blending
+  const secondary = em.secondary_affinity > 0.65 ? {
+    family: getSecondaryFamily(em),
+    strength: Math.min(0.2, em.secondary_affinity - 0.65)
+  } : undefined;
+  
+  const out = {
+    family: 'Strata',
+    seed,
+    palette,
+    scale,
+    knobs,
+    secondary,
+    __contract: 'binding-2.5.1'
+  };
+  
+  validateFamilyBinding('Strata', out);
+  
+  console.log(`[StrataBinding] Generated parameters:`, {
+    family: out.family,
+    seed: out.seed,
+    layers: knobs.layers,
+    depth: knobs.depth.toFixed(2),
+    secondary: secondary?.family || null
+  });
+  
+  return out;
+}
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.StrataBinding = StrataBinding;
+function getSecondaryFamily(em) {
+  const families = { ...em.families };
+  const ranked = Object.entries(families).sort(([,a], [,b]) => b - a);
+  return ranked[1] ? ranked[1][0] : null;
 }

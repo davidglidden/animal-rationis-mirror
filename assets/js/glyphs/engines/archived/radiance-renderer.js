@@ -1,4 +1,5 @@
-// Radiance Family Glyph Renderer - Semantic-Aware Architecture
+// Radiance Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
+// Semantic-Aware Architecture
 // Creates emanation patterns - source, spiritual center, infinite reach
 class RadianceRenderer {
   deriveRadianceParams(vp) {
@@ -596,4 +597,5 @@ class RadianceRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Radiance = RadianceRenderer;
+  console.log('[Glyph] Registered engine: Radiance');
 }

@@ -1,57 +1,66 @@
-// Flow renderer binding - translates EM energies to Flow parameters
+// Flow Family Binding - v2.5.1
+// Maps EM energies to flow-specific parameters
+import { validateFamilyBinding } from '../contracts.js';
 
-const FlowBinding = {
-  // Renderer selection logic
-  choose() { 
-    return 'Flow'; 
-  },
-  
-  // Parameter derivation from EM
-  params({ families, cadence, scale, seed }) {
-    const circularity = Math.max(0, Math.min(1, cadence.pulse));
-    const velocity = families.flux;
-    const density = scale.density;
-    
-    // Pattern selection based on energies
-    const pattern = (circularity > 0.7) ? 'spiral'
-                  : (velocity > 0.6) ? 'jet'
-                  : (density > 0.55) ? 'eddy' 
-                  : 'laminar';
-    
-    // Particle count scales with granularity
-    const particleCount = Math.max(200, Math.min(1400, 
-      Math.round(200 + 1200 * scale.granularity)
-    ));
-    
-    // Turbulence increases with flux
-    const turbulence = Math.max(0.05, Math.min(0.65, 
-      0.05 + 0.6 * families.flux
-    ));
-    
-    // Viscosity decreases with anisotropy (more directed = less viscous)
-    const viscosity = Math.max(0.65, Math.min(0.98, 
-      0.65 + 0.3 * (1 - cadence.anisotropy)
-    ));
-    
-    // Trail length from contemplative energy
-    const trailLength = Math.max(0.3, Math.min(0.95,
-      0.3 + 0.65 * families.stratification
-    ));
-    
-    return {
-      pattern,
-      particleCount,
-      turbulence,
-      viscosity,
-      trailLength,
-      animationSpeed: 0.5 + 0.5 * velocity,
-      seed: window.hashSeedNumeric ? window.hashSeedNumeric(seed + ':Flow') : seed,
-      paletteIntent: families.flux > 0.6 ? 'fire' : 'water'
-    };
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+
+export function fromEM(em) {
+  if (!em || !em.families) {
+    throw new Error('[FlowBinding] Invalid EM object - missing families');
   }
-};
+  
+  // Core binding outputs
+  const scale = clamp(em.scale?.density || 0.5, 0.5, 2.0);
+  const seed = String(em.seed);
+  
+  // Sacred Palette integration - flow uses oceanic palette
+  const palette = {
+    name: 'oceanic',
+    intent: 'flow'
+  };
+  
+  // Map EM energies to flow-specific knobs
+  const velocity = clamp(em.families?.flux || 0.5, 0, 1);
+  const turbulence = clamp(0.05 + 0.6 * (em.families?.flux || 0.5), 0.05, 0.65);
+  const directionality = clamp(em.cadence?.anisotropy || 0.5, 0, 1);
+  
+  const knobs = {
+    velocity,
+    turbulence,
+    direction: directionality
+  };
+  
+  // Secondary family micro-blending
+  const secondary = em.secondary_affinity > 0.65 ? {
+    family: getSecondaryFamily(em),
+    strength: Math.min(0.2, em.secondary_affinity - 0.65)
+  } : undefined;
+  
+  const out = {
+    family: 'Flow',
+    seed,
+    palette,
+    scale,
+    knobs,
+    secondary,
+    __contract: 'binding-2.5.1'
+  };
+  
+  validateFamilyBinding('Flow', out);
+  
+  console.log(`[FlowBinding] Generated parameters:`, {
+    family: out.family,
+    seed: out.seed,
+    velocity: knobs.velocity.toFixed(2),
+    turbulence: knobs.turbulence.toFixed(2),
+    secondary: secondary?.family || null
+  });
+  
+  return out;
+}
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.FlowBinding = FlowBinding;
+function getSecondaryFamily(em) {
+  const families = { ...em.families };
+  const ranked = Object.entries(families).sort(([,a], [,b]) => b - a);
+  return ranked[1] ? ranked[1][0] : null;
 }

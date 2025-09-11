@@ -362,7 +362,20 @@ const SacredPalette = {
   }
 };
 
-// Export for use in renderers
-if (typeof window !== 'undefined') {
-  window.SacredPalette = SacredPalette;
+// Simple palette selection for ES modules
+export function pickPalette(intent, family) {
+  return {
+    name: intent || 'default',
+    intent: family?.toLowerCase() || intent,
+    colors: {
+      primary: SacredPalette.families?.[family]?.primary || SacredPalette.base?.ochre || '#8B7A5E',
+      secondary: SacredPalette.families?.[family]?.accent || SacredPalette.base?.slate || '#778899'
+    }
+  };
 }
+
+// Export the palette object
+export default SacredPalette;
+
+// ES Module exports only - no globals
+console.log('[SacredPalette] Palette system loaded (ESM)');

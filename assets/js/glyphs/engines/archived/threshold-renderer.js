@@ -1,4 +1,4 @@
-// Threshold Family Glyph Renderer
+// Threshold Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates liminal space patterns - portals, membranes, phase boundaries
 class ThresholdRenderer {
   constructor(canvas, params = {}) {
@@ -833,4 +833,5 @@ class ThresholdRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Threshold = ThresholdRenderer;
+  console.log('[Glyph] Registered engine: Threshold');
 }

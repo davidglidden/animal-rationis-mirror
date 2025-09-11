@@ -1,4 +1,4 @@
-// Balance Family Glyph Renderer
+// Balance Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates equilibrium patterns - scales, pendulums, harmonics
 class BalanceRenderer {
   constructor(canvas, params = {}) {
@@ -799,4 +799,5 @@ class BalanceRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Balance = BalanceRenderer;
+  console.log('[Glyph] Registered engine: Balance');
 }

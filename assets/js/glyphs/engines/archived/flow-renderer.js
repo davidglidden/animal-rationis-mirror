@@ -1,4 +1,4 @@
-// Flow Family Glyph Renderer
+// Flow Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates fluid dynamics patterns - currents, eddies, streams
 class FlowRenderer {
   deriveFlowParams(vp) {
@@ -313,4 +313,5 @@ class FlowRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Flow = FlowRenderer;
+  console.log('[Glyph] Registered engine: Flow');
 }

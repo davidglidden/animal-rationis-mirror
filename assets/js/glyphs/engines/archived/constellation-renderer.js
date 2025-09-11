@@ -1,4 +1,4 @@
-// Constellation Family Glyph Renderer
+// Constellation Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates star field patterns with connecting lines and pulsing nodes
 class ConstellationRenderer {
   deriveConstellationParams(vp) {
@@ -337,4 +337,5 @@ class ConstellationRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Constellation = ConstellationRenderer;
+  console.log('[Glyph] Registered engine: Constellation');
 }

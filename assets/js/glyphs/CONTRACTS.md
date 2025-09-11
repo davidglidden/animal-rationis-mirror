@@ -98,28 +98,52 @@ Each renderer emits exactly one diagnostic line:
 3. **Divergence**: Different content of same type → distinguishable parameters (≥15% difference)
 4. **Family selection**: "Ritual of Choosing" → grid/strata (not flow), "Vespers with Jordi" → strata
 
-## Renderer Binding Contract
+## Binding Output Contract v2.5.1
 
-Each renderer binding must implement:
+Each family binding exports `fromEM(em)` and MUST return:
 
 ```javascript
-export default {
-  choose(em) {
-    // Return renderer name string
-    // May use EM energies for variant selection
-    return 'RendererName';
-  },
-  
-  params(em) {
-    // Convert EM energies to renderer-specific parameters
-    // Must be deterministic for same EM input
-    // Must use deterministic seed: hashSeed(em.seed + ':RendererName')
-    return {
-      // renderer-specific parameters
-      seed: hashSeed(em.seed + ':RendererName')
-    };
-  }
-};
+{
+  family: "<FamilyName>",                // exact family string
+  seed: string,                          // deterministic seed
+  palette: { name: string, ... },        // sacred-palette selection
+  scale: number,                         // 0.5–2.0
+
+  // Required family knobs (examples; see per-family list)
+  knobs: { ... },                        // flat; all required present
+
+  // Optional
+  secondary?: { family: string, strength: number },  // if EM.secondary_affinity>0.65
+  __contract: "binding-2.5.1"
+}
+```
+
+### Per-Family Required Knobs
+
+- **Flow**: velocity, turbulence, direction
+- **Grid**: gridness, granularity, orthogonality
+- **Strata**: layers, depth, density
+- **Constellation**: starCount, brightness, connections
+- **Radiance**: intensity, rayCount, glow, burst
+- **Interference**: waveCount, phase, amplitude
+- **Spiral**: turns, tightness, armCount
+- **Balance**: axisTilt, weights, tension
+- **Chaos**: noiseScale, entropy
+- **Collapse**: centerBias, decayRate, fragmentation
+- **Threshold**: edgeStrength, contrast, bandCount
+
+### Validation
+
+All bindings are validated using `assertBindingOutput()` from `contracts.js`:
+
+```javascript
+import { validateFamilyBinding } from './contracts.js';
+
+export function fromEM(em) {
+  const out = { family: 'Example', seed, palette, scale, knobs, __contract: 'binding-2.5.1' };
+  validateFamilyBinding('Example', out);
+  return out;
+}
 ```
 
 ## Architecture Benefits

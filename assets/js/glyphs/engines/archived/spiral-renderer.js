@@ -1,4 +1,4 @@
-// Spiral Family Glyph Renderer
+// Spiral Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates various spiral patterns - fibonacci, archimedean, logarithmic
 class SpiralRenderer {
   deriveSpiralParams(vp){
@@ -281,4 +281,5 @@ class SpiralRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Spiral = SpiralRenderer;
+  console.log('[Glyph] Registered engine: Spiral');
 }

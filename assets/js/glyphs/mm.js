@@ -102,8 +102,5 @@ export function buildMM({ rawText, analyzers, priors = {} }) {
   return { intent, texture, dynamics, meta };
 }
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.buildMM = buildMM;
-  console.log('🧬 Meaning Model (MM) builder loaded');
-}
+// ES Module exports only - no globals
+console.log('🧬 Meaning Model (MM) builder loaded (ESM)');

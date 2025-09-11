@@ -1,5 +1,28 @@
-// Grid Family Glyph Renderer
+// Grid Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates systematic patterns - logic, structure, organized thought
+
+// Parameter adapter for MM→EM→Binding pipeline compatibility
+function adaptGridParams(params) {
+  // Map new binding parameters to renderer expectations
+  return {
+    gridType: 'orthogonal', // Fixed for now
+    density: params.columns ? params.columns / 12 : 0.5, // Normalize columns to 0-1
+    regularity: params.orthogonality ?? 0.5,
+    perturbation: params.alignmentJitter ?? 0.1,
+    connectionProbability: params.structuralConnections ?? 0.3,
+    geometricComplexity: params.precision ?? 0.5,
+    logicalDepth: params.subdivision ?? 0.5,
+    animationSpeed: params.animationSpeed ?? 0.3,
+    cellSize: params.cellSize ?? 20,
+    columns: params.columns ?? 6,
+    rows: params.rows ?? 4,
+    strokeWeight: params.strokeWeight ?? 1.5,
+    rhythmicModulation: params.rhythmicModulation ?? 0.0,
+    seed: params.seed,
+    paletteIntent: params.paletteIntent ?? 'earth'
+  };
+}
+
 class GridRenderer {
   deriveGridParams(vp){
     const g=vp.genome||{}, topo=g.topology||{}, cx=g.complexity||{}, res=g.resonance||{};
@@ -14,26 +37,28 @@ class GridRenderer {
   constructor(canvas, params = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.params = params;
-    const fp = (params?.genome?.uniqueIdentifiers?.fingerprint ?? params?.uniqueness ?? 0) >>> 0;
-    this._seed = fp;
-    this._rng  = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(fp || 0xA53A9D1B);
     
-    const P = this.deriveGridParams(this.params);
-    this.params = { ...this.params, ...P };
-    console.debug('♍ SIGIL Grid', { seed:this._seed, ...P });
+    // Adapt parameters from MM→EM→Binding pipeline
+    const adaptedParams = adaptGridParams(params);
+    this.params = adaptedParams;
     
-    this.params = {
-      gridType: this.semanticParams.gridType,
-      density: this.semanticParams.density,
-      regularity: this.semanticParams.regularity,
-      perturbation: this.semanticParams.perturbation,
-      connectionProbability: this.semanticParams.connectionProbability,
-      geometricComplexity: this.semanticParams.geometricComplexity,
-      logicalDepth: this.semanticParams.logicalDepth,
-      animationSpeed: this.semanticParams.animationSpeed,
-      ...params
-    };
+    // Use seed from binding system or generate fallback
+    this._seed = adaptedParams.seed || 0xA53A9D1B;
+    this._rng = (window.GlyphUtils?.seededRng || ((s)=>()=>((s=(1664525*s+1013904223)>>>0)/0x1_0000_0000)))(this._seed);
+    
+    // Legacy genome-based parameters (if available)
+    if (params?.genome) {
+      const legacyParams = this.deriveGridParams(params);
+      this.params = { ...this.params, ...legacyParams };
+    }
+    
+    console.log('[Grid] Initialized with params:', { 
+      seed: this._seed, 
+      columns: this.params.columns,
+      rows: this.params.rows,
+      orthogonality: this.params.regularity,
+      paletteIntent: this.params.paletteIntent
+    });
     this.time = 0;
     this.gridPoints = [];
     this.connections = [];
@@ -675,4 +700,5 @@ class GridRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Grid = GridRenderer;
+  console.log('[Glyph] Registered engine: Grid');
 }

@@ -1,4 +1,4 @@
-// Interference Family Glyph Renderer
+// Interference Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates wave interference patterns - constructive and destructive
 class InterferenceRenderer {
   deriveInterferenceParams(vp) {
@@ -285,4 +285,5 @@ class InterferenceRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Interference = InterferenceRenderer;
+  console.log('[Glyph] Registered engine: Interference');
 }

@@ -1,4 +1,4 @@
-// Strata Family Glyph Renderer
+// Strata Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates geological layer patterns - sedimentary, fault lines, erosion
 class StrataRenderer {
   constructor(canvas, params = {}) {
@@ -372,4 +372,5 @@ class StrataRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Strata = StrataRenderer;
+  console.log('[Glyph] Registered engine: Strata');
 }

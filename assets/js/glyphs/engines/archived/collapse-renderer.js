@@ -1,4 +1,4 @@
-// Collapse Family Glyph Renderer
+// Collapse Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates collapse patterns - gravitational, structural, systemic
 class CollapseRenderer {
   constructor(canvas, params = {}) {
@@ -595,4 +595,5 @@ class CollapseRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Collapse = CollapseRenderer;
+  console.log('[Glyph] Registered engine: Collapse');
 }

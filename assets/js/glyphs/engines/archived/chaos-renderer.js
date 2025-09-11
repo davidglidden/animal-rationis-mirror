@@ -1,4 +1,4 @@
-// Chaos Family Glyph Renderer
+// Chaos Family Glyph Renderer - ACTIVE ENGINE (v2.5) - Do not archive
 // Creates chaotic patterns - strange attractors, butterfly effects, turbulence
 class ChaosRenderer {
   constructor(canvas, params = {}) {
@@ -525,4 +525,5 @@ class ChaosRenderer {
 if (typeof window !== 'undefined') {
   window.GlyphRenderers = window.GlyphRenderers || {};
   window.GlyphRenderers.Chaos = ChaosRenderer;
+  console.log('[Glyph] Registered engine: Chaos');
 }

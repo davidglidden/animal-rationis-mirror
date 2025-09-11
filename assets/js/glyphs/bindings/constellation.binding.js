@@ -1,69 +1,63 @@
-// Constellation renderer binding - translates EM energies to Constellation parameters
+// Constellation Family Binding - v2.5.1
+// Maps EM energies to constellation-specific parameters
+import { validateFamilyBinding } from '../contracts.js';
 
-const ConstellationBinding = {
-  // Renderer selection logic
-  choose() { 
-    return 'Constellation'; 
-  },
-  
-  // Parameter derivation from EM
-  params({ families, cadence, scale, seed }) {
-    // Star count from constellation energy
-    const starCount = 80 + Math.round(240 * families.constellation);
-    
-    // Clustering increases with pulse (rhythmic grouping)
-    const clustering = 0.15 + 0.5 * cadence.pulse;
-    
-    // Graph bias from anisotropy (directional connections)
-    const graphBias = cadence.anisotropy;
-    
-    // Connection distance from stratification (temporal links)
-    const connectionDistance = Math.max(50, Math.min(200,
-      50 + 150 * families.stratification
-    ));
-    
-    // Brightness variation from flux
-    const brightnessVariation = Math.max(0.2, Math.min(0.8,
-      0.2 + 0.6 * families.flux
-    ));
-    
-    // Pulse speed from velocity
-    const pulseSpeed = 0.5 + 1.0 * scale.density;
-    
-    // Drift from contemplative energy
-    const driftSpeed = Math.max(0.1, Math.min(0.5,
-      0.1 + 0.4 * families.stratification
-    ));
-    
-    // Connection probability based on gridness
-    const connectionProbability = Math.max(0.1, Math.min(0.4,
-      0.1 + 0.3 * families.gridness
-    ));
-    
-    // Constellation pattern type
-    const constellationPattern = 
-      families.constellation > 0.7 ? 'mythic' :
-      families.gridness > 0.5 ? 'geometric' :
-      families.flux > 0.5 ? 'dynamic' : 'organic';
-    
-    return {
-      starCount,
-      clusterTightness: clustering,
-      connectionDistance,
-      connectionProbability,
-      pulseSpeed,
-      driftSpeed,
-      brightness: 0.4 + 0.4 * brightnessVariation,
-      constellationPattern,
-      graphBias,
-      animationSpeed: 0.3 + 0.4 * pulseSpeed,
-      seed: window.hashSeedNumeric ? window.hashSeedNumeric(seed + ':Constellation') : seed,
-      paletteIntent: 'astral'
-    };
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+const quantize = (x, min, max) => Math.round(min + (max - min) * clamp(x, 0, 1));
+
+export function fromEM(em) {
+  if (!em || !em.families) {
+    throw new Error('[ConstellationBinding] Invalid EM object - missing families');
   }
-};
+  
+  // Core binding outputs
+  const scale = clamp(em.scale?.density || 0.5, 0.5, 2.0);
+  const seed = String(em.seed);
+  
+  // Sacred Palette integration - constellation uses cosmic palette
+  const palette = {
+    name: 'cosmic',
+    intent: 'constellation'
+  };
+  
+  // Map EM energies to constellation-specific knobs
+  const knobs = {
+    starCount: quantize(em.families?.constellation || 0.5, 20, 100),
+    brightness: clamp(0.2 + 0.8 * (em.families?.constellation || 0.5), 0.2, 1.0),
+    connections: clamp(0.05 + 0.4 * (em.scale?.granularity || 0.5), 0.05, 0.45)
+  };
+  
+  // Secondary family micro-blending
+  const secondary = em.secondary_affinity > 0.65 ? {
+    family: getSecondaryFamily(em),
+    strength: Math.min(0.2, em.secondary_affinity - 0.65)
+  } : undefined;
+  
+  const out = {
+    family: 'Constellation',
+    seed,
+    palette,
+    scale,
+    knobs,
+    secondary,
+    __contract: 'binding-2.5.1'
+  };
+  
+  validateFamilyBinding('Constellation', out);
+  
+  console.log(`[ConstellationBinding] Generated parameters:`, {
+    family: out.family,
+    seed: out.seed,
+    starCount: knobs.starCount,
+    brightness: knobs.brightness.toFixed(2),
+    secondary: secondary?.family || null
+  });
+  
+  return out;
+}
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.ConstellationBinding = ConstellationBinding;
+function getSecondaryFamily(em) {
+  const families = { ...em.families };
+  const ranked = Object.entries(families).sort(([,a], [,b]) => b - a);
+  return ranked[1] ? ranked[1][0] : null;
 }

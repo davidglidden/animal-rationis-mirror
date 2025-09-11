@@ -41,11 +41,17 @@ export function buildEM(mm) {
     granularity: c01(0.25 + 0.75 * mm.texture.structural_complexity)
   };
   
+  // Calculate secondary affinity for micro-blending
+  const familyValues = [gridness, stratification, flux, constellation];
+  familyValues.sort((a, b) => b - a);
+  const secondary_affinity = familyValues[1] || 0; // Second highest family strength
+  
   // Package for consumption
   const em = {
     families: { gridness, stratification, flux, constellation },
     cadence,
     scale,
+    secondary_affinity,
     seed: mm.meta.seed
   };
   
@@ -78,9 +84,5 @@ export function familyFromEM(em) {
   return familyMap[topName] || 'flow'; // default fallback
 }
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.buildEM = buildEM;
-  window.familyFromEM = familyFromEM;
-  console.log('⚡ Expression Model (EM) builder loaded');
-}
+// ES Module exports only - no globals
+console.log('⚡ Expression Model (EM) builder loaded (ESM)');

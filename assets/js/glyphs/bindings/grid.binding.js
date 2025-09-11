@@ -1,58 +1,62 @@
-// Grid renderer binding - translates EM energies to Grid parameters
+// Grid Family Binding - v2.5.1
+// Maps EM energies to grid-specific parameters
+import { validateFamilyBinding } from '../contracts.js';
 
-const GridBinding = {
-  // Renderer selection logic - Grid or Weave variant
-  choose({ families }) { 
-    return families.gridness >= 0.5 ? 'Grid' : 'Weave'; 
-  },
-  
-  // Parameter derivation from EM
-  params({ families, cadence, scale, seed }) {
-    // Column count increases with gridness
-    const columns = 3 + Math.round(5 * families.gridness);
-    const rows = Math.max(3, Math.round(columns * 0.8)); // Slightly fewer rows
-    
-    // Cell aspect ratio - more anisotropic = more rectangular
-    const cellAspect = 0.6 + 0.6 * cadence.anisotropy;
-    
-    // Jitter decreases with anisotropy (more ordered)
-    const jitter = 0.02 + 0.06 * (1 - cadence.anisotropy);
-    
-    // Line weight pulses with cadence
-    const weight = 0.4 + 0.4 * cadence.pulse;
-    
-    // Cell size inversely related to density
-    const cellSize = Math.max(6, Math.min(30, 
-      Math.round(30 - 24 * scale.density)
-    ));
-    
-    // Orthogonality from analytical intent
-    const orthogonality = Math.max(0.3, Math.min(1.0,
-      0.3 + 0.7 * families.gridness
-    ));
-    
-    // Connection probability from constellation energy
-    const connectionProbability = Math.max(0.05, Math.min(0.4,
-      0.05 + 0.35 * families.constellation
-    ));
-    
-    return {
-      columns,
-      rows,
-      cellSize,
-      cellAspect,
-      gridJitter: jitter,
-      strokeWidth: weight,
-      orthogonality,
-      connectionProbability,
-      animationSpeed: 0.3 + 0.3 * cadence.pulse,
-      seed: window.hashSeedNumeric ? window.hashSeedNumeric(seed + ':Grid') : seed,
-      paletteIntent: 'earth'
-    };
+const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+
+export function fromEM(em) {
+  if (!em || !em.families) {
+    throw new Error('[GridBinding] Invalid EM object - missing families');
   }
-};
+  
+  // Core binding outputs
+  const scale = clamp(em.scale?.density || 0.5, 0.5, 2.0);
+  const seed = String(em.seed);
+  
+  // Sacred Palette integration - grid uses structural palette
+  const palette = {
+    name: 'structural',
+    intent: 'grid'
+  };
+  
+  // Map EM energies to grid-specific knobs
+  const knobs = {
+    gridness: clamp(em.families?.gridness || 0.5, 0, 1),
+    granularity: clamp(em.scale?.granularity || 0.5, 0, 1),
+    orthogonality: clamp(0.3 + 0.7 * (em.families?.gridness || 0.5), 0.3, 1.0)
+  };
+  
+  // Secondary family micro-blending
+  const secondary = em.secondary_affinity > 0.65 ? {
+    family: getSecondaryFamily(em),
+    strength: Math.min(0.2, em.secondary_affinity - 0.65)
+  } : undefined;
+  
+  const out = {
+    family: 'Grid',
+    seed,
+    palette,
+    scale,
+    knobs,
+    secondary,
+    __contract: 'binding-2.5.1'
+  };
+  
+  validateFamilyBinding('Grid', out);
+  
+  console.log(`[GridBinding] Generated parameters:`, {
+    family: out.family,
+    seed: out.seed,
+    gridness: knobs.gridness.toFixed(2),
+    orthogonality: knobs.orthogonality.toFixed(2),
+    secondary: secondary?.family || null
+  });
+  
+  return out;
+}
 
-// Export to global scope
-if (typeof window !== 'undefined') {
-  window.GridBinding = GridBinding;
+function getSecondaryFamily(em) {
+  const families = { ...em.families };
+  const ranked = Object.entries(families).sort(([,a], [,b]) => b - a);
+  return ranked[1] ? ranked[1][0] : null;
 }
