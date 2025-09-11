@@ -145,13 +145,26 @@ async function renderGlyph(canvas, hostElement) {
     applyScriptoriumOverlay(ctx, out);
     applySealInsigniaOverlay(ctx, out);
     
-    // 7. Diagnostic logging
+    // 7. Enhanced diagnostic logging with evidence verification
+    const evidenceCount = mm.features?.council ? 
+      Object.values(mm.features.council.byType || {}).reduce((n,arr)=>n+arr.length,0) : 0;
+    
     console.log('🧭 ESM MM→EM→Render', {
       family: out.family,
       knobs: Object.keys(out.knobs).slice(0, 3).join(','),
       seed: String(out.seed).slice(0, 8),
-      contract: out.__contract
+      contract: out.__contract,
+      evidence: evidenceCount,
+      contentLen: text.length,
+      provenance: provenance
     });
+    
+    // Visual diagnostic for evidence detection
+    if (evidenceCount === 0 && text.length > 50) {
+      console.warn('⚠️  No evidence detected despite substantial content - check analyzers/content resolution');
+    } else if (evidenceCount > 0) {
+      console.log(`✅ Evidence pipeline working: ${evidenceCount} pieces detected`);
+    }
     
     return out;
     
@@ -221,5 +234,34 @@ if (document.readyState === 'loading') {
   setTimeout(bootGlyphs, 0);
 }
 
+// Global reference for console debugging
+if (typeof window !== 'undefined') {
+  window.glyphDiagnostics = glyphDiagnosticsPeek;
+}
+
+// Diagnostic peek function for browser console debugging
+export function glyphDiagnosticsPeek() {
+  const glyphNodes = document.querySelectorAll(
+    '[data-glyph], [data-glyph-source], [data-glyph-content], ' +
+    '.glyph-canvas, canvas[data-content], .glyph-container'
+  );
+  
+  console.log('🔍 Glyph System Diagnostics Peek');
+  console.log(`📊 Found ${glyphNodes.length} glyph hosts on page`);
+  console.log(`🔧 Analyzers loaded: ${countAnalyzers()}`);
+  console.log(`📝 Analyzer list:`, listAnalyzers());
+  
+  if (glyphNodes.length > 0) {
+    console.log('🎯 First glyph host details:');
+    const first = glyphNodes[0];
+    console.log(' - Element:', first.tagName);
+    console.log(' - Attributes:', Array.from(first.attributes).map(a => `${a.name}="${a.value}"`));
+    console.log(' - Text length:', (first.textContent || '').length);
+    console.log(' - HTML length:', (first.innerHTML || '').length);
+  }
+  
+  return { glyphCount: glyphNodes.length, analyzerCount: countAnalyzers() };
+}
+
 // Export functions for manual control if needed
-export { renderGlyph, bindingFor };
+export { renderGlyph, bindingFor, glyphDiagnosticsPeek };
