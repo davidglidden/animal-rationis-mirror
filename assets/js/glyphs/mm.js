@@ -26,6 +26,10 @@ export async function buildMM(input) {
   // Parse once  
   const { ast, index } = parseMarkdown(rawText);
   
+  // Parser smoke - verify AST structure
+  const countNodes = (n) => { let c=1; (n.children||[]).forEach(ch=>c+=countNodes(ch)); return c; };
+  console.log('[MM] parseMarkdown: chars=%d nodes=%d', rawText.length, countNodes(ast));
+  
   // Run analyzers (council) if not provided
   if (!analyzers) {
     const councilOutputs = await runAnalyzers({ 
@@ -39,6 +43,11 @@ export async function buildMM(input) {
     }
     
     const council = mergeCouncil(councilOutputs);
+    
+    // Council merge verification - check evidence survival
+    console.log('[Council] byType keys:', Object.keys(council.byType).length, Object.keys(council.byType));
+    const totalEvidence = Object.values(council.byType).reduce((n,arr)=>n+arr.length,0);
+    console.log('[Council] total evidence pieces:', totalEvidence);
     
     // Convert council evidence to legacy analyzer format for compatibility
     analyzers = councilToLegacyAnalyzers(council, rawText);
@@ -147,6 +156,26 @@ export async function buildMM(input) {
     features: analyzers.__council ? { council: analyzers.__council } : undefined
   };
   
+  // Fallback heuristics - never collapse to identical visuals
+  if (analyzers.__council && !Object.keys(analyzers.__council.byType).length) {
+    console.log('[MM] Applying fallback heuristics for analyzer-quiet content');
+    const words = rawText.trim().split(/\s+/).filter(Boolean).length;
+    const lines = rawText.split(/\n/).length;
+    const chars = rawText.length;
+    
+    // Text-based diversity to prevent identical sigils
+    mm.intent.analytical = c01(words / 200); // more words → more analytical
+    mm.texture.structural_complexity = c01(lines / 12); // more lines → more complex
+    mm.dynamics.velocity = c01(chars / 1000); // longer text → more velocity
+    
+    // Add deterministic variety based on content hash
+    const hashNum = parseInt(meta.seed.slice(-6), 36) / Math.pow(36, 6); // 0..1
+    mm.intent.contemplative = c01(0.1 + 0.3 * hashNum);
+    mm.texture.personal_intimacy = c01(0.1 + 0.2 * (1 - hashNum));
+    
+    console.log('[MM] Fallback applied:', formatIntent(mm.intent), formatTexture(mm.texture));
+  }
+  
   // Log MM construction for diagnostics (using pretty formatters)
   if (typeof window !== 'undefined' && window.console) {
     console.log('🧬 MM constructed:', {
@@ -161,26 +190,35 @@ export async function buildMM(input) {
   return mm;
 }
 
+// Helper for council prefix lookups (wildcards don't work on exact keys)
+function getByTypePrefix(council, prefix) {
+  const out = [];
+  const T = council.byType || {};
+  for (const k in T) if (k.startsWith(prefix)) out.push(...T[k]);
+  return out;
+}
+
 // Convert council evidence to legacy analyzer format for MM compatibility
 function councilToLegacyAnalyzers(council, rawText) {
   const wordCount = rawText.trim().split(/\s+/).filter(Boolean).length || 0;
   const sentenceCount = rawText.split(/[.!?]+/).filter(Boolean).length || 0;
   
-  // Extract evidence counts and values
-  const structureEvidence = council.byType['structure:heading'] || [];
-  const musicFormEvidence = Object.keys(council.byType)
-    .filter(type => type.startsWith('music:form:'))
-    .flatMap(type => council.byType[type]);
-  const rhetoricEvidence = Object.keys(council.byType)
-    .filter(type => type.startsWith('rhetoric:'))
-    .flatMap(type => council.byType[type]);
-  const poeticsEvidence = council.byType['poetics:haiku'] || [];
-  const temporalEvidence = Object.keys(council.byType)
-    .filter(type => type.startsWith('temporal:'))
-    .flatMap(type => council.byType[type]);
-  const voiceEvidence = Object.keys(council.byType)
-    .filter(type => type.startsWith('voice:'))
-    .flatMap(type => council.byType[type]);
+  // Extract evidence counts and values using prefix helper
+  const structureEvidence = (council.byType['structure:heading'] || []);
+  const musicFormEvidence = getByTypePrefix(council, 'music:form:');
+  const rhetoricEvidence = getByTypePrefix(council, 'rhetoric:');
+  const poeticsEvidence = (council.byType['poetics:haiku'] || []);
+  const temporalEvidence = getByTypePrefix(council, 'temporal:');
+  const voiceEvidence = getByTypePrefix(council, 'voice:');
+  
+  console.log('[LegacyAnalyzers] evidence counts:', {
+    structure: structureEvidence.length,
+    musicForm: musicFormEvidence.length,
+    rhetoric: rhetoricEvidence.length,
+    poetics: poeticsEvidence.length,
+    temporal: temporalEvidence.length,
+    voice: voiceEvidence.length
+  });
   
   // Map evidence to analyzer values (0..1 range)
   const clamp = x => Math.max(0, Math.min(1, x));

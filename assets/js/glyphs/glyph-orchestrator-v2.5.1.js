@@ -11,7 +11,8 @@ const ASSETS_VER = '21';
 import './analyzer-council.js?v=21';
 import { CORE_ANALYZERS_LOADED } from './analyzers/core.js?v=21'; 
 import { MUSIC_ANALYZERS_LOADED } from './analyzers/music.js?v=21';
-import { listAnalyzers, countAnalyzers } from './analyzer-council.js?v=21';
+import { listAnalyzers, countAnalyzers, runAnalyzers } from './analyzer-council.js?v=21';
+import { parseMarkdown } from './analyzer-council.js?v=21';
 
 // Verify analyzers loaded and registered
 console.log('[Orchestrator] Analyzers loaded flags:', {
@@ -19,6 +20,19 @@ console.log('[Orchestrator] Analyzers loaded flags:', {
   music: MUSIC_ANALYZERS_LOADED
 });
 console.log('[AnalyzerCouncil] Total analyzers:', countAnalyzers(), listAnalyzers());
+
+// Council smoke test - known-good evidence detection
+async function __councilSmoke() {
+  const smoke = [
+    'A chaconne for viola da gamba with notes inégales at Santes Creus.',
+    'Vespers Magnificat BWV 243.'
+  ].join(' ');
+  const { ast, index } = parseMarkdown(smoke);
+  const outs = await runAnalyzers({ rawText: smoke, ast, index, lang: 'en' });
+  const evidenceCount = outs.reduce((n,o)=>n+(o.evidence?.length||0),0);
+  console.log('[CouncilSmoke] analyzers=%d, evidence=%d', outs.length, evidenceCount, outs);
+}
+__councilSmoke().catch(e => console.warn('[CouncilSmoke] failed:', e));
 
 // Dynamic fallback for resilience (usually no-op)
 (async () => {
@@ -87,6 +101,10 @@ function bindingFor(family) {
 // Main glyph rendering function
 async function renderGlyph(canvas, content) {
   try {
+    // 0. Sanity probe - content extraction verification
+    const preview = (content || '').slice(0, 160).replace(/\n/g,'⏎');
+    console.log('[Orchestrator] glyph content bytes/preview:', content?.length || 0, '::', preview);
+    
     // 1. MM→EM pipeline (MM now handles input normalization and council analysis)
     const mm = await buildMM(content);
     const em = buildEM(mm);
