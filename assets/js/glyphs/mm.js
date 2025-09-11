@@ -76,7 +76,17 @@ export async function buildMM(input) {
     (extendedSemantics?.table ? 0.15 : 0)
   );
   
-  // Intent layer - what the text wants to do
+  // Helper functions to create zero-filled objects
+  const zeroIntent = () => ({ analytical: 0, contemplative: 0, ritual: 0, contested: 0 });
+  const zeroTexture = () => ({ structural_complexity: 0, historical_depth: 0, personal_intimacy: 0, cyclicality: 0 });
+  const zeroDynamics = () => ({ velocity: 0, entropy: 0, polarity: 0 });
+  
+  // Pretty formatters for logs (do NOT store these in mm.*)
+  const formatIntent = (i) => `analytical:${i.analytical.toFixed(2)}, contemplative:${i.contemplative.toFixed(2)}, ritual:${i.ritual.toFixed(2)}, contested:${i.contested.toFixed(2)}`;
+  const formatTexture = (t) => `structural_complexity:${t.structural_complexity.toFixed(2)}, historical_depth:${t.historical_depth.toFixed(2)}, personal_intimacy:${t.personal_intimacy.toFixed(2)}, cyclicality:${t.cyclicality.toFixed(2)}`;
+  const formatDynamics = (d) => `velocity:${d.velocity.toFixed(2)}, entropy:${d.entropy.toFixed(2)}, polarity:${d.polarity.toFixed(2)}`;
+
+  // Intent layer - what the text wants to do (OBJECTS, not strings)
   const intent = {
     analytical: c01(
       0.45 * analyticalFromStructure + 
@@ -104,7 +114,7 @@ export async function buildMM(input) {
     )
   };
   
-  // Texture layer - how the text feels
+  // Texture layer - how the text feels (OBJECTS, not strings)
   const texture = {
     structural_complexity: c01(
       structure.complexity || 
@@ -116,7 +126,7 @@ export async function buildMM(input) {
     cyclicality: c01(structure.cyclicality || 0),
   };
   
-  // Dynamics layer - how the text moves
+  // Dynamics layer - how the text moves (OBJECTS, not strings)
   const dynamics = {
     velocity: c01(temporal.velocity || 0),
     entropy: c01(topology.topicEntropy || 0),
@@ -137,12 +147,12 @@ export async function buildMM(input) {
     features: analyzers.__council ? { council: analyzers.__council } : undefined
   };
   
-  // Log MM construction for diagnostics
+  // Log MM construction for diagnostics (using pretty formatters)
   if (typeof window !== 'undefined' && window.console) {
     console.log('🧬 MM constructed:', {
-      intent: Object.entries(intent).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
-      texture: Object.entries(texture).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
-      dynamics: Object.entries(dynamics).map(([k,v]) => `${k}:${v.toFixed(2)}`).join(', '),
+      intent: formatIntent(intent),
+      texture: formatTexture(texture), 
+      dynamics: formatDynamics(dynamics),
       seed: meta.seed,
       council: mm.features?.council ? 'evidence-based' : 'legacy'
     });
