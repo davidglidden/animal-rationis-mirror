@@ -1,7 +1,9 @@
 // Core Analyzers - Structure, Rhetoric, Poetics, Intertext, Temporal, Voice
 // Each analyzer emits span-level evidence with provenance
 
+console.log('🔄 Core analyzers module loading...');
 import { registerAnalyzer } from '../analyzer-council.js';
+console.log('🔄 Core analyzers registerAnalyzer imported successfully');
 
 // Structure Analyzer - AST-aware structural elements
 registerAnalyzer({

@@ -1,7 +1,9 @@
 // Music-Aware Analyzers - Forms, Forces, Practice, Sources, Venues
 // Lexicon-driven with conservative confidence scoring
 
+console.log('🎵 Music analyzers module loading...');
 import { registerAnalyzer } from '../analyzer-council.js';
+console.log('🎵 Music analyzers registerAnalyzer imported successfully');
 
 // Music lexicons - will load from JSON files
 const MUSIC_LEXICONS = {
