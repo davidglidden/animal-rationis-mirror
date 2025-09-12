@@ -13,6 +13,12 @@ registerAnalyzer({
     const evidence = [];
     const summary = { headings: 0, lists: 0, blockquotes: 0, paragraphs: 0 };
     
+    // Debug: Check if AST is properly formed
+    if (!ast || !ast.children || !Array.isArray(ast.children)) {
+      console.warn('[Structure] AST missing or malformed:', { ast, hasChildren: !!ast?.children });
+      return { summary, evidence };
+    }
+    
     for (const block of ast.children) {
       const span = index.byBlock[block.blockId]?.span;
       
@@ -86,6 +92,12 @@ registerAnalyzer({
   fn: async ({ rawText }) => {
     const evidence = [];
     const summary = { questions: 0, imperatives: 0, hedging: 0, triads: 0 };
+    
+    // Debug: Check if rawText is actually a string
+    if (typeof rawText !== 'string') {
+      console.warn('[Rhetoric] rawText is not a string:', typeof rawText);
+      return { summary, evidence };
+    }
     
     // Questions
     const questionMatches = rawText.matchAll(/[.!]\s*([^.!?]*\?)/g);

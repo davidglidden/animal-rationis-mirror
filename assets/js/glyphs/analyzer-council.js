@@ -76,6 +76,11 @@ export function parseMarkdown(rawText) {
   const index = buildIndex(blocks, rawText);
   const ast = { type: 'root', children: blocks };
   
+  // Debug: Log parse results
+  if (blocks.length === 0 && rawText.length > 100) {
+    console.warn('[parseMarkdown] No blocks parsed from', rawText.length, 'chars of text');
+  }
+  
   return { ast, index };
 }
 
@@ -143,9 +148,22 @@ export function countAnalyzers() {
 
 export async function runAnalyzers(ctx) {
   const outputs = [];
+  
+  // Debug: Log input context
+  if (ctx.rawText?.length > 100) {
+    console.log(`[AnalyzerCouncil] Running ${analyzers.size} analyzers on ${ctx.rawText.length} chars, sample: "${ctx.rawText.slice(0,50)}..."`);
+  }
+  
   for (const [name, mod] of analyzers) {
     try {
       const result = await mod.fn(ctx);
+      
+      // Debug: Check if analyzer returned anything
+      const evidenceCount = result?.evidence?.length || 0;
+      if (evidenceCount === 0 && ctx.rawText?.length > 100) {
+        console.log(`[AnalyzerCouncil] ${name} found 0 evidence`);
+      }
+      
       outputs.push({ 
         name, 
         version: mod.version, 
