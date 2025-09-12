@@ -11,6 +11,10 @@ const clampPos = (x, min = EPS) => Math.max(min, Number.isFinite(x) ? x : min);
 export function renderFlow(ctx, bindingOutput) {
   const { knobs, seed, scale, palette } = bindingOutput;
   
+  // Canvas safety guard - avoid IndexSizeError on tiny canvases
+  const { width: W, height: H } = ctx.canvas;
+  if (W < 2 || H < 2) return; // avoid IndexSizeError on small/zero buffers
+  
   // Clamp all inputs to safe ranges
   const velocity = clamp01(knobs.velocity);
   const turbulence = clamp01(knobs.turbulence);

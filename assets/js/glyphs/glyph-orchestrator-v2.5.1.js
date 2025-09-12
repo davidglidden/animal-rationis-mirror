@@ -90,6 +90,9 @@ import './renderers/threshold.js';
 import { applyScriptoriumOverlay } from './overlays/scriptorium-overlay.js';
 import { applySealInsigniaOverlay } from './overlays/seal-insignia-overlay.js';
 
+// Triptych System
+import { bootTriptychs } from './triptych-renderer.js';
+
 // Pipeline
 import { buildMM } from './mm.js';
 import { buildEM, familyFromEM } from './em.js';
@@ -226,6 +229,9 @@ function renderFallback(canvas, errorMsg) {
 export function bootGlyphs() {
   console.log('[Glyph] ESM Boot v2.5.1 - scanning for glyphs...');
   
+  // Boot triptych sigils first (they have different selectors)
+  bootTriptychs();
+  
   // Find all potential glyph hosts - expanded selectors for content resolution
   const glyphNodes = document.querySelectorAll(
     '[data-glyph], [data-glyph-source], [data-glyph-content], ' +
@@ -234,6 +240,11 @@ export function bootGlyphs() {
   
   glyphNodes.forEach((hostElement, index) => {
     try {
+      // Skip triptych nodes (already handled)
+      if (hostElement.closest('[data-triptych="true"]')) {
+        return;
+      }
+      
       // Find or create canvas
       let canvas;
       if (hostElement.tagName === 'CANVAS') {
@@ -259,12 +270,43 @@ export function bootGlyphs() {
   console.log(`[Glyph] ESM Boot complete - rendered ${glyphNodes.length} glyphs`);
 }
 
-// Auto-boot when DOM is ready (analyzers already loaded via top-level await)
+// Single-glyph auto-boot retired (Triptych is now canonical).
+// bootGlyphs remains exported for dev diagnostics only.
+
+// Orchestrated boot order - analyzers first, then upgrade, then triptych
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootGlyphs, { once: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1) Analyzers have registered (top-level await above ensures this)
+    // 2) Upgrade any legacy [data-glyph] to triptych containers
+    bootLegacyGlyphShim();
+    // 3) Now boot Triptych renderer
+    bootTriptychs();
+  }, { once: true });
 } else {
-  // DOM already loaded - boot immediately (analyzers ready from await above)
-  bootGlyphs();
+  bootLegacyGlyphShim();
+  bootTriptychs();
+}
+
+// Legacy upgrade shim
+export function bootLegacyGlyphShim() {
+  // Finds legacy single-sigil containers and upgrades them into triptych containers.
+  const legacy = document.querySelectorAll('[data-glyph="true"]');
+  legacy.forEach(node => {
+    if (node.dataset.triptych === 'true') return;
+    // Wrap into triptych container with three panes
+    const parent = node.parentNode;
+    const wrap = document.createElement('div');
+    wrap.className = 'sigil-triptych';
+    wrap.dataset.triptych = 'true';
+    ['ground','energy','sign'].forEach(role => {
+      const pane = document.createElement('div');
+      pane.dataset.triptychPane = role;
+      const c = document.createElement('canvas');
+      pane.appendChild(c);
+      wrap.appendChild(pane);
+    });
+    parent.replaceChild(wrap, node);
+  });
 }
 
 // Export functions for manual control if needed

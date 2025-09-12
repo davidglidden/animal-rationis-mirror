@@ -4,7 +4,12 @@ import { createSeededRNG } from '../util-seed.esm.js';
 
 export function renderConstellation(ctx, bindingOutput) {
   const { knobs, seed, scale, palette } = bindingOutput;
-  const { starCount, brightness, connections } = knobs;
+  
+  // Canvas safety guard - avoid IndexSizeError on tiny canvases
+  const { width: W, height: H } = ctx.canvas;
+  if (W < 2 || H < 2) return; // avoid IndexSizeError on small/zero buffers
+  
+  const { starCount = 5, brightness = 0.5, connections = 0.3 } = knobs; // default to 0..1 clamps
   
   const canvas = ctx.canvas;
   ctx.clearRect(0, 0, canvas.width, canvas.height);

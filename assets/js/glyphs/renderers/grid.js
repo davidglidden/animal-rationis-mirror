@@ -5,7 +5,12 @@ import { createSeededRNG } from '../util-seed.esm.js';
 
 export function renderGrid(ctx, bindingOutput) {
   const { knobs, seed, scale, palette } = bindingOutput;
-  const { gridness, granularity, orthogonality } = knobs;
+  
+  // Canvas safety guard - avoid IndexSizeError on tiny canvases
+  const { width: W, height: H } = ctx.canvas;
+  if (W < 2 || H < 2) return; // avoid IndexSizeError on small/zero buffers
+  
+  const { gridness = 0.5, granularity = 0.5, orthogonality = 0.5 } = knobs; // default to 0..1 clamps
   
   // Contract-compliant deterministic seeded RNG
   const rng = createSeededRNG(seed);
