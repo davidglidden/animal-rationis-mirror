@@ -129,25 +129,79 @@ function hashString(str) {
   return Math.abs(hash).toString(36);
 }
 
-// Analyzer registry and runner
-const analyzers = new Map();
+// Analyzer Council Singleton Class
+class AnalyzerCouncil {
+  constructor() {
+    this.registry = new Map();
+    this._readyResolvers = [];
+  }
+  
+  register(name, version, fn) {
+    this.registry.set(name, { name, version, fn });
+    console.log(`[AnalyzerCouncil] Registered: ${name} v${version}`);
+    // ping waiters
+    this._readyResolvers.forEach(r => r());
+  }
+  
+  list() { 
+    return Array.from(this.registry.entries()).map(([name, mod]) => ({
+      name,
+      version: mod.version
+    }));
+  }
+  
+  size() {
+    return this.registry.size;
+  }
+  
+  getAnalyzers() {
+    return this.registry;
+  }
 
+  /**
+   * Resolve when at least `min` analyzers are registered (or on next tick if already met).
+   */
+  whenReady({ min = 1, timeoutMs = 2000 } = {}) {
+    if (this.registry.size >= min) return Promise.resolve();
+    return new Promise((resolve) => {
+      const t = setTimeout(resolve, timeoutMs);
+      const tick = () => {
+        if (this.registry.size >= min) {
+          clearTimeout(t);
+          resolve();
+        }
+      };
+      this._readyResolvers.push(tick);
+      queueMicrotask(tick);
+    });
+  }
+}
+
+// —— Canonical global singleton ——
+const root = (typeof window !== 'undefined') ? window : globalThis;
+if (!root.__GlyphAnalyzerCouncil__) {
+  root.__GlyphAnalyzerCouncil__ = new AnalyzerCouncil();
+}
+
+export const council = root.__GlyphAnalyzerCouncil__;
+
+// Legacy compatibility exports that use the singleton
 export function registerAnalyzer({ name, version, fn }) {
-  analyzers.set(name, { version, fn });
-  console.log(`[AnalyzerCouncil] Registered: ${name} v${version}`);
+  council.register(name, version, fn);
 }
 
 // Self-verification functions for dev diagnostics
 export function listAnalyzers() {
-  return Array.from(analyzers.entries()).map(([name, {version}]) => ({ name, version }));
+  return council.list();
 }
 
 export function countAnalyzers() {
-  return analyzers.size;
+  return council.size();
 }
 
 export async function runAnalyzers(ctx) {
   const outputs = [];
+  const analyzers = council.getAnalyzers();
   
   // Debug: Log input context
   if (ctx.rawText?.length > 100) {

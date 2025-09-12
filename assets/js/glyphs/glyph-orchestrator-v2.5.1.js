@@ -8,12 +8,15 @@ import { defaultContentSource } from './content-resolver.js';
 // Version consistency - single source of truth
 const ASSETS_VER = '21';
 
-// Load analyzer council FIRST - must be before analyzer modules
-import { listAnalyzers, countAnalyzers, runAnalyzers, parseMarkdown } from './analyzer-council.js?v=21';
+// Load analyzer council FIRST - must be before analyzer modules  
+import { council, listAnalyzers, countAnalyzers, runAnalyzers, parseMarkdown } from './analyzer-council.js?v=21';
 
 // Then load analyzer modules which will register themselves
 import './analyzers/core.js?v=21'; 
 import './analyzers/music.js?v=21';
+
+// Wait until at least 5 analyzers are registered
+await council.whenReady({ min: 5, timeoutMs: 2000 });
 
 // Import flags for verification
 import { CORE_ANALYZERS_LOADED } from './analyzers/core.js?v=21'; 
@@ -37,8 +40,8 @@ async function __councilSmoke() {
   const evidenceCount = outs.reduce((n,o)=>n+(o.evidence?.length||0),0);
   console.log('[CouncilSmoke] analyzers=%d, evidence=%d', outs.length, evidenceCount, outs);
 }
-// Delay smoke test to ensure modules are loaded
-setTimeout(() => __councilSmoke().catch(e => console.warn('[CouncilSmoke] failed:', e)), 100);
+// Run smoke test (analyzers already loaded via top-level await)
+__councilSmoke().catch(e => console.warn('[CouncilSmoke] failed:', e));
 
 // Dynamic fallback for resilience (usually no-op)
 (async () => {
@@ -231,12 +234,12 @@ export function bootGlyphs() {
   console.log(`[Glyph] ESM Boot complete - rendered ${glyphNodes.length} glyphs`);
 }
 
-// Optional auto-boot (can be disabled by importing modules manually)
+// Auto-boot when DOM is ready (analyzers already loaded via top-level await)
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootGlyphs);
+  document.addEventListener('DOMContentLoaded', bootGlyphs, { once: true });
 } else {
-  // DOM already loaded - defer boot to next tick to allow all imports to resolve
-  setTimeout(bootGlyphs, 0);
+  // DOM already loaded - boot immediately (analyzers ready from await above)
+  bootGlyphs();
 }
 
 // Export functions for manual control if needed
