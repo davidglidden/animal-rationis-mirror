@@ -8,12 +8,16 @@ import { defaultContentSource } from './content-resolver.js';
 // Version consistency - single source of truth
 const ASSETS_VER = '21';
 
-// Load analyzers - versioned and explicit to ensure execution
-import './analyzer-council.js?v=21';
+// Load analyzer council FIRST - must be before analyzer modules
+import { listAnalyzers, countAnalyzers, runAnalyzers, parseMarkdown } from './analyzer-council.js?v=21';
+
+// Then load analyzer modules which will register themselves
+import './analyzers/core.js?v=21'; 
+import './analyzers/music.js?v=21';
+
+// Import flags for verification
 import { CORE_ANALYZERS_LOADED } from './analyzers/core.js?v=21'; 
 import { MUSIC_ANALYZERS_LOADED } from './analyzers/music.js?v=21';
-import { listAnalyzers, countAnalyzers, runAnalyzers } from './analyzer-council.js?v=21';
-import { parseMarkdown } from './analyzer-council.js?v=21';
 
 // Verify analyzers loaded and registered
 console.log('[Orchestrator] Analyzers loaded flags:', {
@@ -33,7 +37,8 @@ async function __councilSmoke() {
   const evidenceCount = outs.reduce((n,o)=>n+(o.evidence?.length||0),0);
   console.log('[CouncilSmoke] analyzers=%d, evidence=%d', outs.length, evidenceCount, outs);
 }
-__councilSmoke().catch(e => console.warn('[CouncilSmoke] failed:', e));
+// Delay smoke test to ensure modules are loaded
+setTimeout(() => __councilSmoke().catch(e => console.warn('[CouncilSmoke] failed:', e)), 100);
 
 // Dynamic fallback for resilience (usually no-op)
 (async () => {
