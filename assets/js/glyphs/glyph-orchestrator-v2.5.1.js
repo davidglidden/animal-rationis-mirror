@@ -234,34 +234,5 @@ if (document.readyState === 'loading') {
   setTimeout(bootGlyphs, 0);
 }
 
-// Global reference for console debugging
-if (typeof window !== 'undefined') {
-  window.glyphDiagnostics = glyphDiagnosticsPeek;
-}
-
-// Diagnostic peek function for browser console debugging
-export function glyphDiagnosticsPeek() {
-  const glyphNodes = document.querySelectorAll(
-    '[data-glyph], [data-glyph-source], [data-glyph-content], ' +
-    '.glyph-canvas, canvas[data-content], .glyph-container'
-  );
-  
-  console.log('🔍 Glyph System Diagnostics Peek');
-  console.log(`📊 Found ${glyphNodes.length} glyph hosts on page`);
-  console.log(`🔧 Analyzers loaded: ${countAnalyzers()}`);
-  console.log(`📝 Analyzer list:`, listAnalyzers());
-  
-  if (glyphNodes.length > 0) {
-    console.log('🎯 First glyph host details:');
-    const first = glyphNodes[0];
-    console.log(' - Element:', first.tagName);
-    console.log(' - Attributes:', Array.from(first.attributes).map(a => `${a.name}="${a.value}"`));
-    console.log(' - Text length:', (first.textContent || '').length);
-    console.log(' - HTML length:', (first.innerHTML || '').length);
-  }
-  
-  return { glyphCount: glyphNodes.length, analyzerCount: countAnalyzers() };
-}
-
 // Export functions for manual control if needed
-export { renderGlyph, bindingFor, glyphDiagnosticsPeek };
+export { renderGlyph, bindingFor };
