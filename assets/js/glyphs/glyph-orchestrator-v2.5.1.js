@@ -110,7 +110,15 @@ function bindingFor(family) {
 // Main glyph rendering function - now takes host element, not raw content
 async function renderGlyph(canvas, hostElement) {
   try {
-    // 0. Resolve actual content using Content Source Contract
+    // 0. Check canvas dimensions first
+    if (canvas.width <= 0 || canvas.height <= 0) {
+      console.warn('[Orchestrator] Canvas has zero dimensions, deferring render');
+      // Try again on next frame after layout
+      requestAnimationFrame(() => renderGlyph(canvas, hostElement));
+      return null;
+    }
+    
+    // 1. Resolve actual content using Content Source Contract
     const { text, provenance, slug, confidence } = await defaultContentSource.resolve(hostElement);
     
     // Skip if no meaningful content
@@ -144,10 +152,27 @@ async function renderGlyph(canvas, hostElement) {
     // 4. Validate contract
     assertBindingOutput(out.family, out, Object.keys(out.knobs || {}));
     
-    // 5. Render
+    // 5. Render with graceful fallback
     const ctx = canvas.getContext('2d');
     const render = getRenderer(out.family);
-    render(ctx, out);
+    
+    try {
+      render(ctx, out);
+    } catch (err) {
+      console.warn(`[Glyph] ${out.family} renderer failed, falling back to Grid:`, err.message);
+      // Fallback to Grid renderer (most stable)
+      const gridRender = getRenderer('Grid');
+      if (gridRender && gridRender !== render) {
+        try {
+          gridRender(ctx, out);
+        } catch (fallbackErr) {
+          console.error('[Glyph] Even fallback renderer failed:', fallbackErr);
+          renderFallback(canvas, 'Renderer error');
+        }
+      } else {
+        renderFallback(canvas, err.message);
+      }
+    }
     
     // 6. Apply overlays if conditions are met
     applyScriptoriumOverlay(ctx, out);
