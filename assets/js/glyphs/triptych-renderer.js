@@ -15,31 +15,78 @@ import { bindingFor } from './glyph-orchestrator-v2.5.1.js';
 import { getRenderer } from './renderers/index.js';
 import { defaultContentSource } from './content-resolver.js';
 
-// --- seed utils (compat + fallback) -----------------------------------------
-function textHash(s) {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return (h >>> 0).toString(36);
+// ---------- seed + model guards (compat) - Prime production-grade ----------
+const FLAGS = {
+  compat: true,     // today: true - accept both old/new shapes
+  strict: false     // later: flip to true when UCE adapter ready
+};
+
+const seen = new Set();
+function warnOnce(code, msg){
+  if (seen.has(code)) return;
+  seen.add(code);
+  console.warn('[Triptych:deprec]', code, msg);
 }
 
-function deriveSeed({ host, mm, content }) {
-  const fromMM   = mm?.meta?.seed ?? mm?.seed;         // ← compat: meta.seed OR top-level seed
+function emit(evt, payload){
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(`triptych:${evt}`, { detail: payload }));
+  }
+}
+
+function textHash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0).toString(36); }
+
+function deriveSeed({ host, mm, content }){
+  const fromMM   = mm?.meta?.seed ?? mm?.seed;    // compat: meta.seed OR top-level seed
+  
+  // Deprecation warning for old seed location
+  if (FLAGS.compat && mm?.seed && !mm?.meta?.seed) {
+    warnOnce('mm.seed', 'use mm.meta.seed instead of top-level mm.seed');
+    emit('normalize:compat-used', { type: 'mm.seed', mm });
+  }
+  
   const fromHost = host?.getAttribute?.('data-id') || host?.id;
   const fromText = content ? textHash(content) : undefined;
-  return String(fromMM ?? fromHost ?? fromText ?? ('s' + Date.now().toString(36)));
+  return String(fromMM ?? fromHost ?? fromText ?? ('s'+Date.now().toString(36)));
 }
 
-/** Normalize mm/em so the renderer never crashes on missing fields. */
-function normalizeModels({ host, mm, em, content }) {
+// Map new EM shape → legacy em.dynamics fields expected by old renderer code.
+function synthesizeDynamics(em){
+  const density     = em?.scale?.density;          // 0..1 how "full"
+  const pulse       = em?.cadence?.pulse;          // 0..1 rhythmic drive
+  const anisotropy  = em?.cadence?.anisotropy;     // 0..1 irregularity
+  const flux        = em?.families?.flux;          // 0..1 flux vibe
+
+  // Check if dynamics is missing and needs synthesis
+  const needsSynthesis = !em?.dynamics?.velocity && (density || pulse || anisotropy || flux);
+  if (FLAGS.compat && needsSynthesis) {
+    warnOnce('em.dynamics', 'provide em.dynamics or migrate renderer to cadence/scale API');
+    emit('normalize:compat-used', { type: 'em.dynamics', em });
+  }
+
+  // Heuristics: prefer explicitly provided dynamics, else map from scale/cadence/families.
+  const velocity = em?.dynamics?.velocity ?? density ?? pulse ?? 0.5;
+  const entropy  = em?.dynamics?.entropy  ?? anisotropy ?? flux ?? 0.5;
+  const polarity = em?.dynamics?.polarity ?? 0.5;
+
+  return { velocity, entropy, polarity };
+}
+
+function normalizeModels({ host, mm, em, content }){
+  emit('normalize:start', { host: host?.id, mm: !!mm, em: !!em, content: !!content });
+  
+  // ensure mm + seed
   const seed = deriveSeed({ host, mm, content });
-  // ensure mm/meta exists and carries the resolved seed (non-breaking)
   const mmOut = Object.assign({}, mm || {});
-  mmOut.meta = Object.assign({ source: 'uce/cie', seed }, mmOut.meta || {}, { seed });
-  // minimal em guards (keep your existing defaults too)
-  const emOut = Object.assign(
-    { texture: {}, families: {}, cadence: {}, scale: {} },
-    em || {}
-  );
+  mmOut.meta = Object.assign({ source:'uce/cie', seed }, mmOut.meta || {}, { seed });
+
+  // ensure em has the subtrees we need, and synthesize legacy 'dynamics'
+  const emOut = Object.assign({ texture:{}, families:{}, cadence:{}, scale:{} }, em || {});
+  emOut.dynamics = synthesizeDynamics(emOut);
+
+  const mode = FLAGS.strict ? 'strict' : 'compat';
+  emit(`normalize:${mode}`, { seed, mm: mmOut, em: emOut });
+  
   return { mm: mmOut, em: emOut, seed };
 }
 
@@ -401,16 +448,16 @@ async function renderTriptychPane(args = {}) {
   const canvasEl = ensureCanvas(paneEl, args.canvasEl || args.canvas);
   const ctx = canvasEl.getContext('2d'); // never reassign canvasEl
   
-  // Normalize models with seed compatibility shim
+  // Normalize models and get a stable seed
   const articleText = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
-  let { mm, em, seed: baseSeed } = normalizeModels({ 
-    host: hostElement, 
-    mm: args.mm || (typeof window !== 'undefined' ? window.MM?.current : null), 
-    em: args.em || (typeof window !== 'undefined' ? window.EM?.current : null), 
-    content: articleText 
-  });
+  ({ mm, em, seed: baseSeed } = normalizeModels({ host: hostElement, mm: args.mm, em: args.em, content: articleText }));
   
+  emit('render:start', { pane, host: hostElement?.id, seed: baseSeed });
+
+  // forcedFamily may be undefined; guard + normalize to lower case
   const options = args.options || {};
+  const forcedFamilyRaw = options?.forcedFamily;
+  const forcedFamily = (typeof forcedFamilyRaw === 'string') ? forcedFamilyRaw.toLowerCase() : null;
   
   try {
     // 0) DPR-aware sizing with proper error handling
@@ -471,31 +518,34 @@ async function renderTriptychPane(args = {}) {
     const paneSeed = seeds[pane];
     
     const contentAnalysis = {
-      structure: { complexity: mmFinal?.texture?.structural_complexity || 0.5 },
-      temporal: { velocity: mmFinal?.dynamics?.velocity || 0.5 },
-      lexicon: { contemplative: mmFinal?.intent?.contemplative || 0.5 }
+      structure: { complexity: mm?.texture?.structural_complexity || 0.5 },
+      temporal: { velocity: em?.dynamics?.velocity || 0.5 },
+      lexicon: { contemplative: mm?.intent?.contemplative || 0.5 }
     };
     
-    const forcedFamily = selectTriptychFamily(pane, paneSeed, contentAnalysis, hostElement.__usedFamilies);
+    const selected = selectTriptychFamily(pane, String(baseSeed), contentAnalysis, hostElement.__usedFamilies);
 
+    // pick family with a safe default
+    const family = forcedFamily || selected || 'balance';
+    
     // 4) Contract EM → binding input with clamps & pane seed injection
     const contractEM = clampContract({
-      ...emFinal,
-      seed: paneSeed.str, // CRITICAL: Replace with pane-specific seed
-      family: forcedFamily.toLowerCase() // EM expects lowercase token internally
+      ...em,
+      seed: baseSeed, // CRITICAL: Use normalized seed
+      family: family // EM expects lowercase token internally
     });
 
     // 5) Binding + renderer
-    const fromEM = bindingFor(forcedFamily);
+    const fromEM = bindingFor(family);
     const out = fromEM(contractEM);
-    out.family = forcedFamily; // normalize for renderer registry lookup
-    out.seed = paneSeed.str; // Ensure seed is pane-specific
+    out.family = family; // normalize for renderer registry lookup
+    out.seed = baseSeed; // Ensure seed is normalized
 
     // 6) Render with enhanced error handling (ctx already created above)
     safeRender(ctx, out, { motion: !prefersReducedMotion() });
 
     // 7) Enhanced logging with structured data
-    const evidenceCount = mmFinal?.features?.council ? 
+    const evidenceCount = mm?.features?.council ? 
       Object.values(mm.features.council.byType || {}).reduce((n,arr)=>n+arr.length,0) : 0;
     
     log('info', 'Pane rendered successfully', {
@@ -508,16 +558,18 @@ async function renderTriptychPane(args = {}) {
       id: hostElement.getAttribute('data-id')
     });
     
-    announceColophon(hostElement, mmFinal, out, pane);
+    announceColophon(hostElement, mm, out, pane);
     
     // Apply ornament classes based on content
-    applyOrnamentRules(hostElement, mmFinal);
+    applyOrnamentRules(hostElement, mm);
     
+    emit('render:ok', { pane, host: hostElement?.id, family: family, seed: baseSeed });
     return out;
 
   } catch (error) {
     console.error(`[TriptychRenderer] ${pane} pane failed:`, error);
     renderStaticFallback(ctx, pane);
+    emit('render:fallback', { pane, host: hostElement?.id, error: error.message });
     throw error;
   }
 }
@@ -754,14 +806,22 @@ async function bootTriptychs(options = {}) {
 
 // Integration handled by orchestrator - no auto-boot needed
 
-// Expose rescanAndRender API for console debugging
+// Expose rescanAndRender API for console debugging + kill switches
 if (typeof window !== 'undefined') {
   window.TriptychRenderer = Object.assign(window.TriptychRenderer || {}, {
     rescanAndRender: bootTriptychs,  // Main entry point for rescanning
     renderPane: renderTriptychPane,   // Individual pane rendering
     peek: triptychPeek,              // Debug inspection
     version: '2.5.1+prime-guards',   // Version info
-    bootTriptychs                    // Direct access to boot function
+    bootTriptychs,                   // Direct access to boot function
+    
+    // Kill switches for production migration
+    setFlags: (newFlags) => Object.assign(FLAGS, newFlags),
+    getFlags: () => ({ ...FLAGS }),
+    
+    // Observability hooks
+    onCompat: (fn) => window.addEventListener('triptych:normalize:compat-used', fn),
+    onRender: (fn) => window.addEventListener('triptych:render:ok', fn)
   });
 }
 
