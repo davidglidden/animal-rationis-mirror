@@ -1,12 +1,54 @@
 // AldineXXI Triptych Renderer - Specification-compliant implementation
 // Three-pane living abstracts: Ground/Energy/Sign pattern with guaranteed diversity
 
+// Build fingerprint for version verification
+console.info('[TriptychRenderer] build', { 
+  version: '2.5.1+prime-guards', 
+  url: import.meta.url,
+  timestamp: new Date().toISOString()
+});
+
 import { deterministicSeed } from './util-seed.esm.js';
 import { buildMM } from './mm.js';
 import { buildEM } from './em.js';
 import { bindingFor } from './glyph-orchestrator-v2.5.1.js';
 import { getRenderer } from './renderers/index.js';
 import { defaultContentSource } from './content-resolver.js';
+
+// Prime Directive helpers - guards and normalization
+function ensureModels(args = {}) {
+  let em = args.em || (typeof window !== 'undefined' ? window.EM?.current : null);
+  let mm = args.mm || (typeof window !== 'undefined' ? window.MM?.current : null);
+
+  if (!em) em = {
+    texture: { structural_complexity: 0.5 },
+    families: { gridness: .33, stratification: .33, flux: .34, constellation: 0 },
+    cadence: { pulse: 0, anisotropy: .2 },
+    scale:   { density: .5, granularity: .5 }
+  };
+  if (!mm) mm = { intent:{}, texture:{}, dynamics:{} };
+  return { em, mm };
+}
+
+function ensureCanvas(paneEl, existing) {
+  let canvasEl = existing || paneEl?.querySelector?.('.triptych__canvas, [data-triptych-canvas], canvas');
+  if (!(canvasEl instanceof HTMLCanvasElement)) {
+    // fallback: create DOM canvas (should be unnecessary with the template fix)
+    canvasEl = document.createElement('canvas');
+    canvasEl.className = 'triptych__canvas';
+    canvasEl.setAttribute('data-triptych-canvas','1');
+    paneEl?.appendChild?.(canvasEl);
+  }
+  const r = paneEl?.getBoundingClientRect?.() || { width: 256, height: 256 };
+  const dpr = Math.max(1, (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1);
+  const cssW = Math.max(128, Math.floor(r.width  || 256));
+  const cssH = Math.max(128, Math.floor(r.height || 256));
+  canvasEl.style.width  = cssW + 'px';
+  canvasEl.style.height = cssH + 'px';
+  canvasEl.width  = Math.floor(cssW * dpr);
+  canvasEl.height = Math.floor(cssH * dpr);
+  return canvasEl;
+}
 
 // Triptych family selection - guaranteed diversity per specification
 const TRIPTYCH_FAMILIES = {
@@ -167,6 +209,132 @@ function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+// Structured logging & observability
+const log = (lvl, msg, data = {}) => {
+  const payload = { 
+    t: Date.now(), 
+    lvl, 
+    msg, 
+    data: { ...data, contract: 'triptych@1.0.0' } 
+  };
+  console[lvl === 'error' ? 'error' : 'info']('[Triptych]', payload);
+  // Future: enqueue for /_telemetry endpoint (debounced)
+};
+
+// Health status management
+function setTriptychStatus(element, status, reason = '') {
+  element.setAttribute('data-status', status);
+  if (reason) element.setAttribute('data-status-reason', reason);
+  log('info', 'Status updated', { 
+    status, 
+    reason, 
+    id: element.getAttribute('data-id') 
+  });
+}
+
+// UCE Integration - Event bus & context units
+const BUS = window.UCE?.bus || new EventTarget();
+
+function emit(evt, detail) {
+  BUS.dispatchEvent(new CustomEvent(evt, { detail, bubbles: false }));
+}
+
+function emitContextUnit(element, mm, results) {
+  const cu = {
+    unit_type: 'visual_sigil_triptych',
+    contract: element.getAttribute('data-contract') || 'triptych@1.0.0',
+    id: element.getAttribute('data-id'),
+    facets: {
+      palette: 'sacred/default', // TODO: read from YAML
+      style: 'balance', // TODO: read from YAML  
+      seed: mm.meta.seed,
+      panes: Object.keys(results),
+      families: Object.values(results)
+    },
+    provenance: {
+      renderer: element.getAttribute('data-renderer') || 'v2.5.1',
+      page: window.location.pathname,
+      timestamp: new Date().toISOString(),
+      evidence_count: mm.features?.council ? 
+        Object.values(mm.features.council.byType || {}).reduce((n,arr)=>n+arr.length,0) : 0
+    }
+  };
+  
+  emit('sigil:triptych:rendered', cu);
+  log('info', 'Context unit emitted', { id: cu.id, families: cu.facets.families });
+}
+
+// Ready Gates - DOM + presence + analyzers
+const whenDOMReady = () => new Promise(r => {
+  if (document.readyState !== 'loading') return r();
+  document.addEventListener('DOMContentLoaded', r, {once: true});
+});
+
+function whenTriptychPresent() {
+  return new Promise(resolve => {
+    const has = () => !!document.querySelector('[data-triptych]');
+    if (has()) return resolve();
+    const mo = new MutationObserver(() => { 
+      if (has()) { 
+        mo.disconnect(); 
+        resolve(); 
+      }
+    });
+    mo.observe(document.documentElement, {childList: true, subtree: true});
+    // Timeout fallback
+    setTimeout(() => { mo.disconnect(); resolve(); }, 5000);
+  });
+}
+
+async function readyAnalyzers() {
+  if (typeof council !== 'undefined' && council.whenReady) {
+    await council.whenReady({ min: 5, timeoutMs: 3000 });
+  }
+}
+
+// DPR-aware canvas sizing with resize observer
+function sizeCanvasFor(pane, canvas) {
+  const rect = pane.getBoundingClientRect();
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const w = Math.max(1, Math.floor(rect.width * dpr));
+  const h = Math.max(1, Math.floor(rect.height * dpr));
+  
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w; 
+    canvas.height = h;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+  }
+  return { width: w, height: h };
+}
+
+function attachResize(pane, canvas, redrawFn) {
+  const ro = new ResizeObserver(() => { 
+    const size = sizeCanvasFor(pane, canvas);
+    if (redrawFn && size.width > 1 && size.height > 1) {
+      redrawFn();
+    }
+  });
+  ro.observe(pane);
+  return ro;
+}
+
+// Self-healing canvas - union selector + auto-inject + normalize
+function ensurePaneCanvas(paneEl) {
+  let c = paneEl.querySelector('[data-triptych-canvas], .triptych__canvas, canvas');
+  if (!c) {
+    c = document.createElement('canvas');
+    c.setAttribute('data-triptych-canvas', '1');
+    paneEl.appendChild(c);
+    log('info', 'Injected canvas', { pane: paneEl.getAttribute('data-triptych-pane') });
+  }
+  
+  // Normalize canvas attributes for legacy compatibility
+  c.setAttribute('data-triptych-canvas', '1');
+  c.classList.add('triptych__canvas'); // Keep for legacy selectors
+  return c;
+}
+
 // Colophon announcements - specification section 8
 function announceColophon(hostElement, mm, out, pane) {
   const colophon = hostElement.querySelector('.triptych__colophon');
@@ -191,18 +359,34 @@ function announceColophon(hostElement, mm, out, pane) {
   }
 }
 
-// Core rendering function - enhanced with missing mechanics
-async function renderTriptychPane(canvas, hostElement, pane) {
+// Core rendering function - Prime Directive normalized parameters
+async function renderTriptychPane(args = {}) {
+  // Normalize parameters (support both old and new calling conventions)
+  const paneEl = args.paneEl || args.pane || args.canvas?.parentElement;
+  const hostElement = args.host || args.hostElement;
+  const pane = args.paneName || paneEl?.getAttribute('data-triptych-pane') || 'unknown';
+  
+  if (!(paneEl instanceof Element)) {
+    throw new Error('renderTriptychPane: pane element missing');
+  }
+  
+  const canvasEl = ensureCanvas(paneEl, args.canvasEl || args.canvas);
+  const ctx = canvasEl.getContext('2d'); // never reassign canvasEl
+  
+  const { em, mm } = ensureModels(args);
+  const options = args.options || {};
+  
   try {
-    // 0) Device pixel ratio sizing (prevents zero/too-small draw buffers)
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const rect = canvas.getBoundingClientRect();
-    canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    // 0) DPR-aware sizing with proper error handling
+    const size = sizeCanvasFor(paneEl, canvasEl);
 
-    if (canvas.width <= 0 || canvas.height <= 0) {
-      console.warn(`[TriptychRenderer] ${pane} pane canvas has zero dimensions, deferring`);
-      requestAnimationFrame(() => renderTriptychPane(canvas, hostElement, pane));
+    if (size.width <= 1 || size.height <= 1) {
+      log('warn', 'Canvas too small, deferring', { 
+        pane, 
+        size, 
+        id: hostElement.getAttribute('data-id') 
+      });
+      requestAnimationFrame(() => renderTriptychPane(args));
       return null;
     }
 
@@ -217,7 +401,7 @@ async function renderTriptychPane(canvas, hostElement, pane) {
     // Enhanced content threshold checking
     if (!hasMinimalContent(text, confidence)) {
       console.warn(`[TriptychRenderer] ${pane} pane: insufficient content (${text?.length || 0} chars, ${confidence || 0} confidence)`);
-      renderStaticFallback(canvas.getContext('2d'), 'insufficient-content');
+      renderStaticFallback(ctx, 'insufficient-content');
       return null;
     }
 
@@ -234,8 +418,9 @@ async function renderTriptychPane(canvas, hostElement, pane) {
       hostElement.__em = buildEM(hostElement.__mm);
     }
     
-    const mm = hostElement.__mm;
-    const em = hostElement.__em;
+    // Use models from args if provided, otherwise use cached
+    const mmFinal = mm || hostElement.__mm;
+    const emFinal = em || hostElement.__em;
 
     // 3) Seeds & family selection with diversity enforcement
     if (!hostElement.__seeds) {
@@ -250,16 +435,16 @@ async function renderTriptychPane(canvas, hostElement, pane) {
     const paneSeed = seeds[pane];
     
     const contentAnalysis = {
-      structure: { complexity: mm.texture.structural_complexity },
-      temporal: { velocity: mm.dynamics.velocity },
-      lexicon: { contemplative: mm.intent.contemplative }
+      structure: { complexity: mmFinal?.texture?.structural_complexity || 0.5 },
+      temporal: { velocity: mmFinal?.dynamics?.velocity || 0.5 },
+      lexicon: { contemplative: mmFinal?.intent?.contemplative || 0.5 }
     };
     
     const forcedFamily = selectTriptychFamily(pane, paneSeed, contentAnalysis, hostElement.__usedFamilies);
 
     // 4) Contract EM → binding input with clamps & pane seed injection
     const contractEM = clampContract({
-      ...em,
+      ...emFinal,
       seed: paneSeed.str, // CRITICAL: Replace with pane-specific seed
       family: forcedFamily.toLowerCase() // EM expects lowercase token internally
     });
@@ -270,33 +455,33 @@ async function renderTriptychPane(canvas, hostElement, pane) {
     out.family = forcedFamily; // normalize for renderer registry lookup
     out.seed = paneSeed.str; // Ensure seed is pane-specific
 
-    // 6) Render with enhanced error handling
-    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+    // 6) Render with enhanced error handling (ctx already created above)
     safeRender(ctx, out, { motion: !prefersReducedMotion() });
 
-    // 7) Enhanced logging with diagnostics
-    const evidenceCount = mm.features?.council ? 
+    // 7) Enhanced logging with structured data
+    const evidenceCount = mmFinal?.features?.council ? 
       Object.values(mm.features.council.byType || {}).reduce((n,arr)=>n+arr.length,0) : 0;
     
-    console.log(`🎭 Triptych ${pane} rendered:`, {
+    log('info', 'Pane rendered successfully', {
+      pane,
       family: out.family,
       seed: String(paneSeed.str).slice(-8),
-      pane,
       contentLen: text.length,
       evidence: evidenceCount,
-      usedFamilies: Array.from(hostElement.__usedFamilies)
+      usedFamilies: Array.from(hostElement.__usedFamilies),
+      id: hostElement.getAttribute('data-id')
     });
     
-    announceColophon(hostElement, mm, out, pane);
+    announceColophon(hostElement, mmFinal, out, pane);
     
     // Apply ornament classes based on content
-    applyOrnamentRules(hostElement, mm);
+    applyOrnamentRules(hostElement, mmFinal);
     
     return out;
 
   } catch (error) {
     console.error(`[TriptychRenderer] ${pane} pane failed:`, error);
-    renderStaticFallback(canvas.getContext('2d'), pane);
+    renderStaticFallback(ctx, pane);
     throw error;
   }
 }
@@ -356,69 +541,187 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// Public API with enhanced error handling
-export function bootTriptychs(options = {}) {
+// Hardened boot function with ready gates and comprehensive error handling
+export async function bootTriptychs(options = {}) {
   const {
-    mountSelector = '[data-triptych="true"]',
+    mountSelector = '[data-triptych]',
     contentSource = defaultContentSource,
     onRendered = null
   } = options;
   
-  console.log('[TriptychRenderer] Scanning for triptych sigils...');
-  
-  const triptychNodes = document.querySelectorAll(mountSelector);
-  
-  triptychNodes.forEach(async (hostElement, index) => {
-    try {
-      const panes = hostElement.querySelectorAll('[data-triptych-pane]');
-      
-      if (panes.length !== 3) {
-        console.warn(`[TriptychRenderer] Expected 3 panes, found ${panes.length}`);
-        // Still try to render what we have to maintain layout
-      }
-
-      // Process each pane with guaranteed fallback
-      const results = {};
-      for (const paneElement of panes) {
-        const canvas = paneElement.querySelector('.triptych__canvas');
-        if (!canvas) {
-          console.warn('[TriptychRenderer] No canvas found in pane', paneElement);
-          continue;
+  try {
+    // Ready gates - ensure all prerequisites are met
+    await whenDOMReady();
+    await readyAnalyzers();
+    await whenTriptychPresent();
+    
+    log('info', 'Boot sequence started', { selector: mountSelector });
+    
+    const triptychNodes = document.querySelectorAll(mountSelector);
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Process each triptych with comprehensive error handling
+    for (const [index, hostElement] of triptychNodes.entries()) {
+      try {
+        // Set initial status
+        setTriptychStatus(hostElement, 'initializing');
+        
+        // Validate contract and structure  
+        const contract = hostElement.getAttribute('data-contract');
+        if (contract && !contract.startsWith('triptych@1.')) {
+          log('warn', 'Unsupported contract version', { contract, id: hostElement.getAttribute('data-id') });
+        }
+        
+        const panes = hostElement.querySelectorAll('[data-triptych-pane]');
+        
+        // Validate pane structure
+        if (panes.length !== 3) {
+          log('error', 'Invalid pane count', { 
+            expected: 3, 
+            found: panes.length,
+            id: hostElement.getAttribute('data-id')
+          });
+          setTriptychStatus(hostElement, 'degraded', `${panes.length} panes`);
         }
 
-        const pane = paneElement.dataset.triptychPane || 'unknown';
-        try {
-          const result = await renderTriptychPane(canvas, hostElement, pane);
-          if (result) results[pane] = result;
-        } catch (paneError) {
-          console.error(`[TriptychRenderer] Pane ${pane} failed, rendering fallback:`, paneError.message);
-          renderStaticFallback(canvas.getContext('2d'), 'pane-error', `${pane}:err`);
-        }
-      }
+        // Process each pane with self-healing
+        const results = {};
+        const resizeObservers = [];
+        
+        for (const paneElement of panes) {
+          try {
+            // Self-healing canvas injection
+            const canvas = ensurePaneCanvas(paneElement);
+            if (!canvas) {
+              log('error', 'Canvas creation failed', { 
+                pane: paneElement.dataset.triptychPane 
+              });
+              continue;
+            }
 
-      if (onRendered && Object.keys(results).length > 0) {
-        onRendered({
-          element: hostElement,
-          index,
-          results,
-          families: Object.values(results).map(r => r.family)
+            const pane = paneElement.dataset.triptychPane || 'unknown';
+            
+            // Attach resize observer for responsive rendering
+            const redrawFn = () => renderTriptychPane({
+              paneEl: paneElement,
+              canvasEl: canvas,
+              host: hostElement,
+              paneName: pane,
+              em: options.em,
+              mm: options.mm
+            });
+            const ro = attachResize(paneElement, canvas, redrawFn);
+            resizeObservers.push(ro);
+            
+            // Initial render
+            const result = await renderTriptychPane({
+              paneEl: paneElement,
+              canvasEl: canvas,
+              host: hostElement,
+              paneName: pane,
+              em: options.em,
+              mm: options.mm
+            });
+            if (result) {
+              results[pane] = result;
+            }
+            
+          } catch (paneError) {
+            log('error', 'Pane render failed', { 
+              pane: paneElement.dataset.triptychPane,
+              error: paneError.message 
+            });
+            errorCount++;
+            
+            // Render fallback to maintain layout
+            const canvas = paneElement.querySelector('[data-triptych-canvas], canvas');
+            if (canvas) {
+              renderStaticFallback(canvas.getContext('2d'), 'pane-error', paneError.message.slice(0, 10));
+            }
+          }
+        }
+        
+        // Store resize observers for cleanup
+        hostElement.__resizeObservers = resizeObservers;
+
+        // Determine final status
+        const paneCount = Object.keys(results).length;
+        if (paneCount === 3) {
+          setTriptychStatus(hostElement, 'ok');
+          successCount++;
+          
+          // Emit context unit for successful renders
+          const mm = hostElement.__mm;
+          if (mm) {
+            emitContextUnit(hostElement, mm, results);
+          }
+          
+        } else if (paneCount > 0) {
+          setTriptychStatus(hostElement, 'degraded', `${paneCount}/3 panes`);
+        } else {
+          setTriptychStatus(hostElement, 'fail', 'No panes rendered');
+          errorCount++;
+        }
+
+        // Callback for successful renders
+        if (onRendered && paneCount > 0) {
+          onRendered({
+            element: hostElement,
+            index,
+            results,
+            families: Object.values(results).map(r => r.family),
+            status: hostElement.getAttribute('data-status')
+          });
+        }
+
+      } catch (error) {
+        log('error', 'Triptych render failed', { 
+          index, 
+          error: error.message,
+          id: hostElement.getAttribute('data-id')
         });
+        setTriptychStatus(hostElement, 'fail', error.message.slice(0, 20));
+        errorCount++;
       }
-
-    } catch (error) {
-      console.error(`[TriptychRenderer] Failed to render triptych ${index}:`, error);
-      // Ensure we never break the layout - render fallbacks for all panes
-      const panes = hostElement.querySelectorAll('.triptych__canvas');
-      panes.forEach((canvas, i) => {
-        renderStaticFallback(canvas.getContext('2d'), 'host-error', `err:${i}`);
+    }
+    
+    // Final boot summary
+    log('info', 'Boot sequence completed', {
+      total: triptychNodes.length,
+      success: successCount,
+      errors: errorCount,
+      errorRate: errorCount / Math.max(1, triptychNodes.length)
+    });
+    
+    // Error budget check
+    const errorRate = errorCount / Math.max(1, triptychNodes.length);
+    if (errorRate > 0.1) {
+      log('error', 'Error budget exceeded', { 
+        errorRate, 
+        threshold: 0.1,
+        recommendation: 'Check triptych infrastructure'
       });
     }
-  });
 
-  console.log(`[TriptychRenderer] Processed ${triptychNodes.length} triptych sigils`);
+  } catch (bootError) {
+    log('error', 'Boot sequence failed', { error: bootError.message });
+    throw bootError;
+  }
 }
 
 // Integration handled by orchestrator - no auto-boot needed
+
+// Expose rescanAndRender API for console debugging
+if (typeof window !== 'undefined') {
+  window.TriptychRenderer = Object.assign(window.TriptychRenderer || {}, {
+    rescanAndRender: bootTriptychs,  // Main entry point for rescanning
+    renderPane: renderTriptychPane,   // Individual pane rendering
+    peek: triptychPeek,              // Debug inspection
+    version: '2.5.1+prime-guards',   // Version info
+    bootTriptychs                    // Direct access to boot function
+  });
+}
 
 // Exports for testing and extension
 export { 
@@ -427,5 +730,6 @@ export {
   deriveTriptychSeeds,
   clampContract,
   safeRender,
-  triptychPeek
+  triptychPeek,
+  bootTriptychs  // Export main function for API
 };
