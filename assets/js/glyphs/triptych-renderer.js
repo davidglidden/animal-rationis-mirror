@@ -542,7 +542,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Hardened boot function with ready gates and comprehensive error handling
-export async function bootTriptychs(options = {}) {
+async function bootTriptychs(options = {}) {
   const {
     mountSelector = '[data-triptych]',
     contentSource = defaultContentSource,
