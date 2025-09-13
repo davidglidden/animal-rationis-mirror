@@ -44,6 +44,32 @@ const TriptychIpc = (() => {
 
 function textHash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0).toString(36); }
 
+// Fallback contentAnalysis synthesizer (when analyzer council absent)
+function buildContentAnalysisFromModels(mm, em) {
+  // Derive coarse signals from EM/MM, clamp into [0..1]
+  const clamp01 = v => Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 0;
+
+  const structure = {
+    // heuristic: structural_complexity implies heading/section density
+    complexity: clamp01(em?.texture?.structural_complexity ?? 0),
+    sections: clamp01(em?.texture?.granularity ?? 0)
+  };
+
+  const temporal = {
+    // heuristic: velocity ≈ pace; entropy presentness-ish
+    velocity: clamp01(em?.dynamics?.velocity ?? 0),
+    entropy: clamp01(em?.dynamics?.entropy ?? 0)
+  };
+
+  const lexicon = {
+    // heuristic: polarity maps to rhetorical intensity, contemplative from mm
+    contemplative: clamp01(mm?.intent?.contemplative ?? 0),
+    intensity: clamp01(em?.dynamics?.polarity ?? 0)
+  };
+
+  return { structure, temporal, lexicon };
+}
+
 // UCE adapter stub (ends fallbacks)
 window.UCE = window.UCE || { context: {}, adapter: {} };
 window.UCE.context.seed = window.UCE.context.seed || 'uce-seed';
@@ -232,9 +258,21 @@ function deriveTriptychSeeds(baseSeed, rawText) {
 }
 
 // 2. FAMILY DIVERSITY ENFORCEMENT - Enhanced with collision detection
-function selectTriptychFamily(pane, seedPackage, contentAnalysis, usedFamilies = new Set()) {
+function selectTriptychFamily(pane, seedPackage, contentAnalysis = {}, usedFamilies = new Set()) {
   const families = TRIPTYCH_FAMILIES[pane];
   const seedValue = seedPackage.num;
+  
+  // Normalize to a safe shape  
+  const ca = {
+    structure: contentAnalysis.structure || {},
+    temporal:  contentAnalysis.temporal  || {},
+    lexicon:   contentAnalysis.lexicon   || {}
+  };
+
+  // Read with nullish-coalescing & defaults
+  const complexity = Number(ca.structure.complexity ?? 0);
+  const velocity = Number(ca.temporal.velocity ?? 0); 
+  const contemplative = Number(ca.lexicon.contemplative ?? 0);
   
   let familyIndex;
   let selectedFamily;
@@ -244,17 +282,17 @@ function selectTriptychFamily(pane, seedPackage, contentAnalysis, usedFamilies =
   do {
     if (pane === 'ground') {
       // Ground: weight toward Grid/Strata if structural complexity is high
-      const structuralBoost = (contentAnalysis.structure?.complexity || 0) > 0.3 ? 0.2 : 0;
+      const structuralBoost = complexity > 0.3 ? 0.2 : 0;
       const adjustedSeed = seedValue + structuralBoost + (attempts * 0.1);
       familyIndex = Math.floor(adjustedSeed * families.length) % families.length;
     } else if (pane === 'energy') {
       // Energy: weight toward Flow/Chaos if temporal velocity is high
-      const velocityBoost = (contentAnalysis.temporal?.velocity || 0) > 0.3 ? 0.2 : 0;
+      const velocityBoost = velocity > 0.3 ? 0.2 : 0;
       const adjustedSeed = seedValue + velocityBoost + (attempts * 0.1);
       familyIndex = Math.floor(adjustedSeed * families.length) % families.length;
     } else { // sign
       // Sign: weight toward Constellation/Radiance if contemplative depth is high
-      const contemplativeBoost = (contentAnalysis.lexicon?.contemplative || 0) > 0.3 ? 0.2 : 0;
+      const contemplativeBoost = contemplative > 0.3 ? 0.2 : 0;
       const adjustedSeed = seedValue + contemplativeBoost + (attempts * 0.1);
       familyIndex = Math.floor(adjustedSeed * families.length) % families.length;
     }
@@ -525,7 +563,7 @@ function announceColophon(hostElement, mm, out, pane) {
 // Core rendering function - tightened API (Prime Directive)
 async function renderTriptychPane(args) {
   const { host, paneEl, canvas } = args || {};
-  let { mm, em, seed, forcedFamily } = args || {};
+  let { mm, em, seed, forcedFamily, contentAnalysis } = args || {};
 
   // Canvas guards
   if (!canvas || typeof canvas.getContext !== 'function') {
@@ -544,6 +582,11 @@ async function renderTriptychPane(args) {
     seed = seed || resolved.seed;
   }
 
+  // Ensure contentAnalysis is available (real or synthetic)
+  const ca = contentAnalysis
+    || window.CIE?.contentAnalysis
+    || buildContentAnalysisFromModels(mm, em);
+
   // Normalize
   forcedFamily = (forcedFamily ? String(forcedFamily).toLowerCase() : '') || null;
 
@@ -555,7 +598,7 @@ async function renderTriptychPane(args) {
 
   const family = forcedFamily ||
     (typeof selectTriptychFamily === 'function'
-      ? selectTriptychFamily(paneEl?.dataset?.triptychPane, { mm, em, seed })
+      ? selectTriptychFamily(paneEl?.dataset?.triptychPane, { seed, mm, em }, ca)
       : 'flow');
 
   // Use {mm, em, seed, family, velocity, scomp} safely below
@@ -719,6 +762,7 @@ async function bootTriptychs(options = {}) {
                 opts: options, 
                 contentSource: defaultContentSource 
               });
+              const ca = window.CIE?.contentAnalysis || buildContentAnalysisFromModels(resolved.mm, resolved.em);
               renderTriptychPane({
                 host: hostElement,
                 paneEl: paneElement,
@@ -726,6 +770,7 @@ async function bootTriptychs(options = {}) {
                 mm: resolved.mm,
                 em: resolved.em,
                 seed: resolved.seed,
+                contentAnalysis: ca,
                 forcedFamily: options?.forcedFamily
               });
             };
@@ -737,6 +782,7 @@ async function bootTriptychs(options = {}) {
               opts: options, 
               contentSource: defaultContentSource 
             });
+            const ca = window.CIE?.contentAnalysis || buildContentAnalysisFromModels(resolved.mm, resolved.em);
             const result = await renderTriptychPane({
               host: hostElement,
               paneEl: paneElement,
@@ -744,6 +790,7 @@ async function bootTriptychs(options = {}) {
               mm: resolved.mm,
               em: resolved.em,
               seed: resolved.seed,
+              contentAnalysis: ca,
               forcedFamily: options?.forcedFamily
             });
             if (result) {
@@ -860,6 +907,7 @@ export {
   renderTriptychPane,
   bootTriptychs,
   // Testing and extension utilities
+  buildContentAnalysisFromModels,
   selectTriptychFamily,
   deriveTriptychSeeds,
   clampContract,
