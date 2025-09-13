@@ -21,18 +21,26 @@ const FLAGS = {
   strict: false     // later: flip to true when UCE adapter ready
 };
 
-const seen = new Set();
-function warnOnce(code, msg){
-  if (seen.has(code)) return;
-  seen.add(code);
-  console.warn('[Triptych:deprec]', code, msg);
-}
-
-function emit(evt, payload){
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent(`triptych:${evt}`, { detail: payload }));
+// Namespaced helpers to avoid symbol collisions in module scope
+const TriptychIpc = (() => {
+  const seen = new Set();
+  function warnOnce(code, msg){
+    if (seen.has(code)) return;
+    seen.add(code);
+    console.warn('[Triptych:deprec]', code, msg);
   }
-}
+  function emit(evt, payload){
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(`triptych:${evt}`, { detail: payload }));
+      }
+    } catch (e) {
+      // Never disrupt paint for telemetry
+      // console.debug('[Triptych:emit:fail]', evt, e);
+    }
+  }
+  return { warnOnce, emit };
+})();
 
 function textHash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0).toString(36); }
 
@@ -41,8 +49,8 @@ function deriveSeed({ host, mm, content }){
   
   // Deprecation warning for old seed location
   if (FLAGS.compat && mm?.seed && !mm?.meta?.seed) {
-    warnOnce('mm.seed', 'use mm.meta.seed instead of top-level mm.seed');
-    emit('normalize:compat-used', { type: 'mm.seed', mm });
+    TriptychIpc.warnOnce('mm.seed', 'use mm.meta.seed instead of top-level mm.seed');
+    TriptychIpc.emit('normalize:compat-used', { type: 'mm.seed', mm });
   }
   
   const fromHost = host?.getAttribute?.('data-id') || host?.id;
@@ -60,8 +68,8 @@ function synthesizeDynamics(em){
   // Check if dynamics is missing and needs synthesis
   const needsSynthesis = !em?.dynamics?.velocity && (density || pulse || anisotropy || flux);
   if (FLAGS.compat && needsSynthesis) {
-    warnOnce('em.dynamics', 'provide em.dynamics or migrate renderer to cadence/scale API');
-    emit('normalize:compat-used', { type: 'em.dynamics', em });
+    TriptychIpc.warnOnce('em.dynamics', 'provide em.dynamics or migrate renderer to cadence/scale API');
+    TriptychIpc.emit('normalize:compat-used', { type: 'em.dynamics', em });
   }
 
   // Heuristics: prefer explicitly provided dynamics, else map from scale/cadence/families.
@@ -73,7 +81,7 @@ function synthesizeDynamics(em){
 }
 
 function normalizeModels({ host, mm, em, content }){
-  emit('normalize:start', { host: host?.id, mm: !!mm, em: !!em, content: !!content });
+  TriptychIpc.emit('normalize:start', { host: host?.id, mm: !!mm, em: !!em, content: !!content });
   
   // ensure mm + seed
   const seed = deriveSeed({ host, mm, content });
@@ -85,7 +93,7 @@ function normalizeModels({ host, mm, em, content }){
   emOut.dynamics = synthesizeDynamics(emOut);
 
   const mode = FLAGS.strict ? 'strict' : 'compat';
-  emit(`normalize:${mode}`, { seed, mm: mmOut, em: emOut });
+  TriptychIpc.emit(`normalize:${mode}`, { seed, mm: mmOut, em: emOut });
   
   return { mm: mmOut, em: emOut, seed };
 }
@@ -310,8 +318,14 @@ function setTriptychStatus(element, status, reason = '') {
 // UCE Integration - Event bus & context units
 const BUS = window.UCE?.bus || new EventTarget();
 
-function emit(evt, detail) {
-  BUS.dispatchEvent(new CustomEvent(evt, { detail, bubbles: false }));
+// guard CustomEvent in older browsers (defensive)
+const makeEvt = (name, detail) => {
+  try { return new CustomEvent(name, { detail, bubbles:false }); }
+  catch { const e = document.createEvent('CustomEvent'); e.initCustomEvent(name, false, false, detail); return e; }
+};
+
+function emitUCE(evt, detail){
+  try { BUS.dispatchEvent(makeEvt(evt, detail)); } catch {/* never break paint */}
 }
 
 function emitContextUnit(element, mm, results) {
@@ -335,7 +349,7 @@ function emitContextUnit(element, mm, results) {
     }
   };
   
-  emit('sigil:triptych:rendered', cu);
+  emitUCE('sigil:triptych:rendered', cu);
   log('info', 'Context unit emitted', { id: cu.id, families: cu.facets.families });
 }
 
@@ -452,7 +466,7 @@ async function renderTriptychPane(args = {}) {
   const articleText = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
   ({ mm, em, seed: baseSeed } = normalizeModels({ host: hostElement, mm: args.mm, em: args.em, content: articleText }));
   
-  emit('render:start', { pane, host: hostElement?.id, seed: baseSeed });
+  TriptychIpc.emit('render:start', { pane, host: hostElement?.id, seed: baseSeed });
 
   // forcedFamily may be undefined; guard + normalize to lower case
   const options = args.options || {};
@@ -563,13 +577,13 @@ async function renderTriptychPane(args = {}) {
     // Apply ornament classes based on content
     applyOrnamentRules(hostElement, mm);
     
-    emit('render:ok', { pane, host: hostElement?.id, family: family, seed: baseSeed });
+    TriptychIpc.emit('render:ok', { pane, host: hostElement?.id, family: family, seed: baseSeed });
     return out;
 
   } catch (error) {
     console.error(`[TriptychRenderer] ${pane} pane failed:`, error);
     renderStaticFallback(ctx, pane);
-    emit('render:fallback', { pane, host: hostElement?.id, error: error.message });
+    TriptychIpc.emit('render:fallback', { pane, host: hostElement?.id, error: error.message });
     throw error;
   }
 }
