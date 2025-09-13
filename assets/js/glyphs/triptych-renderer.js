@@ -44,6 +44,26 @@ const TriptychIpc = (() => {
 
 function textHash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0).toString(36); }
 
+// Family name normalizer and validator
+function normalizeFamilyName(name) {
+  if (!name) return '';
+  const s = String(name).trim().toLowerCase();
+  const map = {
+    flow: 'Flow',
+    grid: 'Grid',
+    strata: 'Strata',
+    constellation: 'Constellation',
+    radiance: 'Radiance',
+    interference: 'Interference',
+    spiral: 'Spiral',
+    balance: 'Balance',
+    chaos: 'Chaos',
+    collapse: 'Collapse',
+    threshold: 'Threshold'
+  };
+  return map[s] || ''; // return '' if unknown
+}
+
 // Fallback contentAnalysis synthesizer (when analyzer council absent)
 function buildContentAnalysisFromModels(mm, em) {
   // Derive coarse signals from EM/MM, clamp into [0..1]
@@ -309,7 +329,10 @@ function selectTriptychFamily(pane, seedPackage, contentAnalysis = {}, usedFamil
   }
   
   usedFamilies.add(selectedFamily);
-  return selectedFamily;
+  
+  // Normalize and validate before return
+  const canonFamily = normalizeFamilyName(selectedFamily);
+  return canonFamily || 'Flow'; // hard default
 }
 
 // Contract clamping - enforce visual discipline per specification section 2
@@ -596,12 +619,20 @@ async function renderTriptychPane(args) {
   const velocity = Number.isFinite(dyn.velocity) ? dyn.velocity : 0.5;
   const scomp    = Number.isFinite(tex.structural_complexity) ? tex.structural_complexity : 0.5;
 
-  const family = forcedFamily ||
+  // Normalize and validate family name before use
+  const rawFamily = forcedFamily ||
     (typeof selectTriptychFamily === 'function'
       ? selectTriptychFamily(paneEl?.dataset?.triptychPane, { seed, mm, em }, ca)
       : 'flow');
 
-  // Use {mm, em, seed, family, velocity, scomp} safely below
+  // Gate the binding lookup with fallback to Flow
+  const familyName = normalizeFamilyName(forcedFamily) 
+    || (typeof selectTriptychFamily === 'function' 
+        ? selectTriptychFamily(paneEl?.dataset?.triptychPane, { seed, mm, em }, ca)
+        : null)
+    || 'Flow';
+
+  // Use {mm, em, seed, familyName, velocity, scomp} safely below
   const pane = paneEl?.dataset?.triptychPane || 'unknown';
   
   try {
@@ -613,23 +644,30 @@ async function renderTriptychPane(args) {
       return null;
     }
 
-    // Safe binding and render
-    const fromEM = bindingFor(family);
+    // Safe binding lookup with graceful fallback to Flow
+    let fromEM;
+    try {
+      fromEM = bindingFor(familyName);
+    } catch (bindingError) {
+      TriptychIpc.warnOnce('binding-miss', `Binding for "${familyName}" missing, using Flow`);
+      fromEM = bindingFor('Flow'); // Final fallback
+    }
+    
     const contractEM = {
       ...em,
       seed: seed || 'fallback',
-      family: family,
+      family: familyName,
       dynamics: { velocity, entropy: dyn.entropy || 0.5, polarity: dyn.polarity || 0.5 },
       texture: { structural_complexity: scomp }
     };
     
     const out = fromEM(contractEM);
-    out.family = family;
+    out.family = familyName;
     out.seed = seed;
 
     safeRender(ctx, out, { motion: !prefersReducedMotion() });
 
-    TriptychIpc.emit('render:ok', { pane, host: host?.id, family, seed });
+    TriptychIpc.emit('render:ok', { pane, host: host?.id, family: familyName, seed });
     return out;
 
   } catch (error) {
@@ -907,6 +945,7 @@ export {
   renderTriptychPane,
   bootTriptychs,
   // Testing and extension utilities
+  normalizeFamilyName,
   buildContentAnalysisFromModels,
   selectTriptychFamily,
   deriveTriptychSeeds,
