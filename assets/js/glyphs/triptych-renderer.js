@@ -523,7 +523,7 @@ function announceColophon(hostElement, mm, out, pane) {
 }
 
 // Core rendering function - tightened API (Prime Directive)
-export async function renderTriptychPane(args) {
+async function renderTriptychPane(args) {
   const { host, paneEl, canvas } = args || {};
   let { mm, em, seed, forcedFamily } = args || {};
 
@@ -854,13 +854,15 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Exports for testing and extension
-export { 
-  renderTriptychPane, 
-  selectTriptychFamily, 
+// Single canonical export surface (Prime Directive)
+export {
+  resolveModels,
+  renderTriptychPane,
+  bootTriptychs,
+  // Testing and extension utilities
+  selectTriptychFamily,
   deriveTriptychSeeds,
   clampContract,
   safeRender,
-  triptychPeek,
-  bootTriptychs  // Export main function for API
+  triptychPeek
 };
