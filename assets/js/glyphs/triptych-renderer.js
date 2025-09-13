@@ -44,6 +44,80 @@ const TriptychIpc = (() => {
 
 function textHash(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return (h>>>0).toString(36); }
 
+// UCE adapter stub (ends fallbacks)
+window.UCE = window.UCE || { context: {}, adapter: {} };
+window.UCE.context.seed = window.UCE.context.seed || 'uce-seed';
+window.UCE.adapter.toMM = window.UCE.adapter.toMM || (async ({ content }) => (
+  window.MM?.buildFromMarkdown ? window.MM.buildFromMarkdown(content) : { seed:'uce-seed' }
+));
+window.UCE.adapter.toEM = window.UCE.adapter.toEM || (async ({ mm }) => (
+  window.EM?.buildFromMM ? window.EM.buildFromMM(mm) : { texture:{structural_complexity:0.5}, dynamics:{velocity:0.5, entropy:0.5, polarity:0.5} }
+));
+
+/**
+ * Resolve or build Meaning Model (mm) + Expression Model (em).
+ * Sources (in order of preference):
+ *  1) explicit opts.mm / opts.em (passed in)
+ *  2) UCE context (window.UCE?.context?.mm / em), or a UCE adapter on window.UCE?.adapter?.toMM / toEM
+ *  3) global builders (window.MM?.buildFromMarkdown / window.EM?.buildFromMM)
+ *  4) local builders via ESM imports (if you already import them)
+ *
+ * Always returns objects and never throws.
+ */
+async function resolveModels({ opts = {}, contentSource } = {}) {
+  const out = { mm: opts.mm || null, em: opts.em || null, seed: null };
+
+  // Prefer UCE context
+  if (!out.mm) out.mm = window.UCE?.context?.mm || null;
+  if (!out.em) out.em = window.UCE?.context?.em || null;
+
+  // Try UCE adapters, if provided
+  try {
+    if (!out.mm && typeof window.UCE?.adapter?.toMM === 'function') {
+      out.mm = await window.UCE.adapter.toMM({ content: contentSource?.text || '' });
+    }
+    if (!out.em && typeof window.UCE?.adapter?.toEM === 'function') {
+      out.em = await window.UCE.adapter.toEM({ mm: out.mm });
+    }
+  } catch (e) {
+    console.warn('[Triptych:models] UCE adapter failed', e);
+  }
+
+  // Legacy globals (until removed)
+  try {
+    if (!out.mm && window.MM?.buildFromMarkdown) {
+      out.mm = await window.MM.buildFromMarkdown(contentSource?.text || '');
+    }
+    if (!out.em && window.EM?.buildFromMM) {
+      out.em = await window.EM.buildFromMM(out.mm);
+    }
+  } catch (e) {
+    console.warn('[Triptych:models] legacy builders failed', e);
+  }
+
+  // Final safe defaults (never crash)
+  if (!out.mm) {
+    out.mm = {
+      intent: '', texture: '', dynamics: '',
+      seed: (contentSource?.seed || 'fallback-seed'),
+      council: 'none'
+    };
+    console.warn('[Triptych:models] mm missing → using fallback');
+  }
+  if (!out.em) {
+    out.em = {
+      families: '', cadence: '', scale: '',
+      texture: { structural_complexity: 0.5 },
+      dynamics: { velocity: 0.5, entropy: 0.5, polarity: 0.5 }
+    };
+    console.warn('[Triptych:models] em missing → using fallback');
+  }
+
+  // Seed priority: UCE → mm → content → fallback
+  out.seed = (window.UCE?.context?.seed) || out.mm.seed || contentSource?.seed || 'fallback-seed';
+  return out;
+}
+
 function deriveSeed({ host, mm, content }){
   const fromMM   = mm?.meta?.seed ?? mm?.seed;    // compat: meta.seed OR top-level seed
   
@@ -448,143 +522,78 @@ function announceColophon(hostElement, mm, out, pane) {
   }
 }
 
-// Core rendering function - Prime Directive normalized parameters
-async function renderTriptychPane(args = {}) {
-  // Normalize parameters (support both old and new calling conventions)
-  const paneEl = args.paneEl || args.pane || args.canvas?.parentElement;
-  const hostElement = args.host || args.hostElement;
-  const pane = args.paneName || paneEl?.getAttribute('data-triptych-pane') || 'unknown';
-  
-  if (!(paneEl instanceof Element)) {
-    throw new Error('renderTriptychPane: pane element missing');
-  }
-  
-  const canvasEl = ensureCanvas(paneEl, args.canvasEl || args.canvas);
-  const ctx = canvasEl.getContext('2d'); // never reassign canvasEl
-  
-  // Normalize models and get a stable seed
-  const articleText = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
-  ({ mm, em, seed: baseSeed } = normalizeModels({ host: hostElement, mm: args.mm, em: args.em, content: articleText }));
-  
-  TriptychIpc.emit('render:start', { pane, host: hostElement?.id, seed: baseSeed });
+// Core rendering function - tightened API (Prime Directive)
+export async function renderTriptychPane(args) {
+  const { host, paneEl, canvas } = args || {};
+  let { mm, em, seed, forcedFamily } = args || {};
 
-  // forcedFamily may be undefined; guard + normalize to lower case
-  const options = args.options || {};
-  const forcedFamilyRaw = options?.forcedFamily;
-  const forcedFamily = (typeof forcedFamilyRaw === 'string') ? forcedFamilyRaw.toLowerCase() : null;
+  // Canvas guards
+  if (!canvas || typeof canvas.getContext !== 'function') {
+    console.warn('[TriptychRenderer] invalid canvas; abort pane');
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+  if (!ctx) { console.warn('[TriptychRenderer] 2D ctx unavailable'); return; }
+
+  // If caller didn't supply models, resolve now
+  if (!mm || !em) {
+    const content = await (window.ContentResolver?.resolve?.() ?? Promise.resolve({ text: '' }));
+    const resolved = await resolveModels({ contentSource: content });
+    mm = mm || resolved.mm;
+    em = em || resolved.em;
+    seed = seed || resolved.seed;
+  }
+
+  // Normalize
+  forcedFamily = (forcedFamily ? String(forcedFamily).toLowerCase() : '') || null;
+
+  const safeEM = em || {};
+  const dyn = safeEM.dynamics || {};
+  const tex = safeEM.texture || {};
+  const velocity = Number.isFinite(dyn.velocity) ? dyn.velocity : 0.5;
+  const scomp    = Number.isFinite(tex.structural_complexity) ? tex.structural_complexity : 0.5;
+
+  const family = forcedFamily ||
+    (typeof selectTriptychFamily === 'function'
+      ? selectTriptychFamily(paneEl?.dataset?.triptychPane, { mm, em, seed })
+      : 'flow');
+
+  // Use {mm, em, seed, family, velocity, scomp} safely below
+  const pane = paneEl?.dataset?.triptychPane || 'unknown';
   
   try {
-    // 0) DPR-aware sizing with proper error handling
-    const size = sizeCanvasFor(paneEl, canvasEl);
-
+    // DPR-aware sizing
+    const size = sizeCanvasFor(paneEl, canvas);
     if (size.width <= 1 || size.height <= 1) {
-      log('warn', 'Canvas too small, deferring', { 
-        pane, 
-        size, 
-        id: hostElement.getAttribute('data-id') 
-      });
+      console.warn('[TriptychRenderer] Canvas too small, deferring');
       requestAnimationFrame(() => renderTriptychPane(args));
       return null;
     }
 
-    // 1) Resolve content once per host (cached)
-    if (!hostElement.__contentResolved) {
-      const resolved = await defaultContentSource.resolve(hostElement);
-      hostElement.__contentResolved = resolved;
-    }
-    
-    const { text, slug, confidence } = hostElement.__contentResolved;
-    
-    // Enhanced content threshold checking
-    if (!hasMinimalContent(text, confidence)) {
-      console.warn(`[TriptychRenderer] ${pane} pane: insufficient content (${text?.length || 0} chars, ${confidence || 0} confidence)`);
-      renderStaticFallback(ctx, 'insufficient-content');
-      return null;
-    }
-
-    // 2) Build MM/EM once per host; cache on host
-    if (!hostElement.__mm) {
-      hostElement.__mm = await buildMM({ 
-        rawText: text, 
-        analyzers: undefined,
-        priors: { seedTag: slug || undefined } 
-      });
-    }
-    
-    if (!hostElement.__em) {
-      hostElement.__em = buildEM(hostElement.__mm);
-    }
-    
-    // Use models from args if provided, otherwise use cached
-    const mmFinal = mm || hostElement.__mm;
-    const emFinal = em || hostElement.__em;
-
-    // 3) Seeds & family selection with diversity enforcement
-    if (!hostElement.__seeds) {
-      hostElement.__seeds = deriveTriptychSeeds(baseSeed, text);
-    }
-    
-    if (!hostElement.__usedFamilies) {
-      hostElement.__usedFamilies = new Set();
-    }
-    
-    const seeds = hostElement.__seeds;
-    const paneSeed = seeds[pane];
-    
-    const contentAnalysis = {
-      structure: { complexity: mm?.texture?.structural_complexity || 0.5 },
-      temporal: { velocity: em?.dynamics?.velocity || 0.5 },
-      lexicon: { contemplative: mm?.intent?.contemplative || 0.5 }
+    // Safe binding and render
+    const fromEM = bindingFor(family);
+    const contractEM = {
+      ...em,
+      seed: seed || 'fallback',
+      family: family,
+      dynamics: { velocity, entropy: dyn.entropy || 0.5, polarity: dyn.polarity || 0.5 },
+      texture: { structural_complexity: scomp }
     };
     
-    const selected = selectTriptychFamily(pane, String(baseSeed), contentAnalysis, hostElement.__usedFamilies);
-
-    // pick family with a safe default
-    const family = forcedFamily || selected || 'balance';
-    
-    // 4) Contract EM → binding input with clamps & pane seed injection
-    const contractEM = clampContract({
-      ...em,
-      seed: baseSeed, // CRITICAL: Use normalized seed
-      family: family // EM expects lowercase token internally
-    });
-
-    // 5) Binding + renderer
-    const fromEM = bindingFor(family);
     const out = fromEM(contractEM);
-    out.family = family; // normalize for renderer registry lookup
-    out.seed = baseSeed; // Ensure seed is normalized
+    out.family = family;
+    out.seed = seed;
 
-    // 6) Render with enhanced error handling (ctx already created above)
     safeRender(ctx, out, { motion: !prefersReducedMotion() });
 
-    // 7) Enhanced logging with structured data
-    const evidenceCount = mm?.features?.council ? 
-      Object.values(mm.features.council.byType || {}).reduce((n,arr)=>n+arr.length,0) : 0;
-    
-    log('info', 'Pane rendered successfully', {
-      pane,
-      family: out.family,
-      seed: String(paneSeed.str).slice(-8),
-      contentLen: text.length,
-      evidence: evidenceCount,
-      usedFamilies: Array.from(hostElement.__usedFamilies),
-      id: hostElement.getAttribute('data-id')
-    });
-    
-    announceColophon(hostElement, mm, out, pane);
-    
-    // Apply ornament classes based on content
-    applyOrnamentRules(hostElement, mm);
-    
-    TriptychIpc.emit('render:ok', { pane, host: hostElement?.id, family: family, seed: baseSeed });
+    TriptychIpc.emit('render:ok', { pane, host: host?.id, family, seed });
     return out;
 
   } catch (error) {
     console.error(`[TriptychRenderer] ${pane} pane failed:`, error);
     renderStaticFallback(ctx, pane);
-    TriptychIpc.emit('render:fallback', { pane, host: hostElement?.id, error: error.message });
-    throw error;
+    TriptychIpc.emit('render:fallback', { pane, host: host?.id, error: error.message });
+    return null; // Don't throw, return null for graceful handling
   }
 }
 
@@ -705,31 +714,37 @@ async function bootTriptychs(options = {}) {
             const pane = paneElement.dataset.triptychPane || 'unknown';
             
             // Attach resize observer for responsive rendering
-            const redrawFn = () => {
-              const content = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
-              const norm = normalizeModels({ host: hostElement, mm: options?.mm, em: options?.em, content });
+            const redrawFn = async () => {
+              const resolved = await resolveModels({ 
+                opts: options, 
+                contentSource: defaultContentSource 
+              });
               renderTriptychPane({
-                paneEl: paneElement,
-                canvasEl: canvas,
                 host: hostElement,
-                paneName: pane,
-                em: norm.em,
-                mm: norm.mm
+                paneEl: paneElement,
+                canvas: canvas,
+                mm: resolved.mm,
+                em: resolved.em,
+                seed: resolved.seed,
+                forcedFamily: options?.forcedFamily
               });
             };
             const ro = attachResize(paneElement, canvas, redrawFn);
             resizeObservers.push(ro);
             
-            // Initial render with normalized models
-            const content = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
-            const norm = normalizeModels({ host: hostElement, mm: options?.mm, em: options?.em, content });
+            // Initial render with resolved models
+            const resolved = await resolveModels({ 
+              opts: options, 
+              contentSource: defaultContentSource 
+            });
             const result = await renderTriptychPane({
-              paneEl: paneElement,
-              canvasEl: canvas,
               host: hostElement,
-              paneName: pane,
-              em: norm.em,
-              mm: norm.mm
+              paneEl: paneElement,
+              canvas: canvas,
+              mm: resolved.mm,
+              em: resolved.em,
+              seed: resolved.seed,
+              forcedFamily: options?.forcedFamily
             });
             if (result) {
               results[pane] = result;
