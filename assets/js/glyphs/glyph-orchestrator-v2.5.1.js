@@ -91,7 +91,7 @@ import { applyScriptoriumOverlay } from './overlays/scriptorium-overlay.js';
 import { applySealInsigniaOverlay } from './overlays/seal-insignia-overlay.js';
 
 // Triptych System
-import { bootTriptychs } from './triptych-renderer.js';
+import { bootTriptychs } from './triptych-renderer.js?v=22';
 
 // Pipeline
 import { buildMM } from './mm.js';

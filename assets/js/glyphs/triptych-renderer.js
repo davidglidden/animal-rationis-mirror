@@ -15,6 +15,34 @@ import { bindingFor } from './glyph-orchestrator-v2.5.1.js';
 import { getRenderer } from './renderers/index.js';
 import { defaultContentSource } from './content-resolver.js';
 
+// --- seed utils (compat + fallback) -----------------------------------------
+function textHash(s) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(36);
+}
+
+function deriveSeed({ host, mm, content }) {
+  const fromMM   = mm?.meta?.seed ?? mm?.seed;         // ← compat: meta.seed OR top-level seed
+  const fromHost = host?.getAttribute?.('data-id') || host?.id;
+  const fromText = content ? textHash(content) : undefined;
+  return String(fromMM ?? fromHost ?? fromText ?? ('s' + Date.now().toString(36)));
+}
+
+/** Normalize mm/em so the renderer never crashes on missing fields. */
+function normalizeModels({ host, mm, em, content }) {
+  const seed = deriveSeed({ host, mm, content });
+  // ensure mm/meta exists and carries the resolved seed (non-breaking)
+  const mmOut = Object.assign({}, mm || {});
+  mmOut.meta = Object.assign({ source: 'uce/cie', seed }, mmOut.meta || {}, { seed });
+  // minimal em guards (keep your existing defaults too)
+  const emOut = Object.assign(
+    { texture: {}, families: {}, cadence: {}, scale: {} },
+    em || {}
+  );
+  return { mm: mmOut, em: emOut, seed };
+}
+
 // Prime Directive helpers - guards and normalization
 function ensureModels(args = {}) {
   let em = args.em || (typeof window !== 'undefined' ? window.EM?.current : null);
@@ -247,7 +275,7 @@ function emitContextUnit(element, mm, results) {
     facets: {
       palette: 'sacred/default', // TODO: read from YAML
       style: 'balance', // TODO: read from YAML  
-      seed: mm.meta.seed,
+      seed: baseSeed,
       panes: Object.keys(results),
       families: Object.values(results)
     },
@@ -373,7 +401,15 @@ async function renderTriptychPane(args = {}) {
   const canvasEl = ensureCanvas(paneEl, args.canvasEl || args.canvas);
   const ctx = canvasEl.getContext('2d'); // never reassign canvasEl
   
-  const { em, mm } = ensureModels(args);
+  // Normalize models with seed compatibility shim
+  const articleText = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
+  let { mm, em, seed: baseSeed } = normalizeModels({ 
+    host: hostElement, 
+    mm: args.mm || (typeof window !== 'undefined' ? window.MM?.current : null), 
+    em: args.em || (typeof window !== 'undefined' ? window.EM?.current : null), 
+    content: articleText 
+  });
+  
   const options = args.options || {};
   
   try {
@@ -424,7 +460,7 @@ async function renderTriptychPane(args = {}) {
 
     // 3) Seeds & family selection with diversity enforcement
     if (!hostElement.__seeds) {
-      hostElement.__seeds = deriveTriptychSeeds(mm.meta.seed, text);
+      hostElement.__seeds = deriveTriptychSeeds(baseSeed, text);
     }
     
     if (!hostElement.__usedFamilies) {
@@ -603,25 +639,31 @@ async function bootTriptychs(options = {}) {
             const pane = paneElement.dataset.triptychPane || 'unknown';
             
             // Attach resize observer for responsive rendering
-            const redrawFn = () => renderTriptychPane({
-              paneEl: paneElement,
-              canvasEl: canvas,
-              host: hostElement,
-              paneName: pane,
-              em: options.em,
-              mm: options.mm
-            });
+            const redrawFn = () => {
+              const content = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
+              const norm = normalizeModels({ host: hostElement, mm: options?.mm, em: options?.em, content });
+              renderTriptychPane({
+                paneEl: paneElement,
+                canvasEl: canvas,
+                host: hostElement,
+                paneName: pane,
+                em: norm.em,
+                mm: norm.mm
+              });
+            };
             const ro = attachResize(paneElement, canvas, redrawFn);
             resizeObservers.push(ro);
             
-            // Initial render
+            // Initial render with normalized models
+            const content = document.querySelector('article')?.innerText?.slice(0, 10000) || '';
+            const norm = normalizeModels({ host: hostElement, mm: options?.mm, em: options?.em, content });
             const result = await renderTriptychPane({
               paneEl: paneElement,
               canvasEl: canvas,
               host: hostElement,
               paneName: pane,
-              em: options.em,
-              mm: options.mm
+              em: norm.em,
+              mm: norm.mm
             });
             if (result) {
               results[pane] = result;
