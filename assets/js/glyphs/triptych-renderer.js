@@ -1,8 +1,10 @@
 // AldineXXI Triptych Renderer - Clean, Self-contained Implementation
 // Prime Directive: Simple, durable, future-proof for UCE integration
 
-// Ensure registry loads & Flow registers via side-effect
-import "/assets/js/glyphs/renderers/index.js";
+// triptych-renderer.js
+import { RendererRegistry } from "/assets/js/glyphs/renderers/index.js";
+import "/assets/js/glyphs/renderers/flow.js"; // minimal baseline
+// (More bindings can be imported here later.)
 
 // Build fingerprint for version verification
 console.info('[TriptychRenderer] build', { 
@@ -138,7 +140,7 @@ async function renderTriptychPane({
 
   // family + binding
   const fam = forcedFamily || "flow";
-  const binding = (window.RendererRegistry && (window.RendererRegistry.get(fam) || window.RendererRegistry.getDefault()));
+  const binding = RendererRegistry.get(fam) || RendererRegistry.getDefault();
 
   if (!binding) return; // guard
 
@@ -193,5 +195,13 @@ async function bootTriptychs(){
   });
 }
 
+// --- Health probe (optional, dev only)
+export function triptychHealth() {
+  const keys = (window.RendererRegistry?.keys?.()||[]);
+  const canv = [...document.querySelectorAll("canvas.triptych__canvas")];
+  const painted = canv.some(c => c.dataset.painted === "1");
+  return { registry_keys: keys, canvases: canv.length, painted };
+}
+
 // --- Single export (no duplicates)
-export { renderTriptychPane, resolveModels, bootTriptychs, TriptychIpc };
+export { renderTriptychPane, resolveModels, bootTriptychs, TriptychIpc, triptychHealth };

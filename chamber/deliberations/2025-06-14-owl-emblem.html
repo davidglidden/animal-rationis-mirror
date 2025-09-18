@@ -202,10 +202,9 @@ Your reflection aestheticizes this violence</code></pre>
   <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
   
   <!-- Essential modulepreloads only -->
-  <link rel="modulepreload" href="../../assets/js/glyphs/glyph-orchestrator-v2.5.1.js">
   <link rel="modulepreload" href="../../assets/js/glyphs/triptych-renderer.js">
   <link rel="modulepreload" href="../../assets/js/glyphs/renderers/index.js">
-  <link rel="modulepreload" href="../../assets/js/glyphs/bindings/flow.binding.js">
+  <link rel="modulepreload" href="../../assets/js/glyphs/renderers/flow.js">
   
   <!-- Deterministic seed utilities (dual loading) -->
   <script type="module" src="../../assets/js/glyphs/util-seed.esm.js"></script>
@@ -213,8 +212,8 @@ Your reflection aestheticizes this violence</code></pre>
   
   <!-- Single ES module entrypoint -->
   <script type="module">
-    import { bootGlyphs } from "/assets/js/glyphs/glyph-orchestrator-v2.5.1.js";
-    bootGlyphs();
+    import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
+    bootTriptychs();
   </script>
   
   <!-- Non-module dependencies (semantic analysis utils, diagnostics) -->
