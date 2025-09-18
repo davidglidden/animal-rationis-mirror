@@ -1,6 +1,9 @@
 // AldineXXI Triptych Renderer - Clean, Self-contained Implementation
 // Prime Directive: Simple, durable, future-proof for UCE integration
 
+// Ensure registry loads & Flow registers via side-effect
+import "/assets/js/glyphs/renderers/index.js";
+
 // Build fingerprint for version verification
 console.info('[TriptychRenderer] build', { 
   version: '2.5.1+clean', 
@@ -134,38 +137,13 @@ async function renderTriptychPane({
   const _seed = seed || _mm?.seed || 'triptych';
 
   // family + binding
-  const family = selectFamily({ forcedFamily, contentAnalysis });
-  const binding = (window.RendererRegistry?.get && window.RendererRegistry.get(family))
-               || (window.RendererRegistry?.getDefault && window.RendererRegistry.getDefault());
+  const fam = forcedFamily || "flow";
+  const binding = (window.RendererRegistry && (window.RendererRegistry.get(fam) || window.RendererRegistry.getDefault()));
 
-  if (!binding?.fromEM) {
-    TriptychIpc.emit('error', { code: 'BINDING_MISSING', family });
-    return;
-  }
+  if (!binding) return; // guard
 
-  // translate EM -> binding parameters
-  let params;
-  try {
-    params = binding.fromEM({
-      em: _em, mm: _mm, seed: _seed,
-      canvas, paneEl, host,
-      ca: contentAnalysis || {}
-    });
-  } catch (e){
-    TriptychIpc.emit('error', { code: 'FROM_EM_FAIL', family, err: String(e) });
-    return;
-  }
-
-  // draw
-  try {
-    await binding.draw(params);
-    TriptychIpc.emit('render:ok', { family, seed: _seed });
-    
-    // CU emission for UCE integration
-    emitContextUnit({ family, seed: _seed, mm: _mm, em: _em, canvas, paneEl });
-  } catch (e){
-    TriptychIpc.emit('error', { code: 'DRAW_FAIL', family, err: String(e) });
-  }
+  const params = binding.fromEM({ em: _em, mm: _mm, seed: _seed, canvas, paneEl, host, ca: contentAnalysis });
+  await binding.draw(params);
 }
 
 // --- Simple model gate (4-tier, no throws)

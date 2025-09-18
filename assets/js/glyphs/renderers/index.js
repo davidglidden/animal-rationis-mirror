@@ -1,25 +1,19 @@
-// RendererRegistry - Baseline for UCE Glyphs
-// Minimal registry with window attachment for global access
-
-import { FlowBinding } from '../bindings/flow.binding.js';
-
-const _map = new Map();
+// assets/js/glyphs/renderers/index.js
+const _m = new Map();
 
 export const RendererRegistry = {
-  register: binding => _map.set(String(binding.id || '').toLowerCase(), binding),
-  get: id => _map.get(String(id || '').toLowerCase()),
-  getDefault: () => _map.get('flow') || [..._map.values()][0],
-  keys: () => [..._map.keys()],
-  debug: () => ({ registered: [..._map.keys()], size: _map.size })
+  register: (b) => _m.set(b.id.toLowerCase(), b),
+  get: (id) => _m.get(String(id || "").toLowerCase()),
+  getDefault: () => _m.get("flow") || [..._m.values()][0],
+  keys: () => [..._m.keys()],
 };
 
-// Register Flow binding
+// Attach to window for sanity/debug
+if (typeof window !== "undefined") window.RendererRegistry = RendererRegistry;
+
+// Register Flow binding (side effect)
+import { FlowBinding } from "../bindings/flow.binding.js";
 RendererRegistry.register(FlowBinding);
 
-// Attach to window for global access
-if (typeof window !== 'undefined') {
-  window.RendererRegistry = RendererRegistry;
-}
-
-console.info('[RendererRegistry] Registry initialized and attached to window');
-console.info('[RendererRegistry] Registered bindings:', RendererRegistry.keys());
+// (Optional) Legacy alias to avoid breaking older imports:
+export const registerRenderer = (b) => RendererRegistry.register(b);
