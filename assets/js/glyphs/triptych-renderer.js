@@ -196,7 +196,7 @@ async function bootTriptychs(){
 }
 
 // --- Health probe (optional, dev only)
-export function triptychHealth() {
+function triptychHealth() {
   const keys = (window.RendererRegistry?.keys?.()||[]);
   const canv = [...document.querySelectorAll("canvas.triptych__canvas")];
   const painted = canv.some(c => c.dataset.painted === "1");
