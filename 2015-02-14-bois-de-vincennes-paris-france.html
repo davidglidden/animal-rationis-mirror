@@ -156,24 +156,20 @@ Bois de Vincennes, Paris, France
   <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
   <link rel="modulepreload" href="./assets/js/glyphs/renderers/flow.js">
   
-  <!-- Deterministic seed utilities (dual loading) -->
+  <!-- Deterministic seed utilities (ESM only) -->
   <script type="module" src="./assets/js/glyphs/util-seed.esm.js"></script>
-  <script nomodule src="./assets/js/glyphs/util-seed.iife.js"></script>
   
   <!-- Single ES module entrypoint -->
   <script type="module">
-    import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
+    import { bootTriptychs, triptychHealth } from "/assets/js/glyphs/triptych-renderer.js";
     bootTriptychs();
+    
+    // Global health hook for console access
+    if (typeof window !== 'undefined') {
+      window.triptychHealth = triptychHealth;
+    }
   </script>
   
-  <!-- Non-module dependencies (semantic analysis utils, diagnostics) -->
-  <script src="./assets/js/glyphs/glyph-utils.js"></script>
-  <script src="./assets/js/glyphs/illumination-overlay.js"></script>
-  <script src="./assets/js/glyphs/extended-semantics.js"></script>
-  <script src="./assets/js/glyphs/semantic-analysis-utils.js"></script>
-  <script src="./assets/js/glyphs/base-semantic-renderer.js"></script>
-  <script src="./assets/js/glyphs/semantic-visual-translator.js"></script>
-  <script src="./assets/js/glyphs/glyph-diagnostics.js"></script>
-  <script src="./assets/js/glyphs/diagnostic-console.js"></script>
+  <!-- Non-module dependencies archived for baseline simplicity -->
 </body>
 </html>
