@@ -172,35 +172,47 @@ async function resolveModels({ contentSource, seed } = {}){
   return { mm, em, seed: sd };
 }
 
+function ensureCanvas(paneEl) {
+  let c = paneEl.querySelector('canvas.triptych__canvas');
+  if (!c) { c = document.createElement('canvas'); c.className = 'triptych__canvas'; paneEl.appendChild(c); }
+  return c;
+}
+
+function sizeCanvasToPane(canvas, paneEl) {
+  const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  const r = paneEl.getBoundingClientRect();
+  canvas.width  = Math.max(1, (r.width  | 0) * dpr);
+  canvas.height = Math.max(1, (r.height | 0) * dpr);
+  const ctx = canvas.getContext('2d');
+  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
 // --- Boot path (clean auto-boot using public API)
-async function bootTriptychs(){
-  const roots = document.querySelectorAll('[data-triptych]');
-  if (!roots.length) {
-    console.info('[TriptychRenderer] No triptych elements found');
-    return;
+async function bootTriptychs() {
+  const hosts = document.querySelectorAll('[data-triptych]');
+  if (!hosts.length) return;
+  for (const host of hosts) {
+    const panes = host.querySelectorAll('[data-triptych-pane]');
+    for (const paneEl of panes) {
+      const canvas = ensureCanvas(paneEl);
+      sizeCanvasToPane(canvas, paneEl);
+      try {
+        await renderTriptychPane({ host, paneEl, canvas });
+      } catch (err) {
+        console.warn('[Triptych] pane render failed',
+          { pane: paneEl.getAttribute('data-triptych-pane') }, err);
+      }
+    }
   }
-  
-  console.info(`[TriptychRenderer] Booting ${roots.length} triptych(s)`);
-  const models = await resolveModels({ contentSource: await (window.ContentResolver?.resolve?.() ?? null) });
-  
-  roots.forEach(root => {
-    const canvas = root.querySelector('canvas');
-    renderTriptychPane({
-      host: root, 
-      paneEl: root, 
-      canvas,
-      ...models,
-      forcedFamily: root.getAttribute('data-family') // optional override
-    });
-  });
 }
 
 // --- Health probe (optional, dev only)
 function triptychHealth() {
-  const keys = (window.RendererRegistry?.keys?.()||[]);
-  const canv = [...document.querySelectorAll("canvas.triptych__canvas")];
-  const painted = canv.some(c => c.dataset.painted === "1");
-  return { registry_keys: keys, canvases: canv.length, painted };
+  const keys = (window.RendererRegistry?.keys?.() || []);
+  const canv = [...document.querySelectorAll('canvas.triptych__canvas')];
+  const painted = canv.filter(c => c.dataset.painted === '1').length;
+  return { registry_keys: keys, canvases: canv.length, painted_count: painted,
+           ok: (keys.includes('flow') && painted === canv.length) };
 }
 
 // --- Single export (no duplicates)

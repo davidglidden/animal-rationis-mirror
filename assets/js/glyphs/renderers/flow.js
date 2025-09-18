@@ -10,20 +10,16 @@ RendererRegistry.register({
     return { lines, canvas };
   },
   draw({ lines, canvas }) {
-    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio||1));
-    const r = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, (r.width*dpr)|0);
-    canvas.height = Math.max(1, (r.height*dpr)|0);
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     for (let i=0;i<lines;i++){
-      ctx.globalAlpha = 0.25;
-      ctx.beginPath();
-      ctx.moveTo(Math.random()*canvas.width,  Math.random()*canvas.height);
-      ctx.lineTo(Math.random()*canvas.width,  Math.random()*canvas.height);
-      ctx.stroke();
+      ctx.globalAlpha = 0.5;
+      const x1 = Math.random()*canvas.width,  y1=Math.random()*canvas.height;
+      const x2 = Math.random()*canvas.width,  y2=Math.random()*canvas.height;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
     }
-    canvas.dataset.painted = "1";
-    canvas.classList.add("triptych--painted");
+    canvas.dataset.painted = '1';
+    canvas.classList.add('triptych--painted');
   }
 });
