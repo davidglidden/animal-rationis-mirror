@@ -1,34 +1,25 @@
-// Renderer Registry - v2.5.1
-// Central registry for all family renderers
-// Prime Directive: Single source of truth for renderer lookup
+// RendererRegistry - Baseline for UCE Glyphs
+// Minimal registry with window attachment for global access
 
-const registry = new Map();
+import { FlowBinding } from '../bindings/flow.binding.js';
 
-export function registerRenderer(name, fn) {
-  if (typeof fn !== 'function') {
-    throw new Error(`[RendererRegistry] Invalid renderer function for ${name}`);
-  }
-  registry.set(name, fn);
-  console.log(`[RendererRegistry] Registered: ${name}`);
+const _map = new Map();
+
+export const RendererRegistry = {
+  register: binding => _map.set(String(binding.id || '').toLowerCase(), binding),
+  get: id => _map.get(String(id || '').toLowerCase()),
+  getDefault: () => _map.get('flow') || [..._map.values()][0],
+  keys: () => [..._map.keys()],
+  debug: () => ({ registered: [..._map.keys()], size: _map.size })
+};
+
+// Register Flow binding
+RendererRegistry.register(FlowBinding);
+
+// Attach to window for global access
+if (typeof window !== 'undefined') {
+  window.RendererRegistry = RendererRegistry;
 }
 
-export function getRenderer(name) {
-  const fn = registry.get(name);
-  if (typeof fn !== 'function') {
-    throw new Error(`[RendererRegistry] Missing family renderer: ${name}`);
-  }
-  return fn;
-}
-
-export function listRenderers() {
-  return Array.from(registry.keys()).sort();
-}
-
-export function hasRenderer(name) {
-  return registry.has(name);
-}
-
-// For debugging
-export function getRegistrySize() {
-  return registry.size;
-}
+console.info('[RendererRegistry] Registry initialized and attached to window');
+console.info('[RendererRegistry] Registered bindings:', RendererRegistry.keys());
