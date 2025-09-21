@@ -1,20 +1,18 @@
-import { RendererRegistry } from './index.js';
-
 function seededRand(seed){
   let h = 2166136261 >>> 0;
   for (let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
   return () => ((h = Math.imul(h ^ (h>>>15), 2246822507) ^ Math.imul(h ^ (h>>>13), 3266489909)) >>> 0) / 2**32;
 }
 
-const FlowBinding = {
+export const FlowBinding = {
   id: 'flow',
   fromEM({ em, seed, canvas }){
     const r = seededRand(String(seed || 'triptych'));
     const lines = 140 + Math.floor(r()*60);
-    return { lines, w: canvas.width, h: canvas.height };
+    return { lines, w: canvas.width, h: canvas.height, canvas };
   },
-  draw({ lines, w, h, target }){
-    const ctx = target.getContext('2d');
+  draw({ lines, w, h, canvas }){
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,w,h);
     for (let i=0;i<lines;i++){
       ctx.globalAlpha = 0.35;
@@ -27,5 +25,4 @@ const FlowBinding = {
   }
 };
 
-RendererRegistry.register(FlowBinding);
-export { FlowBinding };
+export default FlowBinding;

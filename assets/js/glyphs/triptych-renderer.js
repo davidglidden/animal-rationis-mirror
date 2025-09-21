@@ -83,7 +83,7 @@ export async function renderTriptychPane({ host, paneEl, canvas, mm, em, seed, f
 
     // Render
     const params = binding.fromEM({ em: emx, mm: mmx, seed: sdx, canvas, paneEl, host });
-    await binding.draw({ ...params, target: canvas });
+    await binding.draw({ ...params, canvas });
 
     canvas.dataset.painted = '1';
   } catch(e){

@@ -1,19 +1,21 @@
 // RendererRegistry — single source of truth
-const __bindings = new Map();
+export const RendererRegistry = (() => {
+  const _m = new Map();
+  return {
+    register: (b) => _m.set(String(b.id).toLowerCase(), b),
+    get: (id) => _m.get(String(id || '').toLowerCase()),
+    getDefault: () => _m.get('flow') || [..._m.values()][0],
+    keys: () => [..._m.keys()],
+  };
+})();
 
-export const RendererRegistry = {
-  register(b){
-    if (!b?.id || typeof b.fromEM !== 'function' || typeof b.draw !== 'function') {
-      console.warn('[RendererRegistry] invalid binding', b);
-      return;
-    }
-    __bindings.set(String(b.id).toLowerCase(), b);
-  },
-  get(id){ return __bindings.get(String(id || '').toLowerCase()); },
-  getDefault(){ return __bindings.get('flow') || [...__bindings.values()][0]; },
-  keys(){ return [...__bindings.keys()]; }
-};
+// Import bindings (no renderer imports this file)
+import { FlowBinding } from './flow.js';
+import { GridBinding } from './grid.js';
 
-// Side-effect: load bindings to self-register
-import './flow.js';
-import './grid.js';
+// Register bindings
+RendererRegistry.register(FlowBinding);
+RendererRegistry.register(GridBinding);
+
+// Explicit exports (no wildcard re-exports)
+export { FlowBinding, GridBinding };
