@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head prefix="og: http://ogp.me/ns#">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Animal Rationis Capax" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="#fff" />
+  <meta name="apple-mobile-web-app-title" content="Animal Rationis Capax" />
+  <title>output-parser-spec-v1 - Animal Rationis Capax</title>
+  <link rel="canonical" href="../../chamber/protocols/output-parser-spec-v1.html" />
+  <meta name="description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <meta property="og:site_name" content="Animal Rationis Capax" />
+  <meta property="og:title" content="output-parser-spec-v1 | Animal Rationis Capax" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/chamber/protocols/output-parser-spec-v1.html" />
+  <meta property="og:description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta property="og:image" content="/assets/img/avatar.png" />
+  <meta property="og:image:width" content="640" />
+  <meta property="og:image:height" content="640" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="output-parser-spec-v1 | Animal Rationis Capax" />
+  <meta name="twitter:url" content="/chamber/protocols/output-parser-spec-v1.html" />
+  <meta name="twitter:description" content="A quiet corner of contemplation for the thinking animal" />
+  <meta name="twitter:image" content="/assets/img/avatar.png" />
+
+  <!-- Favicons for Animal Rationis Capax -->
+  <link rel="apple-touch-icon" sizes="180x180" href="../../assets/favicons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicons/favicon-16x16.png" />
+  <link rel="manifest" href="../../assets/favicons/site.webmanifest" />
+  <link rel="mask-icon" href="../../assets/favicons/safari-pinned-tab.svg" color="#5bbad5" />
+  <meta name="apple-mobile-web-app-title" content="Animal Rationis Capax" />
+  <meta name="application-name" content="Animal Rationis Capax" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#2c2c2c" />
+
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+</head>
+
+<body>
+  <!-- Simple Header with Centered Avatar -->
+  <header class="site-header">
+    <div class="wrapper">
+      <a href="../../" class="avatar-link">
+        <img src="../../assets/img/avatar.png" alt="Home" class="site-avatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="wrapper">
+    <div class="page-content">
+      <h1 id="chamber-output-parser-specification-v1.0">Chamber Output Parser Specification v1.0</h1>
+<h2 id="markdown-json-hakyll-pipeline">Markdown → JSON → Hakyll Pipeline</h2>
+<p><strong>Version</strong>: 1.0<br />
+<strong>Date</strong>: June 30, 2025<br />
+<strong>Purpose</strong>: Define parsing pipeline for multi-agent Chamber outputs<br />
+<strong>Target</strong>: Future CLI tooling and Hakyll integration</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>The Chamber produces rich, multi-layered deliberations that must be parsed into structured data while preserving their literary and philosophical qualities. This specification defines the transformation pipeline from raw AI outputs to publishable content.</p>
+<h3 id="pipeline-stages">Pipeline Stages</h3>
+<pre><code>Raw AI Output → Structured Markdown → JSON Intermediate → Hakyll Content
+     ↓              ↓                      ↓                  ↓
+   (text)      (sections)            (metadata)          (published)</code></pre>
+<hr />
+<h2 id="stage-1-raw-output-structure">Stage 1: Raw Output Structure</h2>
+<h3 id="expected-format-from-each-voice">Expected Format from Each Voice</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">VOICE: Fusus</span><span class="co">]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ROUND: 1</span><span class="co">]</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">TIMESTAMP: 2025-06-30T14:32:00Z</span><span class="co">]</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>The text reveals itself through the breathing of opposites. As the *Geometries of Perplexity*° teaches us, true understanding emerges not from resolving paradox but from inhabiting it fully.</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>I observe three movements in this passage:</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>First, the mechanical reduction that seeks to eliminate mystery—what Ibn Arabi calls the &quot;disease of explanation.&quot; The author struggles against this tendency yet remains partially trapped within its logic.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Second, a yearning toward what Alexander might recognize as &quot;the quality without a name&quot;—that living presence which rational discourse can indicate but never capture. Here I sense an authentic reaching.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>Third, the shadow of exclusion. Though the text speaks of universality, it assumes a reader who already possesses certain philosophical frameworks. The *Treaties on the Perplexed Heart*~ addresses this directly: &quot;What seems universal often speaks only to the initiated.&quot;</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CITATIONS</span><span class="co">]</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Geometries of Perplexity*° (Fusus, Chamber synthesis, 2024)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Treaties on the Perplexed Heart*~ (Fusus commenting on Al-Ghazali, imagined text)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ESSENTIAL QUESTION</span><span class="co">]</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>How can philosophical discourse maintain precision while acknowledging the wordless understanding from which it springs?</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">END VOICE</span><span class="co">]</span></span></code></pre></div>
+<hr />
+<h2 id="stage-2-structured-markdown-parsing">Stage 2: Structured Markdown Parsing</h2>
+<h3 id="parser-requirements">Parser Requirements</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pseudocode for markdown structure parser</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ChamberParser:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> parse_voice_response(<span class="va">self</span>, raw_text):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;voice&quot;</span>: extract_header(<span class="st">&quot;VOICE&quot;</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;round&quot;</span>: extract_header(<span class="st">&quot;ROUND&quot;</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;timestamp&quot;</span>: extract_header(<span class="st">&quot;TIMESTAMP&quot;</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;content&quot;</span>: extract_body_sections(),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;citations&quot;</span>: extract_citations(),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;essential_question&quot;</span>: extract_header(<span class="st">&quot;ESSENTIAL QUESTION&quot;</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;metadata&quot;</span>: {</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;word_count&quot;</span>: count_words(body),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;citation_count&quot;</span>: <span class="bu">len</span>(citations),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;has_refusal&quot;</span>: detect_refusal_pattern()</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> extract_citations(<span class="va">self</span>, text):</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Regex for notation markers</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        patterns <span class="op">=</span> {</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;chamber_generated&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">°'</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;hybrid&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">~'</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;contested&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">†'</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;synthesis&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">§'</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;hermetic&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">∞'</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;miscellaneous&quot;</span>: <span class="vs">r'</span><span class="ch">\*</span><span class="kw">(</span><span class="pp">[^*]</span><span class="op">+</span><span class="kw">)</span><span class="ch">\*</span><span class="vs">※'</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        citations <span class="op">=</span> []</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> notation, pattern <span class="kw">in</span> patterns.items():</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>            matches <span class="op">=</span> re.findall(pattern, text)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> match <span class="kw">in</span> matches:</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                citations.append({</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;title&quot;</span>: match,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;notation&quot;</span>: notation,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;marker&quot;</span>: notation_to_marker[notation]</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> citations</span></code></pre></div>
+<h3 id="section-detection-rules">Section Detection Rules</h3>
+<ol type="1">
+<li><strong>Voice Markers</strong>: <code>[VOICE: Name]</code> starts a voice section</li>
+<li><strong>Round Markers</strong>: <code>[ROUND: N]</code> indicates deliberation phase</li>
+<li><strong>Content Blocks</strong>: Paragraphs between markers</li>
+<li><strong>Citation Blocks</strong>: Listed under <code>[CITATIONS]</code></li>
+<li><strong>Questions</strong>: Under <code>[ESSENTIAL QUESTION]</code></li>
+<li><strong>Refusals</strong>: Patterns like “I cannot speak to this” or “I must withdraw”</li>
+</ol>
+<hr />
+<h2 id="stage-3-json-intermediate-format">Stage 3: JSON Intermediate Format</h2>
+<h3 id="complete-session-structure">Complete Session Structure</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;2025-06-30-pattern-wholeness&quot;</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;multi-voice&quot;</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;rounds&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2025-06-30T14:00:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;orchestrator&quot;</span><span class="fu">:</span> <span class="st">&quot;human&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;input&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;text&quot;</span><span class="fu">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Original passage or question...&quot;</span><span class="fu">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;David Glidden submission&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;deliberation&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;round_1&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;voice&quot;</span><span class="fu">:</span> <span class="st">&quot;Fusus&quot;</span><span class="fu">,</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2025-06-30T14:32:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;paragraphs&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;para1&quot;</span><span class="ot">,</span> <span class="st">&quot;para2&quot;</span><span class="ot">,</span> <span class="st">&quot;para3&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;word_count&quot;</span><span class="fu">:</span> <span class="dv">487</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">},</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;citations&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>          <span class="fu">{</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Geometries of Perplexity&quot;</span><span class="fu">,</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;notation&quot;</span><span class="fu">:</span> <span class="st">&quot;chamber_generated&quot;</span><span class="fu">,</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;marker&quot;</span><span class="fu">:</span> <span class="st">&quot;°&quot;</span><span class="fu">,</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;context&quot;</span><span class="fu">:</span> <span class="st">&quot;teaches us, true understanding emerges&quot;</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;essential_question&quot;</span><span class="fu">:</span> <span class="st">&quot;How can philosophical discourse...&quot;</span><span class="fu">,</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;themes&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;paradox&quot;</span><span class="ot">,</span> <span class="st">&quot;mysticism&quot;</span><span class="ot">,</span> <span class="st">&quot;exclusion&quot;</span><span class="ot">]</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;voice&quot;</span><span class="fu">:</span> <span class="st">&quot;Alexander&quot;</span><span class="fu">,</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;round_2&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;round_3&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cross_voice_analysis&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;tensions&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;between&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Fusus&quot;</span><span class="ot">,</span> <span class="st">&quot;Simone&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;nature&quot;</span><span class="fu">:</span> <span class="st">&quot;mystical union vs ethical clarity&quot;</span><span class="fu">,</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;quote_1&quot;</span><span class="fu">:</span> <span class="st">&quot;true understanding emerges from paradox&quot;</span><span class="fu">,</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;quote_2&quot;</span><span class="fu">:</span> <span class="st">&quot;clarity requires refusing false mystery&quot;</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;convergences&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="fu">{</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;voices&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Alexander&quot;</span><span class="ot">,</span> <span class="st">&quot;Ngana&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;theme&quot;</span><span class="fu">:</span> <span class="st">&quot;pattern recognition&quot;</span><span class="fu">,</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;synthesis&quot;</span><span class="fu">:</span> <span class="st">&quot;Both see patterns as living relationships&quot;</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;extracted_works&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Geometries of Perplexity&quot;</span><span class="fu">,</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;notation&quot;</span><span class="fu">:</span> <span class="st">&quot;chamber_generated&quot;</span><span class="fu">,</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;marker&quot;</span><span class="fu">:</span> <span class="st">&quot;°&quot;</span><span class="fu">,</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;cited_by&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Fusus&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;rounds&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">1</span><span class="ot">,</span> <span class="dv">3</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;develop_canon&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;canon_rationale&quot;</span><span class="fu">:</span> <span class="st">&quot;Foundational concept for paradox methodology&quot;</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;synthesis&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;essential_questions&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;How can philosophical discourse maintain precision...&quot;</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;emergent_themes&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;paradox&quot;</span><span class="ot">,</span> <span class="st">&quot;pattern&quot;</span><span class="ot">,</span> <span class="st">&quot;exclusion&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;recommended_canon&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;geometries-of-perplexity&quot;</span><span class="ot">,</span> <span class="st">&quot;treaties-perplexed-heart&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;editorial_note&quot;</span><span class="fu">:</span> <span class="st">&quot;Strong tension between mystical and ethical approaches productive&quot;</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h2 id="stage-4-hakyll-content-generation">Stage 4: Hakyll Content Generation</h2>
+<h3 id="deliberation-page-template">Deliberation Page Template</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Haskell pseudo-code for Hakyll compiler</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ot">chamberCompiler ::</span> <span class="dt">Compiler</span> (<span class="dt">Item</span> <span class="dt">String</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>chamberCompiler <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    json <span class="ot">&lt;-</span> loadJSON <span class="st">&quot;session.json&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> metadata <span class="ot">=</span> extractMetadata json</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        content <span class="ot">=</span> renderDeliberation json</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    applyTemplate <span class="st">&quot;templates/chamber-deliberation.html&quot;</span> <span class="op">$</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        metadataField metadata <span class="op">&lt;&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        contentField content</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ot">renderDeliberation ::</span> <span class="dt">JSON</span> <span class="ot">-&gt;</span> <span class="dt">Html</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>renderDeliberation json <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    renderRounds (json<span class="op">.</span>deliberation<span class="op">.</span>rounds)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    renderSynthesis (json<span class="op">.</span>synthesis)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    renderCanonLinks (json<span class="op">.</span>extracted_works)</span></code></pre></div>
+<h3 id="generated-markdown-structure">Generated Markdown Structure</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> &quot;On Pattern Wholeness and Living Systems&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2025-06-30</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="an">category:</span><span class="co"> deliberation</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="an">tags:</span><span class="co"> [pattern-language, mysticism, ethics]</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="an">voices_featured:</span><span class="co"> </span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">  - Fusus</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">  - Alexander</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">  - Simone</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">  - Ngana</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="an">generated_works:</span><span class="co"> 4</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="an">essential_question:</span><span class="co"> &quot;How can philosophical discourse maintain precision while acknowledging the wordless understanding from which it springs?&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="an">canon_entries:</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">  - geometries-of-perplexity</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">  - treaties-perplexed-heart</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="an">source_session:</span><span class="co"> &quot;2025-06-30-pattern-wholeness&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="an">protocol_used:</span><span class="co"> &quot;multi-voice&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="an">platforms_analyzed:</span><span class="co"> [claude, gpt]</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>*The Chamber convened to examine [original text], with four voices offering their perspectives across three rounds of deliberation.*</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Round 1: Initial Responses</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;span class=&quot;small-caps&quot;&gt;Fusus&lt;/span&gt; Speaks</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>The text reveals itself through the breathing of opposites...</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;span class=&quot;small-caps&quot;&gt;Alexander&lt;/span&gt; Speaks</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>What strikes me immediately is the mechanical quality...</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Round 2: Cross-Voice Engagement</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>*Having witnessed each other's initial responses, the voices engage:*</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">### &lt;span class=&quot;small-caps&quot;&gt;Simone&lt;/span&gt; Responds to &lt;span class=&quot;small-caps&quot;&gt;Fusus&lt;/span&gt;</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>While Fusus seeks unity through paradox, I must insist...</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Synthesis</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>The deliberation revealed productive tensions between...</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="fu">### Emerged Works</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>From this examination, several significant works emerged for the Chamber canon:</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">*Geometries of Perplexity*°</span><span class="co">](/chamber/canon/chamber-generated/geometries-of-perplexity)</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">*Treaties on the Perplexed Heart*~</span><span class="co">](/chamber/canon/hybrid/treaties-perplexed-heart)</span></span></code></pre></div>
+<hr />
+<h2 id="implementation-roadmap">Implementation Roadmap</h2>
+<h3 id="phase-1-manual-parsing-current">Phase 1: Manual Parsing (Current)</h3>
+<ul>
+<li>Human reads raw outputs</li>
+<li>Manual extraction of citations and themes</li>
+<li>Copy-paste into Jekyll templates</li>
+</ul>
+<h3 id="phase-2-semi-automated-next">Phase 2: Semi-Automated (Next)</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CLI commands for assisted parsing</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> parse <span class="at">--file</span><span class="op">=</span><span class="st">&quot;raw-output.txt&quot;</span> <span class="at">--format</span><span class="op">=</span>json</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> extract-citations <span class="at">--file</span><span class="op">=</span><span class="st">&quot;raw-output.txt&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">chamber</span> generate-deliberation <span class="at">--session</span><span class="op">=</span><span class="st">&quot;2025-06-30-example&quot;</span></span></code></pre></div>
+<h3 id="phase-3-full-pipeline-future">Phase 3: Full Pipeline (Future)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Python pipeline example</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> chamber_parser <span class="im">import</span> ChamberParser</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hakyll_export <span class="im">import</span> HakyllExporter</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>parser <span class="op">=</span> ChamberParser()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> parser.parse_session(<span class="st">&quot;2025-06-30-pattern-wholeness&quot;</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>json_data <span class="op">=</span> session.to_json()</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>exporter <span class="op">=</span> HakyllExporter()</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>exporter.create_deliberation(json_data)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>exporter.create_canon_entries(json_data.extracted_works)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>exporter.update_cross_references()</span></code></pre></div>
+<hr />
+<h2 id="parser-rules-edge-cases">Parser Rules &amp; Edge Cases</h2>
+<h3 id="citation-extraction">Citation Extraction</h3>
+<ul>
+<li><strong>Multi-line citations</strong>: Parser must handle citations spanning lines</li>
+<li><strong>Nested markers</strong>: When works cite other works</li>
+<li><strong>Context preservation</strong>: Store surrounding text for relevance</li>
+</ul>
+<h3 id="voice-consistency">Voice Consistency</h3>
+<ul>
+<li><strong>Name variations</strong>: “Simone” vs “Simone Weil” vs “S. Weil”</li>
+<li><strong>Voice drift</strong>: Detect when voices lose character</li>
+<li><strong>Round tracking</strong>: Maintain temporal sequence</li>
+</ul>
+<h3 id="refusal-handling">Refusal Handling</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>refusal_patterns <span class="op">=</span> [</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I cannot speak&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I must withdraw&quot;</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;This text refuses my reading&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I find myself unable&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;[REFUSAL]&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<h3 id="metadata-extraction">Metadata Extraction</h3>
+<ul>
+<li><strong>Themes</strong>: NLP extraction vs manual tagging</li>
+<li><strong>Question synthesis</strong>: Multiple questions → essential question</li>
+<li><strong>Work counting</strong>: De-duplication across rounds</li>
+</ul>
+<hr />
+<h2 id="quality-assurance">Quality Assurance</h2>
+<h3 id="validation-checks">Validation Checks</h3>
+<ol type="1">
+<li><strong>Voice count matches configuration</strong></li>
+<li><strong>All rounds properly sequenced</strong></li>
+<li><strong>Citations have valid notation markers</strong></li>
+<li><strong>Essential questions extracted</strong></li>
+<li><strong>No content truncation</strong></li>
+</ol>
+<h3 id="error-handling">Error Handling</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ParserError(<span class="pp">Exception</span>):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">pass</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MissingVoiceError(ParserError):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Raised when expected voice doesn't appear&quot;&quot;&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> InvalidNotationError(ParserError):</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Raised when citation uses unknown marker&quot;&quot;&quot;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> StructureError(ParserError):</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Raised when expected sections missing&quot;&quot;&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="future-enhancements">Future Enhancements</h2>
+<h3 id="advanced-parsing">Advanced Parsing</h3>
+<ul>
+<li><strong>Sentiment analysis</strong> per voice</li>
+<li><strong>Tension detection</strong> algorithms</li>
+<li><strong>Theme clustering</strong> across sessions</li>
+<li><strong>Voice personality validation</strong></li>
+</ul>
+<h3 id="integration-features">Integration Features</h3>
+<ul>
+<li><strong>Live parsing</strong> during sessions</li>
+<li><strong>Real-time preview</strong> generation</li>
+<li><strong>Citation graph</strong> building</li>
+<li><strong>Cross-session analysis</strong></li>
+</ul>
+<h3 id="export-formats">Export Formats</h3>
+<ul>
+<li><strong>LaTeX</strong> for print publication</li>
+<li><strong>EPUB</strong> for Chamber collected works</li>
+<li><strong>Graph data</strong> for visualization</li>
+<li><strong>API endpoints</strong> for Chamber queries</li>
+</ul>
+<hr />
+<p><em>This specification enables the Chamber’s multi-agent deliberations to flow seamlessly from dynamic conversation to structured knowledge, preserving both analytical precision and poetic resonance.</em></p>
+    </div>
+  </main>
+
+  <!-- Footer with Reading Compass and Controls -->
+  <footer class="site-footer">
+    <div class="wrapper">
+      <!-- Reading Compass Navigation -->
+      <nav class="reading-compass" aria-label="Reading Compass">
+        <div class="compass-points">
+          <a href="../../essays.html" title="Essays" class="compass-point">●</a>
+          <a href="../../observations.html" title="Observations" class="compass-point">○</a>
+          <a href="../../chamber/" title="Chamber" class="compass-point">⟐</a>
+          <a href="../../fragments.html" title="Fragments" class="compass-point">◈</a>
+          <a href="../../glimpses.html" title="Glimpses" class="compass-point">◉</a>
+          <a href="../../photo-essays.html" title="Photo Essays" class="compass-point">⊙</a>
+          <a href="../../archive.html" title="Archive" class="compass-point">☷</a>
+          <a href="../../about/" title="About" class="compass-point">✍︎</a>
+        </div>
+      </nav>
+
+      <!-- Theme Toggle -->
+      <div class="footer-controls">
+        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+          ◐
+        </button>
+      </div>
+
+      <!-- Standard Footer Info -->
+      <p class="whisper">
+        <span lang="la">Animal Rationis Capax</span>
+      </p>
+
+      
+
+      <p class="whisper">
+        <span class="small-caps">Barcelona</span>
+        <span class="seasonal-geometry">□</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Theme toggle functionality (same as frontispiece) -->
+  <script>
+    function toggleTheme() {
+      const currentTheme = localStorage.getItem('theme') || 'auto';
+      let nextTheme;
+      switch (currentTheme) {
+        case 'auto': nextTheme = 'light'; break;
+        case 'light': nextTheme = 'dark'; break;
+        case 'dark': nextTheme = 'auto'; break;
+        default: nextTheme = 'auto';
+      }
+      localStorage.setItem('theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme === 'auto' ? '' : nextTheme);
+    }
+    
+    // Initialize theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
+  </script>
+
+  <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
+  
+  <!-- Option B: Registry + Flow + Grid preloads -->
+  <link rel="modulepreload" href="../../assets/js/glyphs/renderers/index.js">
+  <link rel="modulepreload" href="../../assets/js/glyphs/triptych-renderer.js">
+  
+  <!-- Single ES module entrypoint -->
+  <script type="module">
+    import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
+    bootTriptychs();
+  </script>
+  
+  <!-- Non-module dependencies archived for baseline simplicity -->
+</body>
+</html>
