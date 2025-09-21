@@ -1,6 +1,6 @@
 function seeded(seed) {
   let h = 2166136261 >>> 0;
-  const s = String(seed||"triptych");
+  const s = String(seed||'triptych');
   return () => {
     for (let i=0;i<s.length;i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
     h = Math.imul(h ^ (h>>>13), 0x85ebca6b);
@@ -9,7 +9,7 @@ function seeded(seed) {
 }
 
 export const ConstellationBinding = {
-  id: "constellation",
+  id: 'constellation',
   fromEM({ em, seed, canvas }) {
     const prng = seeded(seed);
     const count = 16 + Math.floor((em?.texture?.density || 0.5) * 24);
@@ -20,7 +20,7 @@ export const ConstellationBinding = {
     return { pts };
   },
   draw({ pts }, canvas) {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.globalAlpha = 0.8;
     // points
@@ -36,6 +36,6 @@ export const ConstellationBinding = {
       ctx.lineTo(pts[i+1].x, pts[i+1].y);
       ctx.stroke();
     }
-    canvas.dataset.painted = "1";
+    canvas.dataset.painted = '1';
   }
 };

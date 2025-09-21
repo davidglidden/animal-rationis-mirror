@@ -1,24 +1,31 @@
 // AldineXXI Triptych Renderer - Option C Implementation
 // Registry-based with semantic analysis, family selection and CU enrichment
 
-import { RendererRegistry } from "/assets/js/glyphs/renderers/index.js";
-import { resolveContent } from "./analysis/content-resolver.js";
-import { computeCA, buildMM } from "./analysis/mm.js";
-import { buildEM, selectFamily } from "./analysis/em.js";
+// Import registry first, then renderers
+await import('/assets/js/glyphs/renderers/index.js');
+await Promise.allSettled([
+  import('/assets/js/glyphs/renderers/flow.js'),
+  import('/assets/js/glyphs/renderers/grid.js'),
+]);
+
+import { RendererRegistry } from '/assets/js/glyphs/renderers/index.js';
+import { resolveContent } from './analysis/content-resolver.js';
+import { computeCA, buildMM } from './analysis/mm.js';
+import { buildEM, selectFamily } from './analysis/em.js';
 
 // Build fingerprint for version verification
-console.info("[TriptychRenderer] build", { 
-  version: "option-c", 
+console.info('[TriptychRenderer] build', {
+  version: 'option-c',
   url: import.meta.url,
   timestamp: new Date().toISOString()
 });
 
 // --- Normalize EM for consistent shape
 function normalizeEM(em){
-  const out = em && typeof em === "object" ? {...em} : {};
-  out.families = out.families && typeof out.families === "object" ? out.families : { flow: 1 };
-  out.dynamics = out.dynamics && typeof out.dynamics === "object" ? out.dynamics : { velocity: 0.5 };
-  out.texture  = out.texture  && typeof out.texture  === "object" ? out.texture  : { density: 0.5 };
+  const out = em && typeof em === 'object' ? {...em} : {};
+  out.families = out.families && typeof out.families === 'object' ? out.families : { flow: 1 };
+  out.dynamics = out.dynamics && typeof out.dynamics === 'object' ? out.dynamics : { velocity: 0.5 };
+  out.texture  = out.texture  && typeof out.texture  === 'object' ? out.texture  : { density: 0.5 };
   return out;
 }
 
@@ -33,11 +40,11 @@ export async function resolveModels({ forcedFamily } = {}) {
   const ca = await computeCA(content);
   const mm = mmO || buildMM(ca, sdO);
   const em = emO || buildEM(mm, ca);
-  const seed = sdO || mm.seed || "triptych";
+  const seed = sdO || mm.seed || 'triptych';
 
   // URL param or <meta> can force family
-  const urlForced = new URLSearchParams(location.search).get("family");
-  const metaForced = document.querySelector("meta[name=\"sigil-family\"]")?.content || undefined;
+  const urlForced = new URLSearchParams(location.search).get('family');
+  const metaForced = document.querySelector('meta[name="sigil-family"]')?.content || undefined;
   const family = selectFamily(em, forcedFamily || urlForced || metaForced);
 
   // Store for diagnostics
@@ -51,7 +58,7 @@ function legacySelectFamily({ forcedFamily, em }){
   if (forcedFamily) return forcedFamily.toLowerCase();
   const fams = em?.families || {};
   const best = Object.entries(fams).sort((a,b)=>b[1]-a[1])[0]?.[0];
-  return (best || "flow").toLowerCase();
+  return (best || 'flow').toLowerCase();
 }
 
 // --- Render single pane with semantic analysis
@@ -69,10 +76,10 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     canvas.style.width  = `${Math.max(1, Math.round(r.width))}px`;
     canvas.style.height = `${Math.max(1, Math.round(r.height))}px`;
 
-    const binding = RendererRegistry.get(family) || RendererRegistry.get("flow") || RendererRegistry.getDefault();
-    if (!binding){ 
-      console.warn("[Triptych] no binding for", family); 
-      return; 
+    const binding = RendererRegistry.get(family) || RendererRegistry.get('flow') || RendererRegistry.getDefault();
+    if (!binding){
+      console.warn('[Triptych] no binding for', family);
+      return;
     }
 
     // Render
@@ -80,18 +87,18 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     await binding.draw(params, canvas);
 
     // mark painted for health
-    canvas.dataset.painted = "1";
+    canvas.dataset.painted = '1';
 
     // Emit/ensure CU script (enrich)
     ensureCU({ family, seed, em });
   } catch(e){
-    console.warn("[Triptych] renderTriptychPane error", e);
+    console.warn('[Triptych] renderTriptychPane error', e);
   }
 }
 
 // --- CU helper (append or update) with enrichment
 function ensureCU({ family, seed, em }) {
-  const sel = "script[type=\"application/json\"][data-cu=\"sigil\"]";
+  const sel = 'script[type="application/json"][data-cu="sigil"]';
   let tag = document.querySelector(sel);
   const cu = {
     id: "cu://sigil/triptych",
@@ -102,8 +109,8 @@ function ensureCU({ family, seed, em }) {
   };
   const json = JSON.stringify(cu);
   if (!tag) {
-    tag = document.createElement("script");
-    tag.type = "application/json"; tag.setAttribute("data-cu","sigil");
+    tag = document.createElement('script');
+    tag.type = 'application/json'; tag.setAttribute('data-cu','sigil');
     tag.textContent = json;
     document.body.appendChild(tag);
   } else {
@@ -113,41 +120,44 @@ function ensureCU({ family, seed, em }) {
 
 // --- Boot all triptychs on page
 export async function bootTriptychs(){
-  const hosts = document.querySelectorAll("[data-triptych]");
+  const hosts = document.querySelectorAll('[data-triptych]');
   for (const host of hosts){
-    const panes = host.querySelectorAll("[data-triptych-pane]");
+    const panes = host.querySelectorAll('[data-triptych-pane]');
     for (const paneEl of panes){
-      let canvas = paneEl.querySelector("canvas.triptych__canvas");
-      if (!canvas){ 
-        canvas = document.createElement("canvas"); 
-        canvas.className="triptych__canvas"; 
-        paneEl.appendChild(canvas); 
+      let canvas = paneEl.querySelector('canvas.triptych__canvas');
+      if (!canvas){
+        canvas = document.createElement('canvas');
+        canvas.className='triptych__canvas';
+        paneEl.appendChild(canvas);
       }
       await renderTriptychPane({ host, paneEl, canvas });
     }
   }
-  
+
   // CU emission handled per-pane in renderTriptychPane
-  
+
   // Health check
   try {
     const h = triptychHealth();
-    if (!h.ok) console.warn("[Triptych][WARN]", h);
+    if (!h.ok) console.warn('[Triptych][WARN]', h);
   } catch {}
 }
 
 // --- Health probe
 export function triptychHealth(){
-  const t = !!document.querySelector("[data-triptych]");
-  const rr = RendererRegistry.keys();
-  const canv = [...document.querySelectorAll("canvas.triptych__canvas")];
-  const painted = canv.filter(c => c.dataset.painted === "1").length;
-  return { 
-    ok: t && rr.length>0 && painted===canv.length, 
-    registry_keys: rr, 
-    canvases: canv.length, 
-    painted_count: painted 
-  };
+  try {
+    const keys = (window?.RendererRegistry?.keys && window.RendererRegistry.keys()) || RendererRegistry?.keys() || [];
+    const canv = [...document.querySelectorAll('canvas.triptych__canvas')];
+    const paintedCount = canv.filter(c => c?.dataset?.painted === '1').length;
+    return {
+      ok: keys.length >= 2 && paintedCount === canv.length && paintedCount > 0,
+      registry_keys: keys,
+      canvases: canv.length,
+      painted_count: paintedCount
+    };
+  } catch {
+    return { ok: false, registry_keys: [], canvases: 0, painted_count: 0 };
+  }
 }
 
 // --- Diagnostics helper

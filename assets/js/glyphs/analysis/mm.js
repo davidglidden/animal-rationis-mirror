@@ -1,5 +1,5 @@
-import { analyzeStructure } from "./analyzers/structure.js";
-import { analyzeLexicon } from "./analyzers/lexicon.js";
+import { analyzeStructure } from './analyzers/structure.js';
+import { analyzeLexicon } from './analyzers/lexicon.js';
 
 // Simple stable hash → base36
 function fnv1a(str) {
@@ -18,7 +18,7 @@ export async function computeCA(content) {
 
 export function buildMM(ca, seedHint) {
   const raw = JSON.stringify(ca);
-  const seed = seedHint || fnv1a(raw) || "triptych";
+  const seed = seedHint || fnv1a(raw) || 'triptych';
   // simple "intent/texture/dynamics" placeholders—expand later
   return {
     seed,

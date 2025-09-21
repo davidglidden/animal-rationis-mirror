@@ -1,33 +1,39 @@
-import { makeRng } from "../util-seed.esm.js";
-function seededRand(seed){
-  let h = 2166136261 >>> 0;
-  for (let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return () => ((h = Math.imul(h ^ (h>>>15), 2246822507) ^ Math.imul(h ^ (h>>>13), 3266489909)) >>> 0) / 2**32;
-}
+import { createSeededRNG } from '../util-seed.esm.js';
 
 export const FlowBinding = {
   id: 'flow',
-  fromEM({ em, seed, canvas }){
-    const r = seededRand(String(seed || 'triptych'));
-    const lines = 140 + Math.floor(r()*60);
-    return { seed, lines, w: canvas.width, h: canvas.height, canvas };
+  fromEM({ em, seed, canvas }) {
+    const rng = createSeededRNG(String(seed || 'triptych'));
+    const lines = 120 + Math.floor(rng() * 80);
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(1, Math.round((canvas.clientWidth || canvas.width) * dpr));
+    const h = Math.max(1, Math.round((canvas.clientHeight || canvas.height) * dpr));
+    return { lines, w, h, dpr, seed: String(seed || 'triptych') };
   },
-  draw({ lines, w, h, canvas }){
-      // Codemod: deterministic RNG + canvas extraction
-  const _params = (typeof { lines !== "undefined") ? { lines : arguments[0];
-  const canvas = _params?.canvas || (typeof canvas !== "undefined" ? canvas : null);
-  const seedForRng = _params?.seed || (typeof seed !== "undefined" ? seed : "triptych");
-  const rng = makeRng(String(seedForRng));
-const ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,w,h);
-    for (let i=0;i<lines;i++){
-      ctx.globalAlpha = 0.35;
+  draw({ lines, w, h, dpr, seed }, canvas) {
+    // size target canvas
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: false });
+    ctx.clearRect(0, 0, w, h);
+
+    // visible style
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.lineWidth = Math.max(1, Math.round(1.0 * dpr));
+
+    // deterministic rng for geometry
+    const rng = createSeededRNG(seed);
+    for (let i = 0; i < lines; i++) {
+      const x1 = Math.floor(rng() * w), y1 = Math.floor(rng() * h);
+      const x2 = Math.floor(rng() * w), y2 = Math.floor(rng() * h);
       ctx.beginPath();
-      const x1 = rng()*w, y1=rng()*h;
-      const x2 = rng()*w, y2=rng()*h;
-      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
+
+    // sentinel
+    canvas.dataset.painted = '1';
   }
 };
 

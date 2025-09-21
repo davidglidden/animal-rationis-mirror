@@ -151,12 +151,20 @@ St. Gilgen⁩, ⁨Salzburg⁩, ⁨Austria⁩
 
   <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
   
-  <!-- Option B: Registry + Flow + Grid preloads -->
+  <!-- Option C: Registry + Four renderer preloads -->
   <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
-  <link rel="modulepreload" href="./assets/js/glyphs/triptych-renderer.js">
+  <link rel="modulepreload" href="./assets/js/glyphs/renderers/flow.js">
+  <link rel="modulepreload" href="./assets/js/glyphs/renderers/grid.js">
+  <link rel="modulepreload" href="./assets/js/glyphs/renderers/constellation.js">
+  <link rel="modulepreload" href="./assets/js/glyphs/renderers/radiance.js">
   
-  <!-- Single ES module entrypoint -->
+  <!-- ES module imports + boot -->
   <script type="module">
+    import "/assets/js/glyphs/renderers/index.js";
+    import "/assets/js/glyphs/renderers/flow.js";
+    import "/assets/js/glyphs/renderers/grid.js";
+    import "/assets/js/glyphs/renderers/constellation.js";
+    import "/assets/js/glyphs/renderers/radiance.js";
     import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
     bootTriptychs();
   </script>

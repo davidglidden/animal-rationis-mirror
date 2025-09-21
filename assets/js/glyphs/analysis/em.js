@@ -22,7 +22,7 @@ export function buildEM(mm, ca) {
 export function selectFamily(em, forced) {
   if (forced) return forced.toLowerCase();
   const entries = Object.entries(em?.families || {});
-  if (!entries.length) return "flow";
+  if (!entries.length) return 'flow';
   entries.sort((a,b) => b[1]-a[1]);
-  return entries[0][0] || "flow";
+  return entries[0][0] || 'flow';
 }
