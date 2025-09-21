@@ -1,4 +1,3 @@
-import { makeRng } from "../util-seed.esm.js";
 function seededRand(seed){
   let h = 2166136261 >>> 0;
   for (let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -10,21 +9,16 @@ export const FlowBinding = {
   fromEM({ em, seed, canvas }){
     const r = seededRand(String(seed || 'triptych'));
     const lines = 140 + Math.floor(r()*60);
-    return { seed, lines, w: canvas.width, h: canvas.height, canvas };
+    return { lines, w: canvas.width, h: canvas.height, canvas };
   },
   draw({ lines, w, h, canvas }){
-      // Codemod: deterministic RNG + canvas extraction
-  const _params = (typeof { lines !== "undefined") ? { lines : arguments[0];
-  const canvas = _params?.canvas || (typeof canvas !== "undefined" ? canvas : null);
-  const seedForRng = _params?.seed || (typeof seed !== "undefined" ? seed : "triptych");
-  const rng = makeRng(String(seedForRng));
-const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,w,h);
     for (let i=0;i<lines;i++){
       ctx.globalAlpha = 0.35;
       ctx.beginPath();
-      const x1 = rng()*w, y1=rng()*h;
-      const x2 = rng()*w, y2=rng()*h;
+      const x1 = Math.random()*w, y1=Math.random()*h;
+      const x2 = Math.random()*w, y2=Math.random()*h;
       ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
       ctx.stroke();
     }
