@@ -8,7 +8,9 @@ export function subscribe(fn) {
 
 export function publish(cu) {
   for (const fn of subs) { try { fn(cu); } catch(e){ console.warn('[CU bus] sub error', e); } }
-  window.__CUs__ = window.__CUs__ || [];
-  window.__CUs__.push(cu);
+  dispatchDomEvent(cu);
+}
+
+function dispatchDomEvent(cu) {
   document.dispatchEvent(new CustomEvent(TOPIC, { detail: cu }));
 }

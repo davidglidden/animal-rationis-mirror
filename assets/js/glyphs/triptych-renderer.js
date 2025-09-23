@@ -91,51 +91,33 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     // mark painted for health
     canvas.dataset.painted = '1';
 
-    // Publish CU for this pane
-    publish(normalizeCU({
-      kind: 'symbol',
-      modality: 'glyph',
-      source: { url: location.href, title: document.title },
-      context: {
-        page: location.pathname,
-        pane: paneEl.getAttribute('data-triptych-pane'),
-        seed,
-        family
-      },
-      payload: {
-        canvas: { w: canvas.width, h: canvas.height, dpr: window.devicePixelRatio || 1 }
-      },
-      provenance: { engine: 'glyphs@option-d' }
-    }));
+    // Publish CU for this pane (idempotent per canvas)
+    if (canvas.dataset.cuEmitted !== '1') {
+      canvas.dataset.cuEmitted = '1';
+      publish(normalizeCU({
+        kind: 'symbol',
+        modality: 'glyph',
+        source: { url: location.href, title: document.title },
+        context: {
+          page: location.pathname,
+          pane: paneEl.getAttribute('data-triptych-pane'),
+          seed,
+          family
+        },
+        payload: {
+          canvas: { w: canvas.width, h: canvas.height, dpr: window.devicePixelRatio || 1 }
+        },
+        provenance: { engine: 'glyphs@option-d' }
+      }));
+    }
 
-    // Emit/ensure CU script (enrich) - keeping for backward compat
-    ensureCU({ family, seed, em });
+    // Legacy CU script removed - all CUs now go through the bus/collector
   } catch(e){
     console.warn('[Triptych] renderTriptychPane error', e);
   }
 }
 
-// --- CU helper (append or update) with enrichment
-function ensureCU({ family, seed, em }) {
-  const sel = 'script[type="application/json"][data-cu="sigil"]';
-  let tag = document.querySelector(sel);
-  const cu = {
-    id: "cu://sigil/triptych",
-    kind: "situation",
-    scope: { source: location.href, time: new Date().toISOString() },
-    signals: { em_families: em?.families || {} },
-    outputs: { glyph: { family, seed } }
-  };
-  const json = JSON.stringify(cu);
-  if (!tag) {
-    tag = document.createElement('script');
-    tag.type = 'application/json'; tag.setAttribute('data-cu','sigil');
-    tag.textContent = json;
-    document.body.appendChild(tag);
-  } else {
-    tag.textContent = json;
-  }
-}
+// Legacy CU helper removed - all CUs now flow through the bus/collector system
 
 // --- Boot all triptychs on page
 export async function bootTriptychs(){
