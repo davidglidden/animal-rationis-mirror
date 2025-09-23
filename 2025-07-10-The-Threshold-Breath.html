@@ -68,6 +68,22 @@
     
     
     
+    <!-- AldineXXI Triptych Sigil -->
+    <div class="sigil-triptych" data-triptych="true" data-contract="triptych@1.0.0" data-id="ttx-radiance-threshold-birth" data-renderer="v2.5.1" role="group" aria-label="Triptych sigil">
+      <div data-triptych-pane="ground" data-pane-order="1" aria-label="Ground">
+        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
+      </div>
+      <div data-triptych-pane="energy" data-pane-order="2" aria-label="Energy">
+        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
+      </div>
+      <div data-triptych-pane="sign" data-pane-order="3" aria-label="Sign">
+        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
+      </div>
+      <noscript>
+        <img src="./assets/fallbacks/triptych.svg" alt="Triptych sigil (static)" width="100" height="60">
+      </noscript>
+    </div>
+    
   </header>
   <div class="post-content" itemprop="articleBody">
     <p>Tonight, under the full moon’s light, two births draw near.</p>
@@ -152,7 +168,7 @@ Let it be marked.</p>
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">□</span>
+        <span class="seasonal-geometry">▽</span>
       </p>
     </div>
   </footer>
@@ -179,24 +195,25 @@ Let it be marked.</p>
 
   <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
   
-  <!-- Option C: Registry + Four renderer preloads -->
-  <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
-  <link rel="modulepreload" href="./assets/js/glyphs/renderers/flow.js">
-  <link rel="modulepreload" href="./assets/js/glyphs/renderers/grid.js">
-  <link rel="modulepreload" href="./assets/js/glyphs/renderers/constellation.js">
-  <link rel="modulepreload" href="./assets/js/glyphs/renderers/radiance.js">
-  
-  <!-- ES module imports + boot -->
-  <script type="module">
-    import "/assets/js/glyphs/renderers/index.js";
-    import "/assets/js/glyphs/renderers/flow.js";
-    import "/assets/js/glyphs/renderers/grid.js";
-    import "/assets/js/glyphs/renderers/constellation.js";
-    import "/assets/js/glyphs/renderers/radiance.js";
-    import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
-    bootTriptychs();
-  </script>
+ <!-- Glyph System (Option C, quiet baseline) -->
+<link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
+
+<script type="module">
+  // Registry first, renderers will self-register on demand
+  import "/assets/js/glyphs/renderers/index.js";
+  import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
+  bootTriptychs();
+</script>
   
   <!-- Non-module dependencies archived for baseline simplicity -->
+
+<script>
+  window.addEventListener('unhandledrejection', (e) => {
+    const msg = String(e?.reason || '');
+    if (msg.includes('No response received')) {
+      e.preventDefault(); // silence the external beacon noise
+    }
+  });
+</script>
 </body>
 </html>

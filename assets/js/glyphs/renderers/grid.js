@@ -21,7 +21,7 @@ export const GridBinding = {
     const ctx = canvas.getContext('2d', { alpha: true });
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.strokeStyle = 'black';
     ctx.lineWidth = Math.max(1, Math.round(0.75 * dpr));
 
     const dx = Math.floor(w / Math.max(1, cols));

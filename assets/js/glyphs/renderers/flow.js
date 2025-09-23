@@ -18,7 +18,7 @@ export const FlowBinding = {
     ctx.clearRect(0, 0, w, h);
 
     // visible style
-    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.strokeStyle = 'black';
     ctx.lineWidth = Math.max(1, Math.round(1.0 * dpr));
 
     // deterministic rng for geometry

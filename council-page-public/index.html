@@ -174,7 +174,7 @@ Some processes resist documentation. This page gestures toward what cannot be fu
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">□</span>
+        <span class="seasonal-geometry">▽</span>
       </p>
     </div>
   </footer>
@@ -201,24 +201,25 @@ Some processes resist documentation. This page gestures toward what cannot be fu
 
   <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
   
-  <!-- Option C: Registry + Four renderer preloads -->
-  <link rel="modulepreload" href="../assets/js/glyphs/renderers/index.js">
-  <link rel="modulepreload" href="../assets/js/glyphs/renderers/flow.js">
-  <link rel="modulepreload" href="../assets/js/glyphs/renderers/grid.js">
-  <link rel="modulepreload" href="../assets/js/glyphs/renderers/constellation.js">
-  <link rel="modulepreload" href="../assets/js/glyphs/renderers/radiance.js">
-  
-  <!-- ES module imports + boot -->
-  <script type="module">
-    import "/assets/js/glyphs/renderers/index.js";
-    import "/assets/js/glyphs/renderers/flow.js";
-    import "/assets/js/glyphs/renderers/grid.js";
-    import "/assets/js/glyphs/renderers/constellation.js";
-    import "/assets/js/glyphs/renderers/radiance.js";
-    import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
-    bootTriptychs();
-  </script>
+ <!-- Glyph System (Option C, quiet baseline) -->
+<link rel="modulepreload" href="../assets/js/glyphs/renderers/index.js">
+
+<script type="module">
+  // Registry first, renderers will self-register on demand
+  import "/assets/js/glyphs/renderers/index.js";
+  import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
+  bootTriptychs();
+</script>
   
   <!-- Non-module dependencies archived for baseline simplicity -->
+
+<script>
+  window.addEventListener('unhandledrejection', (e) => {
+    const msg = String(e?.reason || '');
+    if (msg.includes('No response received')) {
+      e.preventDefault(); // silence the external beacon noise
+    }
+  });
+</script>
 </body>
 </html>
