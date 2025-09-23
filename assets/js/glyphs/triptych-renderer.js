@@ -12,6 +12,8 @@ import { RendererRegistry } from '/assets/js/glyphs/renderers/index.js';
 import { resolveContent } from './analysis/content-resolver.js';
 import { computeCA, buildMM } from './analysis/mm.js';
 import { buildEM, selectFamily } from './analysis/em.js';
+import { publish } from '/assets/js/uce/cu-bus.js';
+import { normalizeCU } from '/assets/js/uce/cu-schema.js';
 
 // Build fingerprint for version verification
 console.info('[TriptychRenderer] build', {
@@ -89,7 +91,24 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     // mark painted for health
     canvas.dataset.painted = '1';
 
-    // Emit/ensure CU script (enrich)
+    // Publish CU for this pane
+    publish(normalizeCU({
+      kind: 'symbol',
+      modality: 'glyph',
+      source: { url: location.href, title: document.title },
+      context: {
+        page: location.pathname,
+        pane: paneEl.getAttribute('data-triptych-pane'),
+        seed,
+        family
+      },
+      payload: {
+        canvas: { w: canvas.width, h: canvas.height, dpr: window.devicePixelRatio || 1 }
+      },
+      provenance: { engine: 'glyphs@option-d' }
+    }));
+
+    // Emit/ensure CU script (enrich) - keeping for backward compat
     ensureCU({ family, seed, em });
   } catch(e){
     console.warn('[Triptych] renderTriptychPane error', e);

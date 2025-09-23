@@ -278,9 +278,20 @@ The Chamber’s deliberations capture the dynamic process of examination as voic
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="../../assets/js/glyphs/renderers/index.js">
 
+<!-- UCE Phase 1 - CU collection layer -->
+<link rel="modulepreload" href="../../assets/js/uce/cu-schema.js">
+<link rel="modulepreload" href="../../assets/js/uce/cu-bus.js">
+<link rel="modulepreload" href="../../assets/js/uce/cu-collector.js">
+
 <script type="module">
   // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
+
+  // UCE CU collection layer
+  import "/assets/js/uce/cu-schema.js";
+  import "/assets/js/uce/cu-bus.js";
+  import "/assets/js/uce/cu-collector.js";
+
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>
