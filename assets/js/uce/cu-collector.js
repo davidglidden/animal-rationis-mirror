@@ -45,7 +45,9 @@ import { subscribe } from './cu-bus.js';
   function writeBundle() {
     const tag = ensureBundleTag();
     // Do NOT include @context/ld+json; we keep this as plain JSON for robustness
-    const json = JSON.stringify({ items: window.__CUs__ });
+    const json = JSON.stringify({ version: '1.0', items: window.__CUs__ });
+    // Size cap (prevents giant embeds)
+    if (json.length > 200_000) return; // skip over-large bundles
     // Defend against HTML parsers by escaping <
     tag.textContent = json.replace(/</g, "\\u003c");
   }
