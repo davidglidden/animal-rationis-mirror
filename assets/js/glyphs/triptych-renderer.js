@@ -15,7 +15,7 @@ import { buildEM, selectFamily } from './analysis/em.js';
 
 // Build fingerprint for version verification
 console.info('[TriptychRenderer] build', {
-  version: 'option-c',
+  version: 'option-d',
   url: import.meta.url,
   timestamp: new Date().toISOString()
 });
