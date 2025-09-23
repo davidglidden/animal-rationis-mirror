@@ -68,6 +68,7 @@ import { subscribe } from './cu-bus.js';
       if (!validateCU(cu)) return;
       const key = cuKey(cu);
       if (!key) return;
+      // Only the collector appends, guarded by __CU_KEYS__
       if (!window.__CU_KEYS__.has(key)) {
         window.__CU_KEYS__.add(key);
         window.__CUs__.push(cu);

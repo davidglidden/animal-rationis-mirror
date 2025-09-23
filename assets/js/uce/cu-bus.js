@@ -1,6 +1,6 @@
 const TOPIC = "uce.cu";
 const subs = new Set();
-// Queue events until at least one subscriber is present (prevents races).
+// Queue events until a subscriber attaches (prevents races).
 window.__CU_QUEUE__ = Array.isArray(window.__CU_QUEUE__) ? window.__CU_QUEUE__ : [];
 
 export function subscribe(fn) {
@@ -17,14 +17,12 @@ export function subscribe(fn) {
 
 export function publish(cu) {
   if (subs.size === 0) {
-    // No subscribers yet; queue it and continue mirroring below.
+    // No subscribers yet; queue it.
     window.__CU_QUEUE__.push(cu);
   } else {
     for (const fn of subs) { try { fn(cu); } catch(e){ console.warn('[CU bus] sub error', e); } }
   }
-  // mirror to DOM for passive collectors / offline build tooling
-  window.__CUs__ = window.__CUs__ || [];
-  window.__CUs__.push(cu);
+  // Keep a DOM signal for anyone listening, but do NOT mutate global state here.
   dispatchDomEvent(cu);
 }
 
