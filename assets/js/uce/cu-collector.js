@@ -1,3 +1,9 @@
+/**
+ * UCE Collector (single writer)
+ * - Subscribes to CU bus, normalizes, *hard-dedupes* by id
+ * - Writes exactly ONE <script type="application/json" data-cu="bundle">{"items":[...]}</script>
+ * - Overwrites existing tag content instead of appending
+ */
 import { normalizeCU, validateCU } from './cu-schema.js';
 import { subscribe } from './cu-bus.js';
 

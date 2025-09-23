@@ -112,6 +112,24 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     }
 
     // Legacy CU script removed - all CUs now go through the bus/collector
+
+    // Global triptych CU publisher function
+    window.publishTriptychCU = (overrides = {}) => {
+      publish(normalizeCU({
+        kind: 'symbol',
+        modality: 'glyph',
+        source: { url: location.href, title: document.title },
+        context: {
+          page: location.pathname,
+          pane: 'manual',
+          seed: 'manual',
+          family: 'manual'
+        },
+        payload: { manual: true },
+        provenance: { engine: 'manual@option-d' },
+        ...overrides
+      }));
+    };
   } catch(e){
     console.warn('[Triptych] renderTriptychPane error', e);
   }
