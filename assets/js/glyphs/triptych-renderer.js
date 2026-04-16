@@ -12,8 +12,6 @@ import { RendererRegistry } from '/assets/js/glyphs/renderers/index.js';
 import { resolveContent } from './analysis/content-resolver.js';
 import { computeCA, buildMM } from './analysis/mm.js';
 import { buildEM, selectFamily } from './analysis/em.js';
-import { publish } from '/assets/js/uce/cu-bus.js';
-import { normalizeCU } from '/assets/js/uce/cu-schema.js';
 
 // Build fingerprint for version verification
 console.info('[TriptychRenderer] build', {
@@ -91,51 +89,10 @@ export async function renderTriptychPane({ host, paneEl, canvas, forcedFamily })
     // mark painted for health
     canvas.dataset.painted = '1';
 
-    // Publish CU for this pane (idempotent per canvas)
-    if (canvas.dataset.cuEmitted !== '1') {
-      canvas.dataset.cuEmitted = '1';
-      publish(normalizeCU({
-        kind: 'symbol',
-        modality: 'glyph',
-        source: { url: location.href, title: document.title },
-        context: {
-          page: location.pathname,
-          pane: paneEl.getAttribute('data-triptych-pane'),
-          seed,
-          family
-        },
-        payload: {
-          canvas: { w: canvas.width, h: canvas.height, dpr: window.devicePixelRatio || 1 }
-        },
-        provenance: { engine: 'glyphs@option-d' }
-      }));
-    }
-
-    // Legacy CU script removed - all CUs now go through the bus/collector
-
-    // Global triptych CU publisher function
-    window.publishTriptychCU = (overrides = {}) => {
-      publish(normalizeCU({
-        kind: 'symbol',
-        modality: 'glyph',
-        source: { url: location.href, title: document.title },
-        context: {
-          page: location.pathname,
-          pane: 'manual',
-          seed: 'manual',
-          family: 'manual'
-        },
-        payload: { manual: true },
-        provenance: { engine: 'manual@option-d' },
-        ...overrides
-      }));
-    };
   } catch(e){
     console.warn('[Triptych] renderTriptychPane error', e);
   }
 }
-
-// Legacy CU helper removed - all CUs now flow through the bus/collector system
 
 // --- Boot all triptychs on page
 export async function bootTriptychs(){
@@ -154,8 +111,6 @@ export async function bootTriptychs(){
       await renderTriptychPane({ host, paneEl, canvas });
     }
   }
-
-  // CU emission handled per-pane in renderTriptychPane
 
   // Health check
   try {

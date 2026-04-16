@@ -71,13 +71,9 @@
     <p><img src="./assets/img/2010-08-25-la-rochelle-france.jpeg" alt="La Rochelle, France"></p>
   </div>
 
-  <!-- Post metadata at bottom in monospace -->
-  <div class="post-meta center">
-    <time datetime="August 25, 2010" itemprop="datePublished">August 25, 2010</time>
-    
-      <span class="location">• La Rochelle, France</span>
-    
-    
+  <!-- Dateline — hic jacet -->
+  <div class="dateline" itemprop="datePublished">
+    <span class="dateline-location">La Rochelle, France</span>, <time datetime="August 25, 2010">August 2010</time>
   </div>
 
   
@@ -119,7 +115,7 @@
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -149,20 +145,8 @@
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="./assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

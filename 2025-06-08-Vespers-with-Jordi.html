@@ -68,22 +68,6 @@
     
     
     
-    <!-- AldineXXI Triptych Sigil -->
-    <div class="sigil-triptych" data-triptych="true" data-contract="triptych@1.0.0" data-id="ttx-vespers-for-the-living-glyph" data-renderer="v2.5.1" role="group" aria-label="Triptych sigil">
-      <div data-triptych-pane="ground" data-pane-order="1" aria-label="Ground">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <div data-triptych-pane="energy" data-pane-order="2" aria-label="Energy">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <div data-triptych-pane="sign" data-pane-order="3" aria-label="Sign">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <noscript>
-        <img src="./assets/fallbacks/triptych.svg" alt="Triptych sigil (static)" width="100" height="60">
-      </noscript>
-    </div>
-    
   </header>
   <div class="post-content" itemprop="articleBody">
     <p class="poetic small-caps">
@@ -368,11 +352,9 @@ memory and possibility meet in the eternal now of music making itself heard.
 </div>
   </div>
 
-  <!-- Post metadata at bottom in monospace -->
-  <div class="post-meta center">
-    <time datetime="June  8, 2025" itemprop="datePublished">June  8, 2025</time>
-    
-    
+  <!-- Dateline — hic jacet -->
+  <div class="dateline" itemprop="datePublished">
+    <time datetime="June  8, 2025">June 2025</time>
   </div>
 
   
@@ -414,7 +396,7 @@ memory and possibility meet in the eternal now of music making itself heard.
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -444,20 +426,8 @@ memory and possibility meet in the eternal now of music making itself heard.
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="./assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

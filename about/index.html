@@ -78,8 +78,8 @@ This site is a living manuscript—a space where observation, pattern recognitio
 <p>How letterforms shape thought. The conversation between <span class="small-caps">EB Garamond</span> and <span class="small-caps">IBM Plex</span>, between manuscript tradition and screen precision. Technical details for those who care about such things.</p>
 <h3 id="navigation-philosophy"><a href="../navigation-philosophy/">Navigation Philosophy</a></h3>
 <p>How interface responds to attention. A translucent header on mobile, a floating avatar on desktop—each viewport receives its own inevitable solution. Not mere responsive design but responsive presence, honoring how we hold devices and how they hold us.</p>
-<h3 id="contemplative-sigils"><a href="../contemplative-sigils/">Contemplative Sigils</a></h3>
-<p>Contemplative technology that creates sacred space for textual encounter. Living symbolic forms generated from semantic analysis—not decoration but spiritual technology that prepares consciousness for deep reading.</p>
+<h3 id="the-vignette"><a href="../vignette/">The Vignette</a></h3>
+<p>A generated threshold object that opens each essay and meditation — a formal map of the text’s semantic territory, experienced before title or first word. Four layers (ground mark, geometry, field, breath) compose a single living form that locates the text as a <em>hic</em>: this thinking happened here, in this form, and nowhere else. Paired with the dateline that closes each piece.</p>
 <h3 id="the-chamber"><a href="../chamber/">The Chamber</a></h3>
 <p>Where certain texts undergo transformation through dialogue with voices across time, discipline, and reality. Work that emerges from this process bears the mark ⟐—the journey ornament opened through examination.</p>
 <h3 id="what-kind-of-attention-does-this-require"><a href="../attention-page/">What Kind of Attention Does This Require?</a></h3>
@@ -115,12 +115,10 @@ This site is a living manuscript—a space where observation, pattern recognitio
 <p>The symbols operate without explanatory text—visitors learn meaning through exploration, not instruction. The principle is <em>festina lente</em>—make haste slowly. The site resists urgency in favor of presence.</p>
 <h2 id="technical-notes">Technical Notes</h2>
 <ul>
-<li>Built with Hakyll using AldineXXI CSS framework</li>
-<li>Typography inspired by Aldus Manutius and subsequent great masters</li>
-<li>Reading Compass navigation system</li>
-<li>Contemplative frontispiece homepage experience</li>
-<li>Mobile-first responsive design</li>
-<li>Self-hosted fonts for consistency</li>
+<li>Built with Hakyll and Pandoc, governed by the AldineXXI specification</li>
+<li>EB Garamond (reading), IBM Plex Sans (navigation), IBM Plex Mono (apparatus) — self-hosted</li>
+<li>Reading Compass navigation, seasonal footer glyph</li>
+<li>Vignette system for essays and meditations</li>
 <li>No tracking, no analytics, no comments</li>
 </ul>
 <p>The only speed is yours.</p>
@@ -169,7 +167,7 @@ Instagram: <a href="https://instagram.com/quaerendoinvenietis"><span class="cita
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -199,20 +197,8 @@ Instagram: <a href="https://instagram.com/quaerendoinvenietis"><span class="cita
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="../assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="../assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

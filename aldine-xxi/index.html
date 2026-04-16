@@ -112,7 +112,7 @@
 <li><strong>Text</strong>: Rich charcoal, never pure black<br />
 </li>
 <li><strong>Accents</strong>: Muted, aged colors that bear memory</li>
-<li><strong>Sacred Palette</strong>: Contemplative colors for <a href="../contemplative-sigils/">Contemplative Sigils</a></li>
+<li><strong>Sacred Palette</strong>: The warm luminance corridor between the light and dark grounds, used for vignette field rendering</li>
 </ul>
 <h3 id="typographic-stack">Typographic Stack</h3>
 <p>Carefully chosen fonts that honor both tradition and readability:</p>
@@ -128,8 +128,8 @@
 <p>How AldineXXI principles manifest in <a href="../typography/">specific typeface choices</a>—the conversation between tradition and screen optimization.</p>
 <h3 id="navigation-philosophy">Navigation Philosophy</h3>
 <p>How the framework shapes <a href="../navigation-philosophy/">interface behavior</a>—creating presence-serving navigation that honors attention.</p>
-<h3 id="contemplative-sigils">Contemplative Sigils</h3>
-<p>How design principles enable <a href="../contemplative-sigils/">contemplative technology</a>—visual thresholds that prepare consciousness for textual encounter.</p>
+<h3 id="the-vignette">The Vignette</h3>
+<p>How the framework’s formal vocabulary enables <a href="../vignette/">generated threshold objects</a> — four-layer compositions that open each essay and meditation, locating the text before the reader encounters it.</p>
 <h3 id="chamber-interface">Chamber Interface</h3>
 <p>How the framework supports <a href="../chamber/">dialogue transformation</a>—creating space for voices across time and discipline.</p>
 <h2 id="philosophical-foundation">Philosophical Foundation</h2>
@@ -168,7 +168,7 @@
 <li><strong><a href="../typography/">Typography</a></strong> - Specific typeface implementation within AldineXXI</li>
 <li><strong><a href="../navigation-philosophy/">Navigation Philosophy</a></strong> - How the framework shapes interface behavior<br />
 </li>
-<li><strong><a href="../contemplative-sigils/">Contemplative Sigils</a></strong> - Visual technology enabled by the design foundation</li>
+<li><strong><a href="../vignette/">The Vignette</a></strong> - Generated threshold objects enabled by the design foundation</li>
 <li><strong><a href="../colophon/">Colophon</a></strong> - Broader philosophical context and influences</li>
 </ul>
 <hr />
@@ -210,7 +210,7 @@
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -240,20 +240,8 @@
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="../assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="../assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

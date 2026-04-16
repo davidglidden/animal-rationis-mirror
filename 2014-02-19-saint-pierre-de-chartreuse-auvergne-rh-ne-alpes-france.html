@@ -76,13 +76,9 @@ Saint-Pierre-de-Chartreuse⁩, ⁨Auvergne-Rhône-Alpes⁩, ⁨France⁩
 </figure>
   </div>
 
-  <!-- Post metadata at bottom in monospace -->
-  <div class="post-meta center">
-    <time datetime="February 19, 2014" itemprop="datePublished">February 19, 2014</time>
-    
-      <span class="location">• Auvergne-Rhône-Alpes, France</span>
-    
-    
+  <!-- Dateline — hic jacet -->
+  <div class="dateline" itemprop="datePublished">
+    <span class="dateline-location">Auvergne-Rhône-Alpes, France</span>, <time datetime="February 19, 2014">February 2014</time>
   </div>
 
   
@@ -124,7 +120,7 @@ Saint-Pierre-de-Chartreuse⁩, ⁨Auvergne-Rhône-Alpes⁩, ⁨France⁩
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -154,20 +150,8 @@ Saint-Pierre-de-Chartreuse⁩, ⁨Auvergne-Rhône-Alpes⁩, ⁨France⁩
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="./assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

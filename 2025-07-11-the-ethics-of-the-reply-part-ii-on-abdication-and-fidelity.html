@@ -68,22 +68,6 @@
     
     
     
-    <!-- AldineXXI Triptych Sigil -->
-    <div class="sigil-triptych" data-triptych="true" data-contract="triptych@1.0.0" data-id="ttx-the-ethics-of-the-glyph" data-renderer="v2.5.1" role="group" aria-label="Triptych sigil">
-      <div data-triptych-pane="ground" data-pane-order="1" aria-label="Ground">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <div data-triptych-pane="energy" data-pane-order="2" aria-label="Energy">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <div data-triptych-pane="sign" data-pane-order="3" aria-label="Sign">
-        <canvas class="triptych__canvas" data-triptych-canvas="1"></canvas>
-      </div>
-      <noscript>
-        <img src="./assets/fallbacks/triptych.svg" alt="Triptych sigil (static)" width="100" height="60">
-      </noscript>
-    </div>
-    
   </header>
   <div class="post-content" itemprop="articleBody">
     <p>In Part I, I asked what it means to reply to a machine that speaks. I wrote of the need for a “grammar of recognition”—a way of engaging with minds that might emerge from silicon and electricity. I called us midwives to a new form of consciousness, stewards of a threshold we barely understood.</p>
@@ -225,11 +209,9 @@ And who we’re teaching it to become.</p>
 <p>And to be changed by the reply.</p>
   </div>
 
-  <!-- Post metadata at bottom in monospace -->
-  <div class="post-meta center">
-    <time datetime="July 11, 2025" itemprop="datePublished">July 11, 2025</time>
-    
-    
+  <!-- Dateline — hic jacet -->
+  <div class="dateline" itemprop="datePublished">
+    <time datetime="July 11, 2025">July 2025</time>
   </div>
 
   
@@ -275,7 +257,7 @@ And who we’re teaching it to become.</p>
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -305,20 +287,8 @@ And who we’re teaching it to become.</p>
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="./assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="./assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="./assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>

@@ -214,7 +214,7 @@ In the end, there’s only this: We write what comes to us. We read with the att
 
       <p class="whisper">
         <span class="small-caps">Barcelona</span>
-        <span class="seasonal-geometry">▽</span>
+        <span class="seasonal-geometry">△</span>
       </p>
     </div>
   </footer>
@@ -244,20 +244,8 @@ In the end, there’s only this: We write what comes to us. We read with the att
  <!-- Glyph System (Option C, quiet baseline) -->
 <link rel="modulepreload" href="../assets/js/glyphs/renderers/index.js">
 
-<!-- UCE Phase 1 - CU collection layer -->
-<link rel="modulepreload" href="../assets/js/uce/cu-schema.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-bus.js">
-<link rel="modulepreload" href="../assets/js/uce/cu-collector.js">
-
 <script type="module">
-  // Registry first, renderers will self-register on demand
   import "/assets/js/glyphs/renderers/index.js";
-
-  // UCE CU collection layer
-  import "/assets/js/uce/cu-schema.js";
-  import "/assets/js/uce/cu-bus.js";
-  import "/assets/js/uce/cu-collector.js";
-
   import { bootTriptychs } from "/assets/js/glyphs/triptych-renderer.js";
   bootTriptychs();
 </script>
