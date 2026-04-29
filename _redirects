@@ -1,0 +1,5 @@
+# CloudFlare Pages redirect rules
+# Renamed pages — preserve external links
+
+/archive.html    /annals.html    301
+/archive/        /annals.html    301
