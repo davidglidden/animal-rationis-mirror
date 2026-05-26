@@ -102,20 +102,86 @@ Alhambra · ƒ/1.6 · 1/121 · 26mm
 
       <!-- Reading Compass Navigation -->
       <nav class="reading-compass" aria-label="Reading Compass">
-        <div class="compass-points">
-  <a href="./essays.html" title="Essays" class="compass-point">●</a>
-  <a href="./observations.html" title="Observations" class="compass-point">○</a>
-  <a href="./fragments.html" title="Fragments" class="compass-point">◈</a>
-  <a href="./glimpses.html" title="Glimpses" class="compass-point">◉</a>
-  <a href="./photo-essays.html" title="Photo Essays" class="compass-point">◧</a>
-  <a href="./dwellings.html" title="Dwellings" class="compass-point">⊙</a>
-  <a href="./dreams.html" title="Dreams" class="compass-point">☾</a>
-  <a href="./heteronyms.html" title="Heteronyms" class="compass-point">⁂</a>
-  <a href="./hommages.html" title="Hommages" class="compass-point">❦</a>
-  <a href="./glosses.html" title="Glosses" class="compass-point">✎</a>
-  <a href="./readings.html" title="Readings" class="compass-point">☞︎</a>
-  <a href="./annals.html" title="Annals" class="compass-point">☷</a>
-  <a href="./about/" title="About" class="compass-point">✍︎</a>
+        <!-- Reading Compass — single source of the sigil set (per §VI; extracted 2026-05-25).
+     SVG-proof 2026-05-26 (feat/compass-svg-proof): the 7 geometric/structural sigils
+     are drawn as native SVG <symbol>s below and referenced via <use>, so they render
+     identically on every device and carry their optical balance in the viewBox — not
+     in per-glyph font-size against an unknown fallback font. Sources: ● ○ ◈ ◉ ◧ ⊙ ☷ ☾ drawn
+     natively (own outlines); ❦ ☞ ¶ are real EB Garamond outlines (OFL, in-family — ¶ is the
+     capitulum, standing for Gloss, replacing the ✎ pencil); ⁂ is three composed Garamond
+     asterisks; ✍ (About) is lifted from URW base-35 D050000L (the one borrowed mark — GPLv2,
+     minimal risk, see SCSS north-star). ▽ Tombeau is defined here in reserve (not yet in row).
+     Line weight is a single knob: stroke-width on `.sigil` (see _compass.scss) — the
+     stroked marks omit stroke-width so they inherit it; filled marks ignore it. -->
+<svg class="compass-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="sigil-essays" viewBox="0 0 100 100"><!-- ● filled circle -->
+    <circle cx="50" cy="50" r="33"></circle>
+  </symbol>
+  <symbol id="sigil-observations" viewBox="0 0 100 100"><!-- ○ ring -->
+    <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor"></circle>
+  </symbol>
+  <symbol id="sigil-fragments" viewBox="0 0 100 100"><!-- ◈ diamond-in-diamond -->
+    <path d="M50 14 L86 50 L50 86 L14 50 Z" fill="none" stroke="currentColor"></path>
+    <path d="M50 35 L65 50 L50 65 L35 50 Z"></path>
+  </symbol>
+  <symbol id="sigil-glimpses" viewBox="0 0 100 100"><!-- ◉ fisheye: thin ring + solid centre (r21 ≈ Apple Symbols proportion) -->
+    <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor"></circle>
+    <circle cx="50" cy="50" r="21"></circle>
+  </symbol>
+  <symbol id="sigil-photo-essays" viewBox="0 0 100 100"><!-- ◧ square, left half filled -->
+    <rect x="20" y="20" width="30" height="60"></rect>
+    <rect x="20" y="20" width="60" height="60" fill="none" stroke="currentColor"></rect>
+  </symbol>
+  <symbol id="sigil-dwellings" viewBox="0 0 100 100"><!-- ⊙ circled dot -->
+    <circle cx="50" cy="50" r="34" fill="none" stroke="currentColor"></circle>
+    <circle cx="50" cy="50" r="7"></circle>
+  </symbol>
+  <symbol id="sigil-annals" viewBox="0 0 100 100"><!-- ☷ trigram (earth): three broken bars -->
+    <rect x="13" y="22" width="30" height="9"></rect><rect x="57" y="22" width="30" height="9"></rect>
+    <rect x="13" y="45" width="30" height="9"></rect><rect x="57" y="45" width="30" height="9"></rect>
+    <rect x="13" y="68" width="30" height="9"></rect><rect x="57" y="68" width="30" height="9"></rect>
+  </symbol>
+  <symbol id="sigil-tombeau" viewBox="0 0 100 100"><!-- ▽ down triangle (reserve) -->
+    <path d="M18 30 L82 30 L50 82 Z" fill="none" stroke="currentColor" stroke-linejoin="round"></path>
+  </symbol>
+  <symbol id="sigil-hommages" viewBox="0 0 100 100"><!-- ❦ fleuron — actual EB Garamond outline (OFL, in-family) -->
+    <path transform="translate(50 50) scale(0.0901 -0.0901) translate(-269.00 -241.00)" d="M15 561Q15 589 34.0 609.5Q53 630 76 645Q76 662 80.0 679.0Q84 696 109 696Q141 696 172.5 679.5Q204 663 227.5 638.5Q251 614 257 589Q265 596 274.5 598.0Q284 600 294 600Q308 600 321.0 586.0Q334 572 344.0 550.5Q354 529 360.0 505.5Q366 482 366 464Q366 439 363 415Q385 415 406.0 424.5Q427 434 441.0 449.0Q455 464 455 478Q455 490 449.5 496.5Q444 503 437 509Q429 516 422.0 525.0Q415 534 415 552Q415 583 437.5 604.5Q460 626 491 626Q505 626 514.0 617.0Q523 608 523 594Q523 587 517.0 583.0Q511 579 505 576Q499 573 494.5 570.0Q490 567 490 562Q490 557 494.5 553.5Q499 550 505 546Q511 542 516.0 538.0Q521 534 521 526Q521 485 500.5 451.0Q480 417 446.0 397.5Q412 378 373 378Q369 378 365.0 378.5Q361 379 357 379Q350 348 335.5 325.0Q321 302 307 286Q303 282 305.0 277.0Q307 272 309 276Q317 287 334.0 298.0Q351 309 370 309Q409 309 435.0 282.0Q461 255 461 216Q461 178 445.5 149.5Q430 121 405.5 98.5Q381 76 355 56Q320 28 291.5 -0.5Q263 -29 263 -70Q263 -94 270.5 -117.0Q278 -140 293.5 -155.0Q309 -170 333 -170Q366 -170 389 -148Q388 -143 387.5 -138.5Q387 -134 387 -130Q386 -107 397.5 -98.0Q409 -89 427 -89Q448 -89 458.5 -106.0Q469 -123 469 -144Q469 -168 450.5 -183.5Q432 -199 404.5 -206.5Q377 -214 351 -214Q299 -214 255.5 -189.5Q212 -165 178.0 -123.0Q144 -81 120.0 -30.0Q96 21 83.5 74.5Q71 128 71 176Q71 217 86.5 258.0Q102 299 132.0 326.5Q162 354 205 354Q231 354 247.5 338.5Q264 323 275 300Q279 293 281.0 293.0Q283 293 287 300Q298 319 305.5 339.5Q313 360 317 384Q285 392 257.0 406.5Q229 421 211.5 442.0Q194 463 194 488Q194 501 197.0 511.5Q200 522 204 531Q206 539 208.5 547.0Q211 555 211 563Q211 589 190.0 603.5Q169 618 143 618Q115 618 90.0 603.5Q65 589 65 566Q65 559 68.0 553.5Q71 548 75 543Q80 538 83.5 532.0Q87 526 87 518Q87 509 78.5 504.5Q70 500 61 500Q39 500 27.0 518.5Q15 537 15 561ZM237 506Q237 481 263.0 458.5Q289 436 321 424V442Q321 462 316.5 486.0Q312 510 302.5 527.0Q293 544 279 544Q263 544 250.0 533.5Q237 523 237 506Z"></path>
+  </symbol>
+  <symbol id="sigil-readings" viewBox="0 0 100 100"><!-- ☞ manicule — actual EB Garamond outline (OFL, in-family) -->
+    <path transform="translate(50 50) scale(0.0810 -0.0810) translate(-551.00 -299.00)" d="M575 -10Q565 -10 554.0 -9.5Q543 -9 530 -8Q526 -8 523.5 -6.0Q521 -4 518 -2Q515 2 512.0 4.5Q509 7 504 8Q499 8 494.5 7.0Q490 6 485 5Q473 0 460 0Q453 2 449.5 5.0Q446 8 442 12Q435 21 427.5 22.0Q420 23 412 23Q400 23 389 20Q384 19 378.5 18.5Q373 18 367 18Q356 18 328.0 27.0Q300 36 269 46Q241 56 214.5 65.5Q188 75 176 75Q163 75 152.0 67.0Q141 59 133 49Q124 39 116.0 31.0Q108 23 98 23Q74 23 66.0 47.0Q58 71 54 98Q53 107 52.5 116.0Q52 125 50 132Q47 150 46.0 165.5Q45 181 45 195Q45 214 46.0 232.5Q47 251 48 274Q48 282 48.5 288.5Q49 295 49 302Q49 319 48.5 334.5Q48 350 48 365Q48 391 51.0 416.5Q54 442 64 472Q69 488 86.5 500.5Q104 513 121 518Q130 522 141 522Q149 522 156.5 518.0Q164 514 172 510Q182 506 188.0 498.5Q194 491 202 486Q210 481 219 480Q225 480 229.5 482.0Q234 484 238 487Q242 490 246.0 493.5Q250 497 254 500Q272 511 287.0 520.5Q302 530 315 539Q338 555 361.5 569.5Q385 584 416 598Q430 605 442.5 606.5Q455 608 468 608Q512 607 538.0 604.5Q564 602 584 599Q602 597 621.0 594.5Q640 592 668 592Q691 592 710.5 594.0Q730 596 748 598Q768 600 785.5 602.0Q803 604 822 604Q831 604 840.5 604.0Q850 604 860 602Q897 598 926.5 592.5Q956 587 984.0 576.5Q1012 566 1044 546Q1057 537 1057 521Q1057 513 1054.0 504.5Q1051 496 1046 488Q1039 475 1018.0 470.5Q997 466 967 466Q963 466 949.0 467.0Q935 468 920.5 469.0Q906 470 898 470Q882 471 869.0 472.0Q856 473 844 474Q832 476 820.5 477.0Q809 478 796 478Q782 478 765.0 476.5Q748 475 736.0 468.5Q724 462 724 447Q724 440 735.0 438.0Q746 436 750 428Q754 422 754.5 416.0Q755 410 756 404Q758 394 764 386Q772 378 783 375Q803 369 810.5 357.0Q818 345 818 331Q818 314 807.0 297.5Q796 281 782 264Q770 251 758.0 237.0Q746 223 738 208Q734 201 737.0 193.5Q740 186 736 178Q729 164 714 158Q713 156 713.0 153.0Q713 150 713 148Q713 143 714.5 137.5Q716 132 717 127Q719 122 720.0 117.0Q721 112 721 106Q721 95 712.5 83.0Q704 71 698 60Q698 55 700.0 50.5Q702 46 698 42Q679 22 662.5 10.5Q646 -1 626.0 -5.5Q606 -10 575 -10ZM423 60Q428 60 433.5 63.5Q439 67 445 68Q450 69 459.0 69.0Q468 69 482 69Q474 88 474 104Q474 112 477.0 117.5Q480 123 484 128Q487 133 490.0 139.0Q493 145 493 154Q493 159 492.5 163.5Q492 168 492 172Q492 189 505.5 207.0Q519 225 522 234Q524 242 524.0 248.0Q524 254 522 262Q519 285 511.5 295.5Q504 306 496 306Q490 306 485.0 301.5Q480 297 472 294Q450 286 436.5 284.0Q423 282 408.0 282.0Q393 282 366 280Q360 280 355.0 279.0Q350 278 345 276Q340 275 335.0 274.0Q330 273 325 273Q323 273 320.5 273.5Q318 274 316 274Q300 276 300 290Q300 304 313.0 307.0Q326 310 339 310Q347 310 354.5 309.5Q362 309 369 308Q376 307 383.0 306.5Q390 306 397 306Q426 306 441.0 315.0Q456 324 476 334Q485 339 492.0 345.5Q499 352 506 358Q508 360 509.5 362.5Q511 365 514 364Q518 363 519.0 359.5Q520 356 524 354Q547 338 564.5 328.0Q582 318 606 302Q617 295 623.0 289.0Q629 283 640 278Q653 272 662.5 268.5Q672 265 686 264Q691 264 691.5 269.5Q692 275 696 276Q708 281 718.5 279.0Q729 277 740 284Q748 289 749.5 295.5Q751 302 754 310Q756 315 758.5 321.0Q761 327 761 331Q761 342 746 347Q739 350 730.0 353.0Q721 356 712 360Q700 366 692.0 371.0Q684 376 672 380Q651 388 633.0 392.0Q615 396 598 402Q574 411 551.0 424.0Q528 437 508 437Q501 437 495.5 434.5Q490 432 485 430Q478 427 470.5 424.5Q463 422 458 422Q449 422 449 431Q449 435 452 438Q466 453 476.5 463.0Q487 473 504 484Q516 492 526.0 496.5Q536 501 550 502Q556 502 561.0 500.0Q566 498 570 496Q575 494 580.0 492.0Q585 490 591 490Q600 490 609.0 494.5Q618 499 626 503Q635 509 644.0 513.5Q653 518 661 518Q665 518 669 512Q673 506 676 506Q693 504 707.0 503.5Q721 503 734 503Q762 503 773.0 503.0Q784 503 792 502Q806 501 817.0 500.0Q828 499 838 497Q849 496 860.0 495.0Q871 494 884 494Q924 495 944.5 497.5Q965 500 988 506Q993 508 996.0 515.0Q999 522 999 529Q999 544 992 548Q975 559 947.0 563.0Q919 567 897 567Q883 567 871.0 565.5Q859 564 848 562Q832 559 817.0 556.0Q802 553 784 552Q778 552 772 555Q770 556 767.0 557.0Q764 558 760 558Q756 558 751.5 557.5Q747 557 743 556Q739 555 734.5 554.5Q730 554 726 554Q704 554 688.0 558.0Q672 562 650 566Q642 568 636.0 570.0Q630 572 622 572Q591 572 572.0 571.0Q553 570 539.5 568.5Q526 567 510 566Q502 565 496.0 562.5Q490 560 484 556Q479 553 473.0 551.0Q467 549 458 549Q449 549 440.5 550.0Q432 551 424 551Q403 551 377.0 537.0Q351 523 333 511Q321 502 308.5 493.0Q296 484 280 474Q274 470 269.0 465.5Q264 461 259 456Q254 452 247.5 448.5Q241 445 232 445Q230 445 227.0 445.5Q224 446 221 446Q208 446 202.0 438.0Q196 430 196 418Q196 398 197.5 381.0Q199 364 200 348Q202 330 204.0 311.5Q206 293 206 270Q206 253 205.0 242.5Q204 232 199 208Q197 195 194.5 180.5Q192 166 192 148Q192 123 212.0 117.5Q232 112 256 112Q261 112 264.5 114.0Q268 116 272 114Q282 110 288 102Q292 99 295.5 95.5Q299 92 304 90Q318 83 329.0 80.5Q340 78 356 74Q367 71 375.0 70.5Q383 70 394 68Q398 67 401.0 66.0Q404 65 407 64Q411 63 415.0 61.5Q419 60 423 60ZM700 406Q706 406 711.0 409.5Q716 413 716 420Q716 436 697.5 448.5Q679 461 655.5 469.0Q632 477 616 477Q602 477 586.0 473.0Q570 469 570 455Q570 444 586.0 435.0Q602 426 625.0 419.5Q648 413 669.0 409.5Q690 406 700 406ZM110 60Q115 60 119.0 71.5Q123 83 127 90Q149 128 156.0 181.5Q163 235 163 295Q163 319 160 352Q159 371 157.5 396.5Q156 422 150.5 442.0Q145 462 131 462Q123 462 115.0 447.5Q107 433 104 422Q96 392 92.0 368.0Q88 344 86.5 319.5Q85 295 82 264Q81 254 80.5 245.0Q80 236 80 228Q80 220 81.0 211.5Q82 203 82 192Q82 185 86.0 170.5Q90 156 94 142Q97 132 99.0 123.0Q101 114 101 109Q101 105 100.5 101.0Q100 97 100 93Q99 89 99 82Q99 78 101.0 69.0Q103 60 110 60ZM676 188Q689 188 698.0 192.0Q707 196 707 206Q707 225 693.0 236.0Q679 247 660.5 254.0Q642 261 628 266Q613 271 602.5 277.5Q592 284 577 284H572Q564 283 562.5 275.5Q561 268 558 260Q556 254 552.5 248.5Q549 243 549 238Q549 229 557 229Q562 229 569 234Q572 236 575.0 237.0Q578 238 581 238Q589 237 589.5 231.0Q590 225 590 220Q598 211 605.0 205.0Q612 199 624 196Q632 194 647.0 191.0Q662 188 676 188ZM644 111Q661 111 674.5 117.5Q688 124 688 138Q688 152 673.5 164.5Q659 177 642 177Q638 177 635.0 176.5Q632 176 628 176Q618 176 610.5 179.0Q603 182 595 186Q588 190 580.5 193.0Q573 196 564 196Q545 195 534 174Q528 165 528 158Q528 146 540.0 139.5Q552 133 567.5 130.0Q583 127 592 124Q607 120 618.5 115.5Q630 111 644 111ZM601 44Q612 44 623.5 53.5Q635 63 635 74Q635 79 632 82Q620 94 607.0 95.5Q594 97 578 102Q565 107 555.5 112.5Q546 118 534 118H528Q521 117 521.0 109.5Q521 102 520 94Q519 87 519.0 81.0Q519 75 524 70Q530 64 537.0 63.5Q544 63 552 60Q557 59 563.0 56.0Q569 53 574 51Q581 48 587.5 46.0Q594 44 601 44Z"></path>
+  </symbol>
+  <defs><!-- single EB Garamond asterisk, centred at origin (composed 3× for the asterism) -->
+    <path id="_ast" transform="scale(0.0900 -0.0900) translate(-170.5 -521)" d="M184 372Q177 372 172.5 377.5Q168 383 167 390L154 482Q137 470 117.5 458.0Q98 446 75 432Q71 428 64 428Q58 428 52.0 431.5Q46 435 46 442Q46 450 55 459L128 517Q109 526 89.0 536.0Q69 546 46 559Q34 564 34 577Q34 588 43.5 590.0Q53 592 59 590Q83 580 105.0 571.5Q127 563 146 555Q141 598 140 648Q140 656 144.0 663.0Q148 670 157 670Q164 670 168.5 664.5Q173 659 174 652L187 560Q204 572 224.0 584.5Q244 597 266 610Q270 614 277 614Q283 614 289.0 611.0Q295 608 295 600Q295 592 286 583L213 525Q233 516 252.5 506.5Q272 497 295 483Q307 478 307 465Q307 455 297.5 452.5Q288 450 282 452Q258 463 236.5 471.0Q215 479 195 487Q200 444 201 394Q201 386 197.0 379.0Q193 372 184 372Z"></path>
+  </defs>
+  <symbol id="sigil-dreams" viewBox="0 0 100 100"><!-- ☾ crescent (drawn; waning, belly-left — confirm orientation) -->
+    <path d="M60 17 A35 35 0 1 0 60 83 A44 44 0 0 1 60 17 Z"></path>
+  </symbol>
+  <symbol id="sigil-heteronyms" viewBox="0 0 100 100"><!-- ⁂ asterism: three EB Garamond asterisks -->
+    <use href="#_ast" transform="translate(50 33)"></use>
+    <use href="#_ast" transform="translate(34 64)"></use>
+    <use href="#_ast" transform="translate(66 64)"></use>
+  </symbol>
+  <symbol id="sigil-glosses" viewBox="0 0 100 100"><!-- ¶ pilcrow — EB Garamond outline (the capitulum: the marginal mark of the gloss tradition; spec §I.j-fr ref + line 2178 "capitulum/paragraphus", line 1530 "continuous gloss apparatus") -->
+    <path transform="translate(50 50) scale(0.0832 -0.0832) translate(-303.5 -179.5)" d="M282 -289Q250 -289 221.5 -275.5Q193 -262 175.5 -237.5Q158 -213 158 -179Q158 -145 174.0 -118.5Q190 -92 215.5 -76.5Q241 -61 268 -61Q302 -61 318.0 -76.0Q334 -91 334 -114Q334 -136 321.0 -149.5Q308 -163 291 -163Q281 -163 274.0 -159.0Q267 -155 262 -150Q256 -145 250.0 -140.0Q244 -135 236 -135Q224 -135 212.0 -147.5Q200 -160 200 -186Q200 -215 226.5 -234.5Q253 -254 286 -254Q311 -254 333.5 -241.0Q356 -228 371.0 -196.5Q386 -165 386 -112V94Q386 102 383.5 110.5Q381 119 373 119Q284 119 209.0 147.5Q134 176 89.5 234.5Q45 293 45 383Q45 477 89.0 535.5Q133 594 214.0 621.0Q295 648 407 648Q435 648 464.5 647.0Q494 646 517.0 644.5Q540 643 547 642Q555 641 558.5 635.0Q562 629 562 622Q562 615 558.0 603.5Q554 592 548 592Q544 592 512.5 600.0Q481 608 443 608Q436 608 430.5 602.5Q425 597 425 590V-112Q425 -175 403.5 -214.0Q382 -253 349.5 -271.0Q317 -289 282 -289Z"></path>
+  </symbol>
+  <symbol id="sigil-about" viewBox="0 0 100 100"><!-- ✍ writing hand — URW base-35 D050000L outline (the one lifted mark; GPLv2 — typeface designs uncopyrightable, minimal risk; see north-star) -->
+    <path transform="translate(50 50) scale(0.1041 -0.1041) translate(-426.50 -345.50)" d="M82 202 94 185 38 74C35 67 33 63 33 63C33 61 36 59 38 59C40 59 45 60 48 61L137 94L189 150C249 134 276 129 310 129C327 129 360 131 437 138L541 127L633 150L646 94H797L820 236V339L797 410L646 419L633 399C603 401 591 404 569 419L476 478L550 562C555 568 557 573 557 580C557 607 537 632 515 632C507 632 499 628 494 623L409 527L348 562C283 533 246 506 154 419C131 352 127 338 117 292ZM643 378C653 326 656 301 656 270C656 244 654 222 646 177C587 159 561 154 534 154C517 154 507 155 447 165C417 162 391 158 381 155C358 150 341 147 331 147L319 148C308 150 297 151 287 153C274 154 266 157 267 161C267 162 269 164 271 166C282 174 288 183 288 192C288 198 282 212 277 218C274 222 255 232 251 232C250 232 249 232 248 231L247 230C246 230 246 229 246 229H247C248 229 248 228 249 227C249 226 251 223 254 219C259 213 264 195 264 185C264 174 256 163 249 163L235 165H214C200 165 191 174 191 188C191 207 202 225 218 233L246 246C268 259 272 260 291 260H415C436 279 440 284 447 301C406 284 384 277 364 277C362 277 357 277 351 278L398 331C398 341 400 350 401 353C402 360 403 365 403 368C403 371 401 377 398 387L457 457L577 387ZM231 326 204 260C198 246 179 223 154 202H137L163 260L154 288L137 298L163 387C168 399 168 400 189 419L264 485C286 505 339 536 351 536C359 536 368 530 397 507ZM85 83C81 82 78 81 76 81C68 81 63 86 63 93C63 97 65 106 67 108L81 135C91 151 92 152 96 152C105 152 127 120 127 107C127 101 123 97 115 94ZM137 288C143 280 145 275 145 263C145 228 130 201 110 201C107 201 103 201 98 202ZM381 371C381 326 352 275 326 275C320 275 311 276 302 278ZM757 387C775 345 781 309 781 253C781 205 777 172 764 127L659 118C674 172 681 222 681 272C681 298 679 316 669 387Z"></path>
+  </symbol>
+</svg>
+<div class="compass-points">
+  <a href="./essays.html" title="Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-essays"></use></svg></a>
+  <a href="./observations.html" title="Observations" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-observations"></use></svg></a>
+  <a href="./fragments.html" title="Fragments" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-fragments"></use></svg></a>
+  <a href="./glimpses.html" title="Glimpses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glimpses"></use></svg></a>
+  <a href="./photo-essays.html" title="Photo Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-photo-essays"></use></svg></a>
+  <a href="./dwellings.html" title="Dwellings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dwellings"></use></svg></a>
+  <a href="./dreams.html" title="Dreams" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dreams"></use></svg></a>
+  <a href="./heteronyms.html" title="Heteronyms" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-heteronyms"></use></svg></a>
+  <a href="./hommages.html" title="Hommages" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-hommages"></use></svg></a>
+  <a href="./glosses.html" title="Glosses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glosses"></use></svg></a>
+  <a href="./readings.html" title="Readings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-readings"></use></svg></a>
+  <a href="./annals.html" title="Annals" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-annals"></use></svg></a>
+  <a href="./about/" title="About" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-about"></use></svg></a>
 </div>
 
       </nav>
