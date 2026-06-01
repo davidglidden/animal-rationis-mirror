@@ -70,14 +70,12 @@
     
   </header>
   
-  <div class="post-content" itemprop="articleBody">
-    <figure>
+  <figure>
 <img src="./assets/img/2020-01-10-tower-road.jpg" alt="Spectre, f/1.8, 9/1s, ISO 20" title="Spectre, f/1.8, 9/1s, ISO 20">
 <figcaption>
 Tower Road · ƒ/1.8 · 9 · 28mm
 </figcaption>
 </figure>
-  </div>
 
   <!-- Dateline — hic jacet -->
   <div class="dateline" itemprop="datePublished">
@@ -169,29 +167,22 @@ Tower Road · ƒ/1.8 · 9 · 28mm
   </symbol>
 </svg>
 <div class="compass-points">
-  <a href="./essays.html" title="Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-essays"></use></svg></a>
-  <a href="./observations.html" title="Observations" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-observations"></use></svg></a>
-  <a href="./fragments.html" title="Fragments" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-fragments"></use></svg></a>
-  <a href="./glimpses.html" title="Glimpses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glimpses"></use></svg></a>
-  <a href="./photo-essays.html" title="Photo Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-photo-essays"></use></svg></a>
-  <a href="./dwellings.html" title="Dwellings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dwellings"></use></svg></a>
-  <a href="./dreams.html" title="Dreams" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dreams"></use></svg></a>
-  <a href="./heteronyms.html" title="Heteronyms" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-heteronyms"></use></svg></a>
-  <a href="./hommages.html" title="Hommages" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-hommages"></use></svg></a>
-  <a href="./glosses.html" title="Glosses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glosses"></use></svg></a>
-  <a href="./readings.html" title="Readings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-readings"></use></svg></a>
-  <a href="./annals.html" title="Annals" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-annals"></use></svg></a>
-  <a href="./about/" title="About" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-about"></use></svg></a>
+  <a href="./essays.html" title="Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-essays"></use></svg><span class="compass-label">Essays</span></a>
+  <a href="./observations.html" title="Observations" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-observations"></use></svg><span class="compass-label">Observations</span></a>
+  <a href="./fragments.html" title="Fragments" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-fragments"></use></svg><span class="compass-label">Fragments</span></a>
+  <a href="./glimpses.html" title="Glimpses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glimpses"></use></svg><span class="compass-label">Glimpses</span></a>
+  <a href="./photo-essays.html" title="Photo Essays" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-photo-essays"></use></svg><span class="compass-label">Photo Essays</span></a>
+  <a href="./dwellings.html" title="Dwellings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dwellings"></use></svg><span class="compass-label">Dwellings</span></a>
+  <a href="./dreams.html" title="Dreams" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-dreams"></use></svg><span class="compass-label">Dreams</span></a>
+  <a href="./heteronyms.html" title="Heteronyms" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-heteronyms"></use></svg><span class="compass-label">Heteronyms</span></a>
+  <a href="./hommages.html" title="Hommages" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-hommages"></use></svg><span class="compass-label">Hommages</span></a>
+  <a href="./glosses.html" title="Glosses" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-glosses"></use></svg><span class="compass-label">Glosses</span></a>
+  <a href="./readings.html" title="Readings" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-readings"></use></svg><span class="compass-label">Readings</span></a>
+  <a href="./annals.html" title="Annals" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-annals"></use></svg><span class="compass-label">Annals</span></a>
+  <a href="./about/" title="About" class="compass-point"><svg class="sigil" aria-hidden="true"><use href="#sigil-about"></use></svg><span class="compass-label">About</span></a>
 </div>
 
       </nav>
-
-      <!-- Theme Toggle -->
-      <div class="footer-controls">
-        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
-          ◐
-        </button>
-      </div>
 
       <!-- Standard Footer Info -->
       <p class="whisper">
@@ -209,25 +200,7 @@ Tower Road · ƒ/1.8 · 9 · 28mm
     </div>
   </footer>
 
-  <!-- Theme toggle functionality (same as frontispiece) -->
-  <script>
-    function toggleTheme() {
-      const currentTheme = localStorage.getItem('theme') || 'auto';
-      let nextTheme;
-      switch (currentTheme) {
-        case 'auto': nextTheme = 'light'; break;
-        case 'light': nextTheme = 'dark'; break;
-        case 'dark': nextTheme = 'auto'; break;
-        default: nextTheme = 'auto';
-      }
-      localStorage.setItem('theme', nextTheme);
-      document.documentElement.setAttribute('data-theme', nextTheme === 'auto' ? '' : nextTheme);
-    }
-    
-    // Initialize theme on page load
-    const savedTheme = localStorage.getItem('theme') || 'auto';
-    document.documentElement.setAttribute('data-theme', savedTheme === 'auto' ? '' : savedTheme);
-  </script>
+  <!-- Theme follows the reader's OS via color-scheme + light-dark() (§III) — no toggle, no JS. -->
 
   <!-- Glyph System (ESM v2.5.1) - Prime Directive: Single entrypoint, no globals -->
   
