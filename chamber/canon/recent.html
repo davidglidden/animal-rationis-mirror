@@ -63,7 +63,7 @@ The latest works born from Chamber examinations, showing how the canon grows thr
 <div class="ornament completion">
 
 </div>
-<p>{% assign canon_pages = site.pages | where_exp: “page”, “page.path contains ‘chamber/canon/’” %}
+<p>{% assign canon_pages = site.pages | where_exp: ‘page’, ‘page.path contains “chamber/canon/”’ %}
 {% assign canon_list = “” | split: “” %}
 {% for page in canon_pages %}
 {% unless page.path contains ‘index.md’ or page.path contains ‘all.md’ or page.path contains ‘recent.md’ %}
@@ -77,7 +77,7 @@ The latest works born from Chamber examinations, showing how the canon grows thr
 <a href="{{ work.url }}"><em>{{ work.title }}</em>{{ work.notation }}</a>
 </h3>
 <p class="canon-meta">
-<span class="small-caps">{{ work.author }}</span>, {% if work.date %}{{ work.date | date: “%Y” }}{% elsif work.date_range %}{{ work.date_range }}{% endif %}
+<span class="small-caps">{{ work.author }}</span>, {% if work.date %}{{ work.date | date: ‘%Y’ }}{% elsif work.date_range %}{{ work.date_range }}{% endif %}
 {% if work.emerged_from %}
 <br><em>Born from <a href="{{ work.emerged_from }}">Chamber examination</a></em>
 {% endif %}
@@ -211,7 +211,7 @@ The latest works born from Chamber examinations, showing how the canon grows thr
       </nav>
 
       <!-- Standard Footer Info -->
-      <p class="whisper">
+      <p class="apparatus-meta">
         <span lang="la">Animal Rationis Capax</span>
       </p>
 
@@ -219,7 +219,7 @@ The latest works born from Chamber examinations, showing how the canon grows thr
 
       
 
-      <p class="whisper">
+      <p class="apparatus-meta">
         <span class="small-caps">Barcelona</span>
         <span class="seasonal-geometry">△</span>
       </p>
