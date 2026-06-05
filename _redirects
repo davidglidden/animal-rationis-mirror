@@ -5,3 +5,6 @@
 /archive/        /annals.html    301
 /resume/         /cv/            301
 /resume.html     /cv/            301
+
+# Jekyll-era flat-route cohort — migrate-on-touch (cohort policy 2026-06-05)
+/2025-03-06-The-discovery-of-Matthieu-Taliesin.html    /the-discovery-of-matthieu-taliesin/    301
