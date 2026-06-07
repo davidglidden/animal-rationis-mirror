@@ -39,14 +39,21 @@
   <link rel="mask-icon" href="../assets/favicons/safari-pinned-tab.svg" color="#8B3A2A" />
   <meta name="apple-mobile-web-app-title" content="Animal Rationis Capax" />
   <meta name="application-name" content="Animal Rationis Capax" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#2c2c2c" />
+  <!-- Browser-chrome colours are palette-derived per §III (W1.7, 2026-06-07):
+       theme-color = the two grounds via paired media-qualified metas;
+       TileColor = the accent (replaces the favicon-generator default orange,
+       which was never a palette value). No colour enters head metadata that
+       does not map to a §III token. -->
+  <meta name="msapplication-TileColor" content="#8B3A2A" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F0E8" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1C1510" />
 
   <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 
 
 <body class="about-page">
+  <a href="#main" class="skip-link">Skip to reading</a>
   <!-- Simple Header with Centered Avatar -->
   <header class="site-header">
     <div class="wrapper">
@@ -58,7 +65,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="wrapper">
+  <main id="main" class="wrapper">
     <div class="page-content">
       <article class="about-page about bears-apparatus">
   <header class="about-header">
@@ -230,15 +237,9 @@
 
   <!-- Glyph/triptych system retired 2026-06-03 — superseded by the §IX vignette; dead since April 2026. -->
   
-  <!-- Non-module dependencies archived for baseline simplicity -->
-
-<script>
-  window.addEventListener('unhandledrejection', (e) => {
-    const msg = String(e?.reason || '');
-    if (msg.includes('No response received')) {
-      e.preventDefault(); // silence the external beacon noise
-    }
-  });
-</script>
+  <!-- ARC ships zero JavaScript — the banish-JS posture (Prologue Postures,
+       PENDING-30). The last residual script (a 2025-09 unhandledrejection
+       silencer that outlived the beacons it silenced) was removed 2026-06-07
+       per W1.10. -->
 </body>
 </html>
